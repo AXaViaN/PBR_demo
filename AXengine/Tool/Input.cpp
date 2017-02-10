@@ -51,29 +51,19 @@ void Input::Update()
 	const U8* keyboardState = SDL_GetKeyboardState(NULL);
 	for( U32 key=0 ; key<sizeof(_keyState) ; key++ )
 	{
-		if(_keyState[key] == KeyState::Down)
+		if(keyboardState[key] == true)
 		{
-			if(keyboardState[key] == true)
+			if(_keyState[key] == KeyState::Down)
 				_keyState[key] = KeyState::Hold;
-			else
-				_keyState[key] = KeyState::Up;
-		}
-		else if(_keyState[key] == KeyState::Up)
-		{
-			if(keyboardState[key] == true)
+			else if(_keyState[key] != KeyState::Hold)
 				_keyState[key] = KeyState::Down;
-			else
-				_keyState[key] = KeyState::Idle;
-		}
-		else if(_keyState[key] == KeyState::Hold)
-		{
-			if(keyboardState[key] == false)
-				_keyState[key] = KeyState::Up;
 		}
 		else
 		{
-			if(keyboardState[key] == true)
-				_keyState[key] = KeyState::Down;
+			if(_keyState[key] == KeyState::Down || _keyState[key] == KeyState::Hold)
+				_keyState[key] = KeyState::Up;
+			else
+				_keyState[key] = KeyState::Idle;
 		}
 	}
 }
