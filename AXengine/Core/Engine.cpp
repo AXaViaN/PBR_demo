@@ -3,6 +3,7 @@
 #include "AXengine/Game.h"
 #include "AXengine/Core/Window.h"
 #include "AXengine/Tool/Debug.h"
+#include "AXengine/Tool/Input.h"
 
 namespace AX { namespace Core {
 
@@ -16,8 +17,10 @@ bool Engine::Init(Game* game)
 	}
 	_game = game;
 	
+	Tool::Debug::SetLogTarget("debug.log", Engine::Name);
+
 	// Init window
-	bool initResult = Window::Instance().Create("PBR Demo Engine", 1280, 720);
+	bool initResult = Window::Instance().Create(Engine::Name, 1280, 720);
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("Window couldn't created!");
@@ -25,14 +28,17 @@ bool Engine::Init(Game* game)
 	}
 	Tool::Debug::LogInfo("Window created!");
 	
+	Tool::Input::Instance().Init();
+
 	return true;
 }
 /*	Terminate subsystems		*/
 void Engine::Terminate()
 {
 	Window::Instance().Destroy();
-	Tool::Debug::LogInfo("Window destroyed!");
 	
+	Tool::Debug::CloseLogTarget();
+
 	_game = nullptr;
 }
 
@@ -40,18 +46,14 @@ void Engine::Terminate()
 void Engine::Run()
 {
 	Window& window = Window::Instance();
+	Tool::Input& input = Tool::Input::Instance();
 	
 	_game->Start();
 	
 	_isRunning = true;
-	while(_isRunning)
+	while(_isRunning && input.IsWindowClosed() == false)
 	{
-		SDL_Event event;
-		while(SDL_PollEvent(&event))
-		{
-			if(event.type == SDL_QUIT)
-				_isRunning = false;
-		}
+		input.Update();
 
 		_game->Update();
 		

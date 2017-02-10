@@ -9,7 +9,8 @@
 #ifndef __AX__GAME_H
 #define __AX__GAME_H
 
-#include "Tool/Debug.h"
+#include "AXengine/Tool/Debug.h"
+#include "AXengine/Tool/Input.h"
 
 namespace AX {
 

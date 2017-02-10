@@ -7,6 +7,7 @@
 #define __AX__CORE__ENGINE_H
 
 #include "AXengine/Tool/Singleton.h"
+#include "AXengine/Tool/Utility.h"
 
 namespace AX {
 class Game;
@@ -40,6 +41,8 @@ public:
 	 * Stop the game loop
 	 */
 	void Exit() { _isRunning = false; }
+
+	const Tool::CHR* Name = "PBR Demo Engine";
 
 private:
 	Game* _game;

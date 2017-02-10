@@ -1,24 +1,30 @@
 #include "AXengine/Game.h"
 
+using namespace AX::Tool;
+
 class Demo : public AX::Game {
 public:
 	void Start()
 	{
-		AX::Tool::Debug::LogInfo("Game started!");
+
 	}
 	void Dispose()
 	{
-		AX::Tool::Debug::LogInfo("Game disposed!");
+
 	}
 	
 	void Update()
 	{
-		AX::Tool::Debug::LogInfo("Game updated!");
+		if(Input::GetKeyDown(SDL_SCANCODE_ESCAPE))
+		{
+			Debug::LogInfo("Escaped!");
+			Exit();
+		}
 	}
 	
 	void Render()
 	{
-		AX::Tool::Debug::LogInfo("Game rendered!");
+
 	}
 	
 };
