@@ -9,8 +9,10 @@
 #ifndef __AX__GAME_H
 #define __AX__GAME_H
 
+#include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
+#include "AXengine/Tool/Loader.h"
 
 namespace AX {
 
@@ -23,7 +25,7 @@ public:
 	// Update is called every frame
 	virtual void Update() = 0;
 	// Render is called every frame
-	virtual void Render() = 0;
+	virtual void Draw() = 0;
 	
 	/**
 	 * Run should be called from program entry point

@@ -27,7 +27,6 @@ public:
 	 */
 	void Destroy();
 	
-	void Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue);
 	void RenderPresent();
 	void SyncFPS(Tool::U32 fps);
 	

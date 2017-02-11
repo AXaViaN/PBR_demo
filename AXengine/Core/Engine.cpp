@@ -2,6 +2,7 @@
 
 #include "AXengine/Game.h"
 #include "AXengine/Core/Window.h"
+#include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 
@@ -47,7 +48,7 @@ void Engine::Run()
 {
 	Window& window = Window::Instance();
 	Tool::Input& input = Tool::Input::Instance();
-	
+
 	_game->Start();
 	
 	_isRunning = true;
@@ -57,9 +58,9 @@ void Engine::Run()
 
 		_game->Update();
 		
-		window.Clear(0.2f, 0.4f, 0.7f);
+		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
 		
-		_game->Render();
+		_game->Draw();
 		
 		window.RenderPresent();
 		window.SyncFPS(60);	

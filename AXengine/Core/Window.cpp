@@ -61,11 +61,6 @@ void Window::Destroy()
 	SDL_Quit();
 }
 
-void Window::Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue)
-{
-	glClearColor(red, green, blue, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
 void Window::RenderPresent()
 {
 	SDL_GL_SwapWindow(_handle);
