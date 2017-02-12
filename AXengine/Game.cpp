@@ -4,6 +4,13 @@
 
 namespace AX {
 
+Game::~Game()
+{
+	// Termination should be called with a separate method but
+	// it wasn't safe. It could be called while inside  game loop.
+	Core::Engine::Instance().Terminate();
+}
+
 void Game::Run()
 {
 	// Initialize and run the engine
@@ -15,15 +22,6 @@ void Game::Exit()
 {
 	// Exit from game loop
 	Core::Engine::Instance().Exit();
-}
-
-/***** PROTECTED *****/
-
-Game::~Game()
-{
-	// Termination should be called with a separate method but
-	// it wasn't safe. It could be called while inside  game loop.
-	Core::Engine::Instance().Terminate();
 }
 
 } // namespace AX

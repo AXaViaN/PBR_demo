@@ -1,0 +1,189 @@
+#include "AXengine/Shader/ShaderProgram.h"
+
+#include "AXengine/Tool/Debug.h"
+#include "AXengine/Tool/Utility.h"
+#include <cstdio>
+#include <GL/glew.h>
+
+namespace AX { namespace Shader {
+
+void ShaderProgram::Start()
+{
+	glUseProgram(_programID);
+}
+void ShaderProgram::Stop()
+{
+	glUseProgram(0);
+}
+
+/***** PROTECTED *****/
+
+bool ShaderProgram::Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragmentFilePath)
+{
+	bool initResult;
+	initResult = loadShader(vertexFilePath, GL_VERTEX_SHADER);
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("Vertex shader %s cannot be loaded!", vertexFilePath);
+		return false;
+	}
+	initResult = loadShader(fragmentFilePath, GL_FRAGMENT_SHADER);
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("Fragment shader %s cannot be loaded!", fragmentFilePath);
+		return false;
+	}
+
+	_programID = glCreateProgram();
+	if(_programID == 0)
+	{
+		Tool::Debug::LogWarning("OpenGL program cannot be created!");
+		return false;
+	}
+	glAttachShader(_programID, _vertexShaderID);
+	glAttachShader(_programID, _fragmentShaderID);
+
+	initResult = linkProgram();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("Shaders %s and %s failed to link!", vertexFilePath, fragmentFilePath);
+		return false;
+	}
+
+	return true;
+}
+void ShaderProgram::Terminate()
+{
+	Stop();
+
+	if(_programID)
+	{
+		if(_fragmentShaderID)
+		{
+			glDetachShader(_programID, _fragmentShaderID);
+			glDeleteShader(_fragmentShaderID);
+			_fragmentShaderID = 0;
+		}
+
+		if(_vertexShaderID)
+		{
+			glDetachShader(_programID, _vertexShaderID);
+			glDeleteShader(_vertexShaderID);
+			_vertexShaderID = 0;
+		}
+
+		glDeleteProgram(_programID);
+		_programID = 0;
+	}
+	else
+	{
+		if(_fragmentShaderID)
+		{
+			glDeleteShader(_fragmentShaderID);
+			_fragmentShaderID = 0;
+		}
+
+		if(_vertexShaderID)
+		{
+			glDeleteShader(_vertexShaderID);
+			_vertexShaderID = 0;
+		}
+	}
+}
+
+void ShaderProgram::BindAttribute(Tool::U32 attributePosition, const Tool::CHR* variableName)
+{
+	glBindAttribLocation(_programID, attributePosition, variableName);
+}
+
+/***** PRIVATE *****/
+
+bool ShaderProgram::loadShader(const Tool::CHR* filePath, Tool::U32 shaderType)
+{
+	// Read shader code
+	std::FILE* shaderFile = std::fopen(filePath, "r");
+	if(shaderFile == nullptr)
+	{
+		Tool::Debug::LogWarning("Shader file %s cannot be opened!", filePath);
+		return false;
+	}
+
+	std::fseek(shaderFile, 0, SEEK_END);
+	Tool::U32 fileSize = std::ftell(shaderFile);
+	std::fseek(shaderFile, 0, SEEK_SET);
+
+	Tool::CHR* fileContent = new Tool::CHR[fileSize+1];
+	std::fread(fileContent, fileSize, 1, shaderFile);
+	fileContent[fileSize] = '\0';
+
+	std::fclose(shaderFile);
+
+	// Compile code
+	GLuint shaderID = glCreateShader(shaderType);
+	if(shaderID == 0)
+	{
+		Tool::Debug::LogWarning("OpenGL shader cannot be created! Shader type = %x", shaderType);
+		return false;
+	}
+
+	glShaderSource(shaderID, 1, &fileContent, NULL);
+	glCompileShader(shaderID);
+	delete[] fileContent;
+
+	GLint isCompiled = 0;
+	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &isCompiled);
+	if(isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &maxLength);
+
+		Tool::CHR* errorLog = new Tool::CHR[maxLength];
+		glGetShaderInfoLog(shaderID, maxLength, &maxLength, &errorLog[0]);
+
+		glDeleteShader(shaderID);
+
+		Tool::Debug::LogWarning("%s", errorLog);
+		Tool::Debug::LogWarning("Shader %s failed to compile", filePath);
+
+		delete[] errorLog;
+		return false;
+	}
+
+	if(shaderType == GL_VERTEX_SHADER)
+		_vertexShaderID = shaderID;
+	else if(shaderType == GL_FRAGMENT_SHADER)
+		_fragmentShaderID = shaderID;
+
+	return true;
+}
+bool ShaderProgram::linkProgram()
+{
+	// Implemented in derived class
+	BindShaderAttributes();
+
+	glLinkProgram(_programID);
+
+	GLint isLinked = 0;
+	glGetProgramiv(_programID, GL_LINK_STATUS, (int*)&isLinked);
+	if(isLinked == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetProgramiv(_programID, GL_INFO_LOG_LENGTH, &maxLength);
+
+		Tool::CHR* errorLog = new Tool::CHR[maxLength];
+		glGetProgramInfoLog(_programID, maxLength, &maxLength, &errorLog[0]);
+
+		Terminate();
+
+		Tool::Debug::LogWarning("%s", &errorLog[0]);
+
+		delete[] errorLog;
+		return false;
+	}
+
+	glValidateProgram(_programID);
+
+	return true;
+}
+
+} } // namespace AX::Shader

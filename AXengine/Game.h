@@ -18,13 +18,15 @@ namespace AX {
 
 class Game {
 public:
+	virtual ~Game();
+
 	// Start is called before game loop
 	virtual void Start() = 0;
 	// Dispose is called after game loop
 	virtual void Dispose() = 0;
 	// Update is called every frame
 	virtual void Update() = 0;
-	// Render is called every frame
+	// Draw is called every frame
 	virtual void Draw() = 0;
 	
 	/**
@@ -38,9 +40,6 @@ public:
 	 * Exit will close the application after the frame finishes
 	 */
 	void Exit();
-	
-protected:
-	virtual ~Game();
 	
 };
 
