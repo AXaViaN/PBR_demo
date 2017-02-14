@@ -19,10 +19,10 @@ bool Engine::Init(Game* game)
 	}
 	_game = game;
 	
-	Tool::Debug::SetLogTarget("debug.log", Engine::Name);
+	Tool::Debug::SetLogTarget("debug.log", Engine::name);
 
 	// Init window
-	bool initResult = Window::Instance().Create(Engine::Name, 1280, 720);
+	bool initResult = Window::Instance().Create(Engine::name, 1280, 720);
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("Window couldn't created!");
@@ -39,11 +39,20 @@ bool Engine::Init(Game* game)
 
 	Tool::Input::Instance().Init();
 
+	initResult = standardShader.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("StandardShader cannot be initialized!");
+		return false;
+	}
+
 	return true;
 }
 /*	Terminate subsystems		*/
 void Engine::Terminate()
 {
+	standardShader.Terminate();
+
 	Tool::Loader::Terminate();
 
 	Window::Instance().Destroy();
@@ -73,7 +82,7 @@ void Engine::Run()
 		_game->Draw();
 		
 		window.RenderPresent();
-		window.SyncFPS(60);	
+		window.SyncFPS(60);
 	}
 	
 	_game->Dispose();

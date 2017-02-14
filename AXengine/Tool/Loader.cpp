@@ -92,13 +92,13 @@ Model::Mesh Loader::loadMesh(F32 positionList[], U32 positionListSize, F32 uvCoo
 
 	U32 vboID;
 	std::vector<U32> vboIDList;
-	vboIDList.reserve(VBOlayout::LAYOUT_SIZE);
+	vboIDList.reserve(Model::VBOlayout::LAYOUT_SIZE);
 
 	glBindVertexArray(vaoID);
-	vboID = storeInVBO(VBOlayout::POSITION, 3, positionList, positionListSize);
+	vboID = storeInVBO(Model::VBOlayout::POSITION, 3, positionList, positionListSize);
 	vboIDList.push_back(vboID);
 
-	vboID = storeInVBO(VBOlayout::UVCOORD, 2, uvCoordList, uvCoordListSize);
+	vboID = storeInVBO(Model::VBOlayout::UVCOORD, 2, uvCoordList, uvCoordListSize);
 	vboIDList.push_back(vboID);
 
 	vboID = bindIndexBuffer(indexList, indexListSize);

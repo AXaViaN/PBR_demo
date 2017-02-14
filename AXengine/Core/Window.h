@@ -27,8 +27,8 @@ public:
 	 */
 	void Destroy();
 	
-	void RenderPresent();
-	void SyncFPS(Tool::U32 fps);
+	void RenderPresent() const;
+	void SyncFPS(Tool::U32 fps) const;
 	
 private:
 	SDL_Window* _handle;

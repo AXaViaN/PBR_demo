@@ -25,12 +25,12 @@ public:
 
 public:
 	GameObject() : mesh(nullptr), material(nullptr) { }
-	GameObject(Model::Mesh* mesh) : mesh(mesh), material(nullptr) { }
-	GameObject(Model::Mesh& mesh) : mesh(&mesh), material(nullptr) { }
+	explicit GameObject(Model::Mesh* mesh) : mesh(mesh), material(nullptr) { }
+	explicit GameObject(Model::Mesh& mesh) : mesh(&mesh), material(nullptr) { }
 	GameObject(Model::Mesh* mesh, Model::Material* material) : mesh(mesh), material(material) { }
 	GameObject(Model::Mesh& mesh, Model::Material& material) : mesh(&mesh), material(&material) { }
 
-	void Render();
+	void Render() const;
 
 	Transform transform;
 

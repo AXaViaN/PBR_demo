@@ -11,6 +11,13 @@
 
 namespace AX { namespace Model {
 
+enum VBOlayout {
+	POSITION,
+	UVCOORD,
+
+	LAYOUT_SIZE
+};
+
 class Mesh {
 public:
 	Mesh() : _vaoID(0), _vertexCount(0) { }
@@ -26,9 +33,9 @@ public:
 	 */
 	void Dispose();
 
-	Tool::U32 GetVaoID() const { return _vaoID; }
-	Tool::SIZE GetVboCount() const { return _vboIDList.size(); }
-	Tool::SIZE GetVertexCount() const { return _vertexCount; }
+	const Tool::U32& GetVaoID() const { return _vaoID; }
+	const Tool::SIZE& GetVboCount() const { return _vboIDList.size(); }
+	const Tool::SIZE& GetVertexCount() const { return _vertexCount; }
 
 private:
 	std::vector<Tool::U32> _vboIDList;

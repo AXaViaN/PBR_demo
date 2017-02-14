@@ -20,11 +20,11 @@ public:
 	/**
 	 * Start shader program. Typically called before rendering.
 	 */
-	void Start();
+	void Start() const;
 	/**
 	 * Stop shader program. Typically called after rendering.
 	 */
-	void Stop();
+	void Stop() const;
 
 	/**
 	 * Implemented in derived to use material according to shader program
@@ -57,12 +57,12 @@ protected:
 	 *	@param uniformLocation Location of the uniform variable
 	 *	@param value Value to send (can be different types)
 	 */
-	void LoadUniform(Tool::U32 uniformLocation, Tool::I32 value);
-	void LoadUniform(Tool::U32 uniformLocation, Tool::F32 value);
-	void LoadUniform(Tool::U32 uniformLocation, bool value);
-	void LoadUniform(Tool::U32 uniformLocation, glm::vec2 value);
-	void LoadUniform(Tool::U32 uniformLocation, glm::vec3 value);
-	void LoadUniform(Tool::U32 uniformLocation, glm::mat4 value);
+	void LoadUniform(const Tool::U32& uniformLocation, Tool::I32 value);
+	void LoadUniform(const Tool::U32& uniformLocation, Tool::F32 value);
+	void LoadUniform(const Tool::U32& uniformLocation, bool value);
+	void LoadUniform(const Tool::U32& uniformLocation, glm::vec2 value);
+	void LoadUniform(const Tool::U32& uniformLocation, glm::vec3 value);
+	void LoadUniform(const Tool::U32& uniformLocation, glm::mat4 value);
 
 private:
 	bool loadShader(const Tool::CHR* filePath, Tool::U32 shaderType);

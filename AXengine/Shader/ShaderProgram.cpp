@@ -8,11 +8,11 @@
 
 namespace AX { namespace Shader {
 
-void ShaderProgram::Start()
+void ShaderProgram::Start() const
 {
 	glUseProgram(_programID);
 }
-void ShaderProgram::Stop()
+void ShaderProgram::Stop() const
 {
 	glUseProgram(0);
 }
@@ -107,27 +107,27 @@ Tool::U32 ShaderProgram::GetUniformLocation(const Tool::CHR* uniformName)
 	return glGetUniformLocation(_programID, uniformName);
 }
 
-void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, Tool::I32 value)
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, Tool::I32 value)
 {
 	glUniform1i(uniformLocation, value);
 }
-void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, Tool::F32 value)
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, Tool::F32 value)
 {
 	glUniform1f(uniformLocation, value);
 }
-void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, bool value)
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, bool value)
 {
 	glUniform1i(uniformLocation, value);
 }
-void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, glm::vec2 value)
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, glm::vec2 value)
 {
 	glUniform2f(uniformLocation, value.x, value.y);
 }
-void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, glm::vec3 value)
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, glm::vec3 value)
 {
 	glUniform3f(uniformLocation, value.x, value.y, value.z);
 }
-void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, glm::mat4 value)
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, glm::mat4 value)
 {
 	glUniformMatrix4fv(uniformLocation, 1, false, glm::value_ptr(value));
 }

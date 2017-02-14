@@ -23,9 +23,9 @@ public:
 	};
 
 public:
-	Material() : shader(nullptr) { }
-	Material(Shader::ShaderProgram* shader) : shader(shader) { }
-	Material(Shader::ShaderProgram& shader) : shader(&shader) { }
+	Material();
+	explicit Material(Shader::ShaderProgram* shader) : shader(shader) { }
+	explicit Material(Shader::ShaderProgram& shader) : shader(&shader) { }
 
 	TextureMap<glm::vec3> diffuseMap;
 

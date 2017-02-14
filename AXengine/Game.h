@@ -11,9 +11,14 @@
 
 #include "AXengine/Entity/GameObject.h"
 #include "AXengine/Gfx/Renderer.h"
+#include "AXengine/Model/Material.h"
+#include "AXengine/Model/Mesh.h"
+#include "AXengine/Model/Texture.h"
+#include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 #include "AXengine/Tool/Loader.h"
+#include "AXengine/Tool/Utility.h"
 
 namespace AX {
 

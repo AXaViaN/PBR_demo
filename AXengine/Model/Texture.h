@@ -22,7 +22,7 @@ public:
 	 */
 	void Dispose();
 
-	Tool::U32 GetTextureID() const { return _textureID; }
+	const Tool::U32& GetTextureID() const { return _textureID; }
 
 private:
 	Tool::U32 _textureID;

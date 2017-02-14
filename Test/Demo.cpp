@@ -1,11 +1,6 @@
 #include "AXengine/Game.h"
 
-// Temporary: testing shaders
-#include "AXengine/Shader/StandardShader.h"
-using namespace AX::Shader;
-
 using namespace AX::Entity;
-using namespace AX::Gfx;
 using namespace AX::Model;
 using namespace AX::Tool;
 
@@ -15,12 +10,9 @@ public:
 	Mesh quadModel;
 	Texture crateTexture;
 	Material quadMaterial;
-	StandardShader standardShader;
 
 	void Start()
 	{
-		standardShader.Init();
-
 		F32 vertexList[] = {
 			-0.5f,  0.5f,  0.0f,
 			-0.5f, -0.5f,  0.0f,
@@ -41,7 +33,6 @@ public:
 		quadModel = Loader::LoadMesh(vertexList, sizeof(vertexList), uvCoordList, sizeof(uvCoordList), indexList, sizeof(indexList));
 		crateTexture = Loader::LoadTexture("Data/crate.png");
 		
-		quadMaterial = Material(standardShader);
 		quadMaterial.diffuseMap.value = glm::vec3(0.3, 0.6, 0.9);
 		
 		quadObject = GameObject(quadModel, quadMaterial);
@@ -50,8 +41,6 @@ public:
 	{
 		quadModel.Dispose();
 		crateTexture.Dispose();
-
-		standardShader.Terminate();
 	}
 	
 	void Update()

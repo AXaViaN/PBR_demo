@@ -51,6 +51,9 @@
     <ClCompile Include="AXengine\Shader\StandardShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AXengine\Model\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AXengine\Core\Engine.h">

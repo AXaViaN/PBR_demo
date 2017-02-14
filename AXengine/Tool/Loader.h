@@ -16,13 +16,6 @@ class Engine;
 
 namespace AX { namespace Tool {
 
-enum VBOlayout {
-	POSITION,
-	UVCOORD,
-
-	LAYOUT_SIZE
-};
-
 class Loader {
 public:
 	static Model::Mesh LoadMesh(F32 positionList[], U32 positionListSize, 

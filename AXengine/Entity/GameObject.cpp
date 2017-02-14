@@ -7,7 +7,7 @@
 
 namespace AX { namespace Entity {
 
-void GameObject::Render()
+void GameObject::Render() const
 {
 	if(mesh)
 	{

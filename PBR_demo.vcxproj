@@ -134,6 +134,7 @@
     <ClCompile Include="AXengine\Entity\GameObject.cpp" />
     <ClCompile Include="AXengine\Game.cpp" />
     <ClCompile Include="AXengine\Gfx\Renderer.cpp" />
+    <ClCompile Include="AXengine\Model\Material.cpp" />
     <ClCompile Include="AXengine\Model\Mesh.cpp" />
     <ClCompile Include="AXengine\Model\Texture.cpp" />
     <ClCompile Include="AXengine\Shader\ShaderProgram.cpp" />

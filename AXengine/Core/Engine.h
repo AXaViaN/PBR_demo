@@ -6,6 +6,7 @@
 #ifndef __AX__CORE__ENGINE_H
 #define __AX__CORE__ENGINE_H
 
+#include "AXengine/Shader/StandardShader.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 
@@ -42,7 +43,9 @@ public:
 	 */
 	void Exit() { _isRunning = false; }
 
-	const Tool::CHR* Name = "PBR Demo Engine";
+	Shader::StandardShader standardShader;
+
+	const Tool::CHR* name = "PBR Demo Engine";
 
 private:
 	Game* _game;
