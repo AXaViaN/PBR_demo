@@ -24,5 +24,12 @@ void Renderer::Render(const Model::Mesh& mesh)
 	for( Tool::U32 vbo=0 ; vbo<mesh.GetVboCount() ; vbo++ )
 		glDisableVertexAttribArray(vbo);
 }
+void Renderer::Render(const Model::Mesh& mesh, const Model::Texture& texture)
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture.GetTextureID());
+
+	Render(mesh);
+}
 
 } } // namespace AX::Render

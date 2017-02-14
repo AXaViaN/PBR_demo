@@ -5,6 +5,7 @@
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
+#include "AXengine/Tool/Loader.h"
 
 namespace AX { namespace Core {
 
@@ -29,6 +30,13 @@ bool Engine::Init(Game* game)
 	}
 	Tool::Debug::LogInfo("Window created!");
 	
+	initResult = Tool::Loader::Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("Loader cannot be initialized!");
+		return false;
+	}
+
 	Tool::Input::Instance().Init();
 
 	return true;
@@ -36,6 +44,8 @@ bool Engine::Init(Game* game)
 /*	Terminate subsystems		*/
 void Engine::Terminate()
 {
+	Tool::Loader::Terminate();
+
 	Window::Instance().Destroy();
 	
 	Tool::Debug::CloseLogTarget();

@@ -8,6 +8,7 @@
 
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Loader.h"
+#include "AXengine/Tool/Utility.h"
 
 namespace AX { namespace Shader {
 
@@ -22,12 +23,23 @@ public:
 		ShaderProgram::Terminate();
 	}
 
+	virtual void ProcessMaterial(Model::Material& material) override;
+
 protected:
 	// Called by base class
 	virtual void BindShaderAttributes() override
 	{
 		ShaderProgram::BindAttribute(Tool::VBOlayout::POSITION, "vs_position");
+		ShaderProgram::BindAttribute(Tool::VBOlayout::UVCOORD, "vs_uvCoord");
 	}
+
+	virtual void GetShaderUniformLocations() override
+	{
+		_uniform_fs_diffuseValue = ShaderProgram::GetUniformLocation("fs_diffuseValue");
+	}
+
+private:
+	Tool::U32 _uniform_fs_diffuseValue;
 
 };
 

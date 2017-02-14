@@ -9,6 +9,7 @@
 #ifndef __AX__GAME_H
 #define __AX__GAME_H
 
+#include "AXengine/Entity/GameObject.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"

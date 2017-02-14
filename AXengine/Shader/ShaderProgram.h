@@ -6,7 +6,9 @@
 #ifndef __AX__SHADER__SHADER_PROGRAM_H
 #define __AX__SHADER__SHADER_PROGRAM_H
 
+#include "AXengine/Model/Material.h"
 #include "AXengine/Tool/Utility.h"
+#include <glm/glm.hpp>
 
 namespace AX { namespace Shader {
 
@@ -24,6 +26,11 @@ public:
 	 */
 	void Stop();
 
+	/**
+	 * Implemented in derived to use material according to shader program
+	 */
+	virtual void ProcessMaterial(Model::Material& material) = 0;
+
 protected:
 	bool Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragmentFilePath);
 	void Terminate();
@@ -35,6 +42,27 @@ protected:
 	 */
 	virtual void BindShaderAttributes() = 0;
 	void BindAttribute(Tool::U32 attributePosition, const Tool::CHR* variableName);
+
+	/**
+	 * Implemented in derived shader program and called from Init().
+	 * 
+	 * Uniform locations can be obtained with GetUniformLocation() calls.
+	 */
+	virtual void GetShaderUniformLocations() = 0;
+	Tool::U32 GetUniformLocation(const Tool::CHR* uniformName);
+	
+	/**
+	 *	Load value to uniform variable in the shader program
+	 *	
+	 *	@param uniformLocation Location of the uniform variable
+	 *	@param value Value to send (can be different types)
+	 */
+	void LoadUniform(Tool::U32 uniformLocation, Tool::I32 value);
+	void LoadUniform(Tool::U32 uniformLocation, Tool::F32 value);
+	void LoadUniform(Tool::U32 uniformLocation, bool value);
+	void LoadUniform(Tool::U32 uniformLocation, glm::vec2 value);
+	void LoadUniform(Tool::U32 uniformLocation, glm::vec3 value);
+	void LoadUniform(Tool::U32 uniformLocation, glm::mat4 value);
 
 private:
 	bool loadShader(const Tool::CHR* filePath, Tool::U32 shaderType);

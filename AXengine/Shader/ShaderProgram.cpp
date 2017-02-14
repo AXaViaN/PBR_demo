@@ -4,6 +4,7 @@
 #include "AXengine/Tool/Utility.h"
 #include <cstdio>
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace AX { namespace Shader {
 
@@ -43,12 +44,18 @@ bool ShaderProgram::Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragm
 	glAttachShader(_programID, _vertexShaderID);
 	glAttachShader(_programID, _fragmentShaderID);
 
+	// Implemented in derived class
+	BindShaderAttributes();
+
 	initResult = linkProgram();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("Shaders %s and %s failed to link!", vertexFilePath, fragmentFilePath);
 		return false;
 	}
+
+	// Implemented in derived class
+	GetShaderUniformLocations();
 
 	return true;
 }
@@ -94,6 +101,35 @@ void ShaderProgram::Terminate()
 void ShaderProgram::BindAttribute(Tool::U32 attributePosition, const Tool::CHR* variableName)
 {
 	glBindAttribLocation(_programID, attributePosition, variableName);
+}
+Tool::U32 ShaderProgram::GetUniformLocation(const Tool::CHR* uniformName)
+{
+	return glGetUniformLocation(_programID, uniformName);
+}
+
+void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, Tool::I32 value)
+{
+	glUniform1i(uniformLocation, value);
+}
+void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, Tool::F32 value)
+{
+	glUniform1f(uniformLocation, value);
+}
+void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, bool value)
+{
+	glUniform1i(uniformLocation, value);
+}
+void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, glm::vec2 value)
+{
+	glUniform2f(uniformLocation, value.x, value.y);
+}
+void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, glm::vec3 value)
+{
+	glUniform3f(uniformLocation, value.x, value.y, value.z);
+}
+void ShaderProgram::LoadUniform(Tool::U32 uniformLocation, glm::mat4 value)
+{
+	glUniformMatrix4fv(uniformLocation, 1, false, glm::value_ptr(value));
 }
 
 /***** PRIVATE *****/
@@ -158,9 +194,6 @@ bool ShaderProgram::loadShader(const Tool::CHR* filePath, Tool::U32 shaderType)
 }
 bool ShaderProgram::linkProgram()
 {
-	// Implemented in derived class
-	BindShaderAttributes();
-
 	glLinkProgram(_programID);
 
 	GLint isLinked = 0;
