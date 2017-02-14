@@ -61,16 +61,11 @@ void Window::Destroy()
 	SDL_Quit();
 }
 
-void Window::Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue)
-{
-	glClearColor(red, green, blue, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-void Window::RenderPresent()
+void Window::RenderPresent() const
 {
 	SDL_GL_SwapWindow(_handle);
 }
-void Window::SyncFPS(Tool::U32 fps)
+void Window::SyncFPS(Tool::U32 fps) const
 {
 	static Tool::U32 lastFrame = 0;
 	

@@ -2,8 +2,10 @@
 
 #include "AXengine/Game.h"
 #include "AXengine/Core/Window.h"
+#include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
+#include "AXengine/Tool/Loader.h"
 
 namespace AX { namespace Core {
 
@@ -17,10 +19,10 @@ bool Engine::Init(Game* game)
 	}
 	_game = game;
 	
-	Tool::Debug::SetLogTarget("debug.log", Engine::Name);
+	Tool::Debug::SetLogTarget("debug.log", Engine::name);
 
 	// Init window
-	bool initResult = Window::Instance().Create(Engine::Name, 1280, 720);
+	bool initResult = Window::Instance().Create(Engine::name, 1280, 720);
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("Window couldn't created!");
@@ -28,13 +30,31 @@ bool Engine::Init(Game* game)
 	}
 	Tool::Debug::LogInfo("Window created!");
 	
+	initResult = Tool::Loader::Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("Loader cannot be initialized!");
+		return false;
+	}
+
 	Tool::Input::Instance().Init();
+
+	initResult = standardShader.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("StandardShader cannot be initialized!");
+		return false;
+	}
 
 	return true;
 }
 /*	Terminate subsystems		*/
 void Engine::Terminate()
 {
+	standardShader.Terminate();
+
+	Tool::Loader::Terminate();
+
 	Window::Instance().Destroy();
 	
 	Tool::Debug::CloseLogTarget();
@@ -47,7 +67,7 @@ void Engine::Run()
 {
 	Window& window = Window::Instance();
 	Tool::Input& input = Tool::Input::Instance();
-	
+
 	_game->Start();
 	
 	_isRunning = true;
@@ -57,12 +77,12 @@ void Engine::Run()
 
 		_game->Update();
 		
-		window.Clear(0.2f, 0.4f, 0.7f);
+		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
 		
-		_game->Render();
+		_game->Draw();
 		
 		window.RenderPresent();
-		window.SyncFPS(60);	
+		window.SyncFPS(60);
 	}
 	
 	_game->Dispose();
