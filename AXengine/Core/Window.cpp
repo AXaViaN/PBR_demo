@@ -75,4 +75,12 @@ void Window::SyncFPS(Tool::U32 fps) const
 	lastFrame = SDL_GetTicks();
 }
 
+glm::ivec2 Window::GetWindowSize()
+{
+	Tool::I32 width, height;
+	SDL_GetWindowSize(instance->_handle, &width, &height);
+
+	return glm::ivec2(width, height);
+}
+
 } } // namespace AX::Core

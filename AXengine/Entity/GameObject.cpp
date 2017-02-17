@@ -9,13 +9,21 @@ namespace AX { namespace Entity {
 
 void GameObject::Render() const
 {
+	Render(nullptr);
+}
+void GameObject::Render(const Camera& camera) const
+{
+	Render(&camera);
+}
+void GameObject::Render(const Camera* camera) const
+{
 	if(mesh)
 	{
 		if(material && material->shader)
 		{
 			material->shader->Start();
-				material->shader->ProcessMaterial(*material);
-				Gfx::Renderer::Render(*mesh);
+			material->shader->ProcessGameObject(*this, camera);
+			Gfx::Renderer::Render(*mesh);
 			material->shader->Stop();
 		}
 		else

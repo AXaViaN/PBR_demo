@@ -6,7 +6,8 @@
 #ifndef __AX__SHADER__SHADER_PROGRAM_H
 #define __AX__SHADER__SHADER_PROGRAM_H
 
-#include "AXengine/Model/Material.h"
+#include "AXengine/Entity/Camera.h"
+#include "AXengine/Entity/GameObject.h"
 #include "AXengine/Tool/Utility.h"
 #include <glm/glm.hpp>
 
@@ -27,9 +28,9 @@ public:
 	void Stop() const;
 
 	/**
-	 * Implemented in derived to use material according to shader program
+	 * Implemented in derived to use game object according to shader program
 	 */
-	virtual void ProcessMaterial(Model::Material& material) = 0;
+	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera) = 0;
 
 protected:
 	bool Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragmentFilePath);

@@ -146,7 +146,9 @@
   <ItemGroup>
     <ClInclude Include="AXengine\Core\Engine.h" />
     <ClInclude Include="AXengine\Core\Window.h" />
+    <ClInclude Include="AXengine\Entity\Camera.h" />
     <ClInclude Include="AXengine\Entity\GameObject.h" />
+    <ClInclude Include="AXengine\Entity\Transform.h" />
     <ClInclude Include="AXengine\Game.h" />
     <ClInclude Include="AXengine\Gfx\Renderer.h" />
     <ClInclude Include="AXengine\Model\Material.h" />

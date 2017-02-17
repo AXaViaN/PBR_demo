@@ -101,5 +101,11 @@
     <ClInclude Include="AXengine\Model\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AXengine\Entity\Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Entity\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

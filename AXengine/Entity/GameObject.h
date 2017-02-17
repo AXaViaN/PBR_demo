@@ -6,6 +6,8 @@
 #ifndef __AX__ENTITY__GAME_OBJECT_H
 #define __AX__ENTITY__GAME_OBJECT_H
 
+#include "AXengine/Entity/Camera.h"
+#include "AXengine/Entity/Transform.h"
 #include <glm/glm.hpp>
 
 namespace AX { namespace Model {
@@ -17,13 +19,6 @@ namespace AX { namespace Entity {
 
 class GameObject {
 public:
-	struct Transform {
-		glm::vec3 position;
-		glm::vec3 rotation;
-		glm::vec3 scale;
-	};
-
-public:
 	GameObject() : mesh(nullptr), material(nullptr) { }
 	explicit GameObject(Model::Mesh* mesh) : mesh(mesh), material(nullptr) { }
 	explicit GameObject(Model::Mesh& mesh) : mesh(&mesh), material(nullptr) { }
@@ -31,6 +26,8 @@ public:
 	GameObject(Model::Mesh& mesh, Model::Material& material) : mesh(&mesh), material(&material) { }
 
 	void Render() const;
+	void Render(const Camera& camera) const;
+	void Render(const Camera* camera) const;
 
 	Transform transform;
 
