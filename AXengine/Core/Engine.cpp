@@ -38,6 +38,7 @@ bool Engine::Init(Game* game)
 	}
 
 	Tool::Input::Instance().Init();
+	Tool::Input::ActivateMouseMotion(true);
 
 	Gfx::Renderer::Instance().Init();
 

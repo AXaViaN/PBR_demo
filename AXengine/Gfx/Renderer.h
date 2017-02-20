@@ -25,10 +25,15 @@ public:
 	static void Render(const Model::Mesh& mesh);
 	static void Render(const Model::Mesh& mesh, const Model::Texture& texture);
 
+	/**
+	 * In debug mode objects are rendered as wireframes
+	 */
+	static void SetDebugMode(bool isDebugMode);
+
 	static glm::mat4 CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, Tool::F32 farPlane);
 	static const glm::mat4& GetDefaultProjectionMatrix() { return instance->_projectionMatrix; }
 
-	const Tool::F32 FOV = 75;
+	const Tool::F32 FOV = 66.6;
 	const Tool::F32 NEAR_PLANE = 0.1f;
 	const Tool::F32 FAR_PLANE = 1000.0f;
 

@@ -28,6 +28,13 @@ public:
 	void Stop() const;
 
 	/**
+	 * Debug draw mode puts renderer to wireframe mode.
+	 * 
+	 * It also gives derived programs a boolean to check for debug mode if needed.
+	 */
+	void SetDebugDrawMode(bool isDebugMode);
+
+	/**
 	 * Implemented in derived to use game object according to shader program
 	 */
 	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera) = 0;
@@ -64,6 +71,8 @@ protected:
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec2 value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec3 value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::mat4 value);
+
+	bool isDebugMode;
 
 private:
 	bool loadShader(const Tool::CHR* filePath, Tool::U32 shaderType);

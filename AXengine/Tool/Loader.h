@@ -24,7 +24,7 @@ public:
 								F32 uvCoordList[], U32 uvCoordListSize, 
 								U32 indexList[], U32 indexListSize);
 
-	static Model::Texture LoadTexture(const CHR* filePath);
+	static Model::Texture LoadTexture(const CHR* filePath, bool addMipmap);
 
 protected:
 	/**

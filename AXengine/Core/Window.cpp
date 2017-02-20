@@ -83,4 +83,12 @@ glm::ivec2 Window::GetWindowSize()
 	return glm::ivec2(width, height);
 }
 
+glm::ivec2 Window::WarpMouse()
+{
+	glm::ivec2 window = GetWindowSize() / 2;
+	SDL_WarpMouseInWindow(_handle, window.x, window.y);
+
+	return window;
+}
+
 } } // namespace AX::Core

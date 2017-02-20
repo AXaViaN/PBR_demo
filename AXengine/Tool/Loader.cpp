@@ -16,7 +16,7 @@ Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, F32 uvCoo
 	return loadMesh(positionList, positionListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
 
-Model::Texture Loader::LoadTexture(const CHR* filePath)
+Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 {
 	SDL_Surface* texture = IMG_Load(filePath);
 	if(texture == nullptr)
@@ -55,8 +55,19 @@ Model::Texture Loader::LoadTexture(const CHR* filePath)
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, texture->format->BytesPerPixel, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+	
+	if(addMipmap)
+	{
+		gluBuild2DMipmaps(GL_TEXTURE_2D, texture->format->BytesPerPixel, texture->w, texture->h, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	SDL_FreeSurface(texture);

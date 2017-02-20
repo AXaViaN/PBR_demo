@@ -16,14 +16,14 @@ void Renderer::Render(const Model::Mesh& mesh)
 {
 	glBindVertexArray(mesh.GetVaoID());
 
-	// Enable all the VBOs before rendering
-	for( Tool::U32 vbo=0 ; vbo<mesh.GetVboCount() ; vbo++ )
+	// Enable all the VBOs before rendering (-1 for index buffer)
+	for( Tool::U32 vbo=0 ; vbo<mesh.GetVboCount()-1 ; vbo++ )
 		glEnableVertexAttribArray(vbo);
 
 	glDrawElements(GL_TRIANGLES, mesh.GetVertexCount(), GL_UNSIGNED_INT, nullptr);
 
 	// Disable all the VBOs after rendering
-	for( Tool::U32 vbo=0 ; vbo<mesh.GetVboCount() ; vbo++ )
+	for( Tool::U32 vbo=0 ; vbo<mesh.GetVboCount()-1 ; vbo++ )
 		glDisableVertexAttribArray(vbo);
 }
 void Renderer::Render(const Model::Mesh& mesh, const Model::Texture& texture)
@@ -32,6 +32,14 @@ void Renderer::Render(const Model::Mesh& mesh, const Model::Texture& texture)
 	glBindTexture(GL_TEXTURE_2D, texture.GetTextureID());
 
 	Render(mesh);
+}
+
+void Renderer::SetDebugMode(bool isDebugMode)
+{
+	if(isDebugMode)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 glm::mat4 Renderer::CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, Tool::F32 farPlane)

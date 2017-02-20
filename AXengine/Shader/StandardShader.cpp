@@ -8,18 +8,26 @@ namespace AX { namespace Shader {
 
 void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera)
 {
-	// Process material
-	if(gameObject.material->diffuseMap.texture)
+	if(isDebugMode)
 	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gameObject.material->diffuseMap.texture->GetTextureID());
-		ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec3(-1, -1, -1));
+		// Give green diffuse in debug mode
+		ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec3(0, 1, 0));
 	}
 	else
 	{
-		ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, gameObject.material->diffuseMap.value);
+		// Process material
+		if(gameObject.material->diffuseMap.texture)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, gameObject.material->diffuseMap.texture->GetTextureID());
+			ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec3(-1, -1, -1));
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, gameObject.material->diffuseMap.value);
+		}
 	}
-
+	
 	// Process transform
 	glm::mat4 modelMatrix;
 	modelMatrix = glm::translate(modelMatrix, gameObject.transform.position);
@@ -32,11 +40,11 @@ void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, con
 	glm::mat4 viewMatrix;
 	if(camera)
 	{
-		viewMatrix = glm::translate(viewMatrix, -camera->transform.position);
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.p), glm::vec3(1, 0, 0));
+		viewMatrix = glm::scale(viewMatrix, glm::vec3(1, 1, 1)/camera->transform.scale);
+		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.x), glm::vec3(1, 0, 0));
 		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.y), glm::vec3(0, 1, 0));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.r), glm::vec3(0, 0, 1));
-		viewMatrix = glm::scale(viewMatrix, glm::vec3(1.0f, 1.0f, 1.0f)/camera->transform.scale);
+		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.z), glm::vec3(0, 0, -1));
+		viewMatrix = glm::translate(viewMatrix, -camera->transform.position);
 	}
 
 	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * viewMatrix * modelMatrix);
