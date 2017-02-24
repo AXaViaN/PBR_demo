@@ -9,6 +9,8 @@
 #ifndef __AX__GAME_H
 #define __AX__GAME_H
 
+#include "AXengine/Entity/Camera.h"
+#include "AXengine/Entity/FreeCamera.h"
 #include "AXengine/Entity/GameObject.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Model/Material.h"
@@ -18,6 +20,7 @@
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 #include "AXengine/Tool/Loader.h"
+#include "AXengine/Tool/Time.h"
 #include "AXengine/Tool/Utility.h"
 
 namespace AX {

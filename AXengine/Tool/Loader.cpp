@@ -16,7 +16,7 @@ Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, F32 uvCoo
 	return loadMesh(positionList, positionListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
 
-Model::Texture Loader::LoadTexture(const CHR* filePath)
+Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 {
 	SDL_Surface* texture = IMG_Load(filePath);
 	if(texture == nullptr)
@@ -37,26 +37,44 @@ Model::Texture Loader::LoadTexture(const CHR* filePath)
 	GLenum pixelFormat;
 	switch(texture->format->BytesPerPixel)
 	{
+		case 1:
+			pixelFormat = GL_R;
+			break;
 		case 3:
 			if(texture->format->Rmask == 0x000000ff)
 				pixelFormat = GL_RGB;
 			else
 				pixelFormat = GL_BGR;
-
 			break;
 		case 4:
 			if(texture->format->Rmask == 0x000000ff)
 				pixelFormat = GL_RGBA;
 			else
 				pixelFormat = GL_BGRA;
-
 			break;
+		default:
+			Debug::LogWarning("PixelFormat is not supported for texture %s! BytesPerPixel = %d", filePath, texture->format->BytesPerPixel);
+			
+			SDL_FreeSurface(texture);
+			glDeleteTextures(1, &textureID);
+			return Model::Texture();
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, texture->format->BytesPerPixel, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+	
+	if(addMipmap)
+	{
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	SDL_FreeSurface(texture);

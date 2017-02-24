@@ -9,6 +9,7 @@
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 #include <SDL2/SDL.h>
+#include <glm/glm.hpp>
 
 namespace AX { namespace Core {
 
@@ -30,6 +31,15 @@ public:
 	void RenderPresent() const;
 	void SyncFPS(Tool::U32 fps) const;
 	
+	static glm::ivec2 GetWindowSize();
+
+	/**
+	 * Put mouse cursor to the center of the window
+	 * 
+	 * @returns position of the cursor
+	 */
+	glm::ivec2 WarpMouse();
+
 private:
 	SDL_Window* _handle;
 	SDL_GLContext _glContext;

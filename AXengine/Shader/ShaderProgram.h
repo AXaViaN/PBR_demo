@@ -6,7 +6,8 @@
 #ifndef __AX__SHADER__SHADER_PROGRAM_H
 #define __AX__SHADER__SHADER_PROGRAM_H
 
-#include "AXengine/Model/Material.h"
+#include "AXengine/Entity/Camera.h"
+#include "AXengine/Entity/GameObject.h"
 #include "AXengine/Tool/Utility.h"
 #include <glm/glm.hpp>
 
@@ -27,9 +28,16 @@ public:
 	void Stop() const;
 
 	/**
-	 * Implemented in derived to use material according to shader program
+	 * Debug draw mode puts renderer to wireframe mode.
+	 * 
+	 * It also gives derived programs a boolean to check for debug mode if needed.
 	 */
-	virtual void ProcessMaterial(Model::Material& material) = 0;
+	void SetDebugDrawMode(bool isDebugMode);
+
+	/**
+	 * Implemented in derived to use game object according to shader program
+	 */
+	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera) = 0;
 
 protected:
 	bool Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragmentFilePath);
@@ -63,6 +71,8 @@ protected:
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec2 value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec3 value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::mat4 value);
+
+	bool isDebugMode;
 
 private:
 	bool loadShader(const Tool::CHR* filePath, Tool::U32 shaderType);

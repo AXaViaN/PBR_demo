@@ -1,5 +1,6 @@
 #include "AXengine/Shader/ShaderProgram.h"
 
+#include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Utility.h"
 #include <cstdio>
@@ -15,6 +16,13 @@ void ShaderProgram::Start() const
 void ShaderProgram::Stop() const
 {
 	glUseProgram(0);
+}
+
+void ShaderProgram::SetDebugDrawMode(bool isDebugMode)
+{
+	this->isDebugMode = isDebugMode;
+
+	Gfx::Renderer::SetDebugMode(isDebugMode);
 }
 
 /***** PROTECTED *****/

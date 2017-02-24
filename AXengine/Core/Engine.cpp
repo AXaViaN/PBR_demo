@@ -38,8 +38,11 @@ bool Engine::Init(Game* game)
 	}
 
 	Tool::Input::Instance().Init();
+	Tool::Input::ActivateMouseMotion(true);
 
-	initResult = standardShader.Init();
+	Gfx::Renderer::Instance().Init();
+
+	initResult = standardShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("StandardShader cannot be initialized!");

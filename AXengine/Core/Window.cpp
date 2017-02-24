@@ -1,6 +1,7 @@
 #include "AXengine/Core/Window.h"
 
 #include "AXengine/Tool/Debug.h"
+#include "AXengine/Tool/Time.h"
 #include <GL/glew.h>
 
 namespace AX { namespace Core {
@@ -41,6 +42,9 @@ bool Window::Create(const Tool::CHR* title, const Tool::U32 width, const Tool::U
 		return false;
 	}
 	
+	// Init timer
+	Tool::Time::Instance();
+
 	return true;
 }
 /*	Destroy window and terminate graphics context		*/
@@ -72,7 +76,24 @@ void Window::SyncFPS(Tool::U32 fps) const
 	if(1000/fps > SDL_GetTicks()-lastFrame)
 		SDL_Delay(1000/fps - (SDL_GetTicks()-lastFrame));
 	
+	Tool::Time::Instance().deltaTime = (SDL_GetTicks() - lastFrame) / 1000.0f;
 	lastFrame = SDL_GetTicks();
+}
+
+glm::ivec2 Window::GetWindowSize()
+{
+	Tool::I32 width, height;
+	SDL_GetWindowSize(instance->_handle, &width, &height);
+
+	return glm::ivec2(width, height);
+}
+
+glm::ivec2 Window::WarpMouse()
+{
+	glm::ivec2 window = GetWindowSize() / 2;
+	SDL_WarpMouseInWindow(_handle, window.x, window.y);
+
+	return window;
 }
 
 } } // namespace AX::Core
