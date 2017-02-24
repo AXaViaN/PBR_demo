@@ -2,6 +2,7 @@
 
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
+#include "AXengine/Tool/Time.h"
 #include <glm/gtx/rotate_vector.hpp>
 
 namespace AX { namespace Entity {
@@ -12,7 +13,7 @@ void FreeCamera::Update()
 	glm::ivec2 mouseDelta = Tool::Input::GetMouseDelta();
 	glm::vec3 rotation = glm::vec3(mouseDelta.y, mouseDelta.x, 0);
 
-	transform.Rotate(rotation / 10.0f * _rotationSpeed);
+	transform.Rotate(rotation * _rotationSpeed * 5.0f * Tool::Time::GetDeltaTime());
 
 	if(transform.rotation.x < -90)
 		transform.rotation.x = -90;
@@ -44,7 +45,7 @@ void FreeCamera::Update()
 	if(Tool::Input::GetKey(SDL_SCANCODE_LCTRL))
 		movement -= up;
 
-	transform.Translate(movement / 100.0f * _movementSpeed);
+	transform.Translate(movement * _movementSpeed * Tool::Time::GetDeltaTime());
 }
 
 } } // namespace AX::Entity

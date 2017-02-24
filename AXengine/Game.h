@@ -20,6 +20,7 @@
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 #include "AXengine/Tool/Loader.h"
+#include "AXengine/Tool/Time.h"
 #include "AXengine/Tool/Utility.h"
 
 namespace AX {

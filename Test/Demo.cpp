@@ -8,17 +8,20 @@ using namespace AX::Tool;
 class Demo : public AX::Game {
 public:
 	FreeCamera camera;
-	GameObject quadObject;
-	Mesh quadModel;
-	Texture crateTexture;
-	Material quadMaterial;
 
-	GameObject surfaceObject;
+	Mesh cubeModel;
+	Texture cubeTexture;
+	Material cubeMaterial;
+	GameObject cubeList[5];
+
 	Mesh surfaceModel;
+	Texture surfaceTexture;
 	Material surfaceMaterial;
+	GameObject surface;
 
 	void Start()
 	{
+		// Cube
 		F32 vertexList[] = {
 			-0.5f,0.5f,-0.5f,
 			-0.5f,-0.5f,-0.5f,
@@ -90,41 +93,53 @@ public:
 			20,21,23,
 			23,21,22
 		};
-
-		quadModel = Loader::LoadMesh(vertexList, sizeof(vertexList), uvCoordList, sizeof(uvCoordList), indexList, sizeof(indexList));
-		crateTexture = Loader::LoadTexture("Data/crate.png", true);
+		cubeModel = Loader::LoadMesh(vertexList, sizeof(vertexList), uvCoordList, sizeof(uvCoordList), indexList, sizeof(indexList));
+		cubeTexture = Loader::LoadTexture("Test/Data/crate.png", true);
+		cubeMaterial.diffuseMap.texture = &cubeTexture;
 		
-		quadMaterial.diffuseMap.texture = &crateTexture;
+		for( GameObject& cube : cubeList )
+			cube = GameObject(cubeModel, cubeMaterial);
+		cubeList[0].transform.SetPosition(0, 0.5, -3);
+		cubeList[1].transform.SetPosition(0, 1.5, -3);
+		cubeList[2].transform.SetPosition(2, 0.5, -3);
+		cubeList[3].transform.SetPosition(0, 0.5, 3);
+		cubeList[4].transform.SetPosition(1, 0.5, 3);
 		
-		quadObject = GameObject(quadModel, quadMaterial);
-		quadObject.transform.SetPosition(0, 0, -2);
-
+		// Surface
 		F32 surfaceVertex[] = {
 			-1, 0, -1,
 			-1, 0,  1,
 			 1, 0, -1,
 			 1, 0,  1
 		};
+		F32 surfaceUV[] = {
+			0, 0,
+			0, 1,
+			1, 0,
+			1, 1
+		};
 		U32 surfaceIndex[] = {
 			0, 1, 2,
 			2, 1, 3
 		};
-		surfaceModel = Loader::LoadMesh(surfaceVertex, sizeof(surfaceVertex), surfaceIndex, sizeof(surfaceIndex));
-		surfaceMaterial.diffuseMap.value = glm::vec3(.5, .3, .1);
-		surfaceObject = GameObject(surfaceModel, surfaceMaterial);
-		surfaceObject.transform.Scale(100);
-
+		surfaceModel = Loader::LoadMesh(surfaceVertex, sizeof(surfaceVertex), surfaceUV, sizeof(surfaceUV), surfaceIndex, sizeof(surfaceIndex));
+		surfaceTexture = Loader::LoadTexture("Test/Data/dirt.jpg", true);
+		surfaceMaterial.diffuseMap.texture = &surfaceTexture;
+		surface = GameObject(surfaceModel, surfaceMaterial);
+		surface.transform.Scale(5);
+		
 		camera.transform.Translate(0, 1, 0);
-		camera.SetMovementSpeed(2.5);
+		camera.SetMovementSpeed(1.5);
 		camera.SetRotationSpeed(1.5);
 		Input::ActivateMouseMotion(false);
 	}
 	void Dispose()
 	{
-		quadModel.Dispose();
-		crateTexture.Dispose();
+		cubeModel.Dispose();
+		cubeTexture.Dispose();
 
 		surfaceModel.Dispose();
+		surfaceTexture.Dispose();
 	}
 	
 	void Update()
@@ -137,7 +152,7 @@ public:
 		if(Input::GetKeyDown(SDL_SCANCODE_TAB))
 		{
 			static bool isDebugMode = false;
-			quadMaterial.shader->SetDebugDrawMode(isDebugMode=!isDebugMode);
+			cubeMaterial.shader->SetDebugDrawMode(isDebugMode=!isDebugMode);
 		}
 
 		if(Input::GetMouseButtonDown(Input::MouseButton::LEFT))
@@ -154,23 +169,10 @@ public:
 	
 	void Draw()
 	{
-		Renderer::Clear(.2, .4, .7);
-		surfaceObject.Render(camera);
+		surface.Render(camera);
 
-		quadObject.transform.SetPosition(0, 0.5, -3);
-		quadObject.Render(camera);
-
-		quadObject.transform.SetPosition(0, 1.5, -3);
-		quadObject.Render(camera);
-
-		quadObject.transform.SetPosition(2, 0.5, -3);
-		quadObject.Render(camera);
-
-		quadObject.transform.SetPosition(0, 0.5, 3);
-		quadObject.Render(camera);
-
-		quadObject.transform.SetPosition(1, 0.5, 3);
-		quadObject.Render(camera);
+		for( GameObject& cube : cubeList )
+			cube.Render(camera);
 	}
 	
 };
