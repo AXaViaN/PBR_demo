@@ -9,11 +9,15 @@ namespace AX { namespace Tool {
 
 Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, U32 indexList[], U32 indexListSize)
 {
-	return loadMesh(positionList, positionListSize, nullptr, 0, indexList, indexListSize);
+	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, indexList, indexListSize);
 }
 Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
 {
-	return loadMesh(positionList, positionListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
+	return loadMesh(positionList, positionListSize, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
+}
+Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, F32 normalList[], U32 normalListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
+{
+	return loadMesh(positionList, positionListSize, normalList, normalListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
 
 Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
@@ -103,7 +107,7 @@ void Loader::Terminate()
 
 /***** PRIVATE *****/
 
-Model::Mesh Loader::loadMesh(F32 positionList[], U32 positionListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
+Model::Mesh Loader::loadMesh(F32 positionList[], U32 positionListSize, F32 normalList[], U32 normalListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
 {
 	U32 vaoID;
 	glGenVertexArrays(1, &vaoID);
@@ -117,6 +121,9 @@ Model::Mesh Loader::loadMesh(F32 positionList[], U32 positionListSize, F32 uvCoo
 	vboIDList.push_back(vboID);
 
 	vboID = storeInVBO(Model::VBOlayout::UVCOORD, 2, uvCoordList, uvCoordListSize);
+	vboIDList.push_back(vboID);
+
+	vboID = storeInVBO(Model::VBOlayout::NORMAL, 3, normalList, normalListSize);
 	vboIDList.push_back(vboID);
 
 	vboID = bindIndexBuffer(indexList, indexListSize);

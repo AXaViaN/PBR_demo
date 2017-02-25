@@ -7,6 +7,7 @@
 #define __AX__CORE__ENGINE_H
 
 #include "AXengine/Shader/StandardShader.h"
+#include "AXengine/Shader/PhongShader.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 
@@ -42,8 +43,9 @@ public:
 	 * Stop the game loop
 	 */
 	void Exit() { _isRunning = false; }
-
+	
 	Shader::StandardShader standardShader;
+	Shader::PhongShader phongShader;
 
 	const Tool::CHR* name = "PBR Demo Engine";
 

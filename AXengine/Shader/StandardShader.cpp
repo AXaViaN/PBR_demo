@@ -6,7 +6,7 @@
 
 namespace AX { namespace Shader {
 
-void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera)
+void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light*& light)
 {
 	if(isDebugMode)
 	{

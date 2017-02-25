@@ -23,6 +23,10 @@ public:
 	static Model::Mesh LoadMesh(F32 positionList[], U32 positionListSize, 
 								F32 uvCoordList[], U32 uvCoordListSize, 
 								U32 indexList[], U32 indexListSize);
+	static Model::Mesh LoadMesh(F32 positionList[], U32 positionListSize, 
+								F32 normalList[], U32 normalListSize, 
+								F32 uvCoordList[], U32 uvCoordListSize, 
+								U32 indexList[], U32 indexListSize);
 
 	static Model::Texture LoadTexture(const CHR* filePath, bool addMipmap);
 
@@ -39,6 +43,7 @@ protected:
 
 private:
 	static Model::Mesh loadMesh(F32 positionList[], U32 positionListSize, 
+								F32 normalList[], U32 normalListSize, 
 								F32 uvCoordList[], U32 uvCoordListSize, 
 								U32 indexList[], U32 indexListSize);
 	static U32 storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], U32 dataSize);

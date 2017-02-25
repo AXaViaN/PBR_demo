@@ -14,6 +14,7 @@ namespace AX { namespace Model {
 enum VBOlayout {
 	POSITION,
 	UVCOORD,
+	NORMAL,
 
 	LAYOUT_SIZE
 };
