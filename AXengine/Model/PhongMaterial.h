@@ -14,6 +14,9 @@ class PhongMaterial : public Material {
 public:
 	PhongMaterial();
 
+	TextureMap<glm::vec3> specularMap;
+	TextureMap<glm::vec3> emissionMap;
+
 };
 
 } } // namespace AX::Model

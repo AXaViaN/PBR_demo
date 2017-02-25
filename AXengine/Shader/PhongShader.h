@@ -40,10 +40,15 @@ private:
 	Tool::U32 _uniform_vs_ModelViewProjectionMatrix;
 	Tool::U32 _uniform_vs_modelViewMatrix;
 	Tool::U32 _uniform_vs_normalMatrix;
-	Tool::U32 _uniform_vs_lightPositionOnCamera;
 
-	Tool::U32 _uniform_fs_diffuseValue;
-	Tool::U32 _uniform_fs_lightColor;
+	Tool::U32 _uniform_fs_material_diffuseMap_value;
+	Tool::U32 _uniform_fs_material_specularMap_value;
+	Tool::U32 _uniform_fs_material_emissionMap_value;
+
+	Tool::U32 _uniform_vs_fs_light_position;
+	Tool::U32 _uniform_vs_fs_light_diffuse;
+	Tool::U32 _uniform_vs_fs_light_specular;
+	Tool::U32 _uniform_vs_fs_light_ambient;
 
 };
 

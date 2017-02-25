@@ -16,12 +16,14 @@ public:
 	GameObject lightObject;
 
 	Mesh cubeModel;
-	Texture cubeTexture;
+	Texture cubeDiffuseTexture;
+	Texture cubeSpecularTexture;
+	Texture cubeEmissionTexture;
 	PhongMaterial cubeMaterial;
 	GameObject cubeList[5];
 
 	Mesh surfaceModel;
-	Texture surfaceTexture;
+	Texture surfaceDiffuseTexture;
 	PhongMaterial surfaceMaterial;
 	GameObject surface;
 
@@ -131,8 +133,12 @@ public:
 			23, 21, 22
 		};
 		cubeModel = Loader::LoadMesh(vertexList, sizeof(vertexList), normalList, sizeof(normalList), uvCoordList, sizeof(uvCoordList), indexList, sizeof(indexList));
-		cubeTexture = Loader::LoadTexture("Test/Data/crate.png", true);
-		cubeMaterial.diffuseMap.texture = &cubeTexture;
+		cubeDiffuseTexture = Loader::LoadTexture("Test/Data/crate_diff.png", true);
+		cubeSpecularTexture = Loader::LoadTexture("Test/Data/crate_spec.png", true);
+		cubeEmissionTexture = Loader::LoadTexture("Test/Data/crate_emis.png", true);
+		cubeMaterial.diffuseMap.texture = &cubeDiffuseTexture;
+		cubeMaterial.specularMap.texture = &cubeSpecularTexture;
+		cubeMaterial.emissionMap.texture = &cubeEmissionTexture;
 		
 		for( GameObject& cube : cubeList )
 			cube = GameObject(cubeModel, cubeMaterial);
@@ -171,8 +177,9 @@ public:
 			2, 1, 3
 		};
 		surfaceModel = Loader::LoadMesh(surfaceVertex, sizeof(surfaceVertex), surfaceNormal, sizeof(surfaceNormal), surfaceUV, sizeof(surfaceUV), surfaceIndex, sizeof(surfaceIndex));
-		surfaceTexture = Loader::LoadTexture("Test/Data/dirt.jpg", true);
-		surfaceMaterial.diffuseMap.texture = &surfaceTexture;
+		surfaceDiffuseTexture = Loader::LoadTexture("Test/Data/dirt_diff.png", true);
+		surfaceMaterial.diffuseMap.texture = &surfaceDiffuseTexture;
+		
 		surface = GameObject(surfaceModel, surfaceMaterial);
 		surface.transform.Scale(5);
 		
@@ -180,11 +187,10 @@ public:
 		camera.SetMovementSpeed(1.5);
 		camera.SetRotationSpeed(1.5);
 
-		light.SetColor(1, 1, 1);
 		light.transform.SetPosition(0, 2, 0);
 		// Light model (debug)
 		lightModel  = Loader::LoadMesh(vertexList, sizeof(vertexList), indexList, sizeof(indexList));
-		lightMaterial.diffuseMap.value = light.color;
+		lightMaterial.diffuseMap.value = light.diffuseIntensity;
 		lightObject = GameObject(lightModel, lightMaterial);
 		lightObject.transform.Scale(0.125);
 
@@ -193,10 +199,12 @@ public:
 	void Dispose()
 	{
 		cubeModel.Dispose();
-		cubeTexture.Dispose();
+		cubeDiffuseTexture.Dispose();
+		cubeSpecularTexture.Dispose();
+		cubeEmissionTexture.Dispose();
 
 		surfaceModel.Dispose();
-		surfaceTexture.Dispose();
+		surfaceDiffuseTexture.Dispose();
 	}
 	
 	void Update()
@@ -235,7 +243,7 @@ public:
 		if(Input::GetKey(SDL_SCANCODE_KP_ENTER))
 			lightTranslation.y -= 1;
 		light.transform.Translate(lightTranslation * Time::GetDeltaTime());
-
+		
 		camera.Update();
 	}
 	
