@@ -18,7 +18,7 @@ namespace AX { namespace Shader {
 
 class PhongShader : public ShaderProgram {
 public:
-	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light*& light) override;
+	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light**& lightList, Tool::SIZE lightCount) override;
 
 protected:
 	/**
@@ -45,10 +45,28 @@ private:
 	Tool::U32 _uniform_fs_material_specularMap_value;
 	Tool::U32 _uniform_fs_material_emissionMap_value;
 
-	Tool::U32 _uniform_vs_fs_light_position;
-	Tool::U32 _uniform_vs_fs_light_diffuse;
-	Tool::U32 _uniform_vs_fs_light_specular;
-	Tool::U32 _uniform_vs_fs_light_ambient;
+	Tool::U32 _uniform_fs_directionalLight_direction;
+	Tool::U32 _uniform_fs_directionalLight_color_diffuse;
+	Tool::U32 _uniform_fs_directionalLight_color_specular;
+	Tool::U32 _uniform_fs_directionalLight_color_ambient;
+	
+	static const Tool::SIZE POINT_LIGHT_COUNT = 8;
+	Tool::U32 _uniform_fs_pointLight_position[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_color_diffuse[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_color_specular[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_color_ambient[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_constant[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_linear[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_quadric[POINT_LIGHT_COUNT];
+
+	static const Tool::SIZE SPOT_LIGHT_COUNT = 8;
+	Tool::U32 _uniform_fs_spotLight_position[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_direction[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_color_diffuse[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_color_specular[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_color_ambient[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_innerCutoff[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_outerCutoff[SPOT_LIGHT_COUNT];
 
 };
 

@@ -1,5 +1,8 @@
 #version 410 core
 
+#define POINT_LIGHT_COUNT 8
+#define SPOT_LIGHT_COUNT 8
+
 struct TextureMap {
 	sampler2D texture;
 	vec3 value;
@@ -10,29 +13,54 @@ struct Material {
 	TextureMap emissionMap;
 };
 
-struct Light {
-	vec3 position; // Position in view space
-	
+struct Color {
 	vec3 diffuse;
 	vec3 specular;
 	vec3 ambient;
+};
+struct DirectionalLight {
+	vec3 direction;
+	
+	Color color;
+};
+struct PointLight {
+	vec3 position;
+	
+	Color color;
+	
+	float constant;
+	float linear;
+	float quadric;
+};
+struct SpotLight {
+	vec3 position;
+	vec3 direction;
+	
+	Color color;
+	
+	float innerCutoff;
+	float outerCutoff;
 };
 
 in vec3 varying_normal;
 in vec2 varying_uvCoord;
 in vec3 varying_onCameraPosition;
-in vec3 varying_fragmentToLightRay;
 
 uniform Material fs_material;
 
-uniform Light vs_fs_light;
+uniform DirectionalLight fs_directionalLight;
+uniform PointLight fs_pointLight[POINT_LIGHT_COUNT];
+uniform SpotLight fs_spotLight[SPOT_LIGHT_COUNT];
 
 out vec4 out_color;
 
 void getColorFromTextureMaps(inout vec3 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor);
-vec3 applyDiffuseLighting(vec3 diffuseColor, vec3 normal, vec3 lightRay);
-vec3 applySpecularLighting(vec3 specularColor, vec3 normal, vec3 lightRay);
-vec3 applyAmbientLighting(vec3 diffuseColor);
+vec3 applyDiffuseLighting(vec3 lightColor, vec3 diffuseColor, vec3 normal, vec3 lightRay);
+vec3 applySpecularLighting(vec3 lightColor, vec3 specularColor, vec3 normal, vec3 lightRay);
+vec3 applyAmbientLighting(vec3 lightColor, vec3 diffuseColor);
+vec3 calculatePointLight(PointLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal);
+vec3 calculateDirectionalLight(DirectionalLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal);
+vec3 calculateSpotLight(SpotLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal);
 
 void main()
 {
@@ -41,21 +69,34 @@ void main()
 	vec3 emissionColor;
 	getColorFromTextureMaps(diffuseColor, specularColor, emissionColor);
 	
+	vec3 normal = normalize(varying_normal);
+	
 	// Lighting
-	vec3 diffuseLight = diffuseColor;
-	vec3 specularLight = vec3(0.0);
-	vec3 ambientLight = vec3(0.0);
-	if(vs_fs_light.diffuse.r != -1)
+	vec3 directionalLight = vec3(0.0);
+	if(fs_directionalLight.color.diffuse.r != -1)
 	{
-		vec3 normal = normalize(varying_normal);
-		vec3 lightRay = normalize(varying_fragmentToLightRay);
-		
-		diffuseLight = applyDiffuseLighting(diffuseColor, normal, lightRay);
-		specularLight = applySpecularLighting(specularColor, normal, lightRay);
-		ambientLight = applyAmbientLighting(diffuseColor);
+		directionalLight = calculateDirectionalLight(fs_directionalLight, diffuseColor, specularColor, normal);
 	}
 	
-	out_color = vec4(diffuseLight + specularLight + ambientLight, 1.0) + emissionColor;
+	vec3 pointLights = vec3(0.0);
+	for( int i=0 ; i<POINT_LIGHT_COUNT ; i++ )
+	{
+		if(fs_pointLight[i].color.diffuse.r != -1)
+		{
+			pointLights += calculatePointLight(fs_pointLight[i], diffuseColor, specularColor, normal);
+		}
+	}
+	
+	vec3 spotLights = vec3(0.0);
+	for( int i=0 ; i<SPOT_LIGHT_COUNT ; i++ )
+	{
+		if(fs_spotLight[i].color.diffuse.r != -1)
+		{
+			spotLights += calculateSpotLight(fs_spotLight[i], diffuseColor, specularColor, normal);
+		}
+	}
+	
+	out_color = vec4(directionalLight + pointLights + spotLights + emissionColor, 1.0);
 }
 
 ///////////////////////////////////////////////////////
@@ -78,22 +119,74 @@ void getColorFromTextureMaps(inout vec3 diffuseColor, inout vec3 specularColor, 
 		emissionColor = fs_material.emissionMap.value;
 }
 
-vec3 applyDiffuseLighting(vec3 diffuseColor, vec3 normal, vec3 lightRay)
+vec3 applyDiffuseLighting(vec3 lightColor, vec3 diffuseColor, vec3 normal, vec3 lightRay)
 {
 	float diffuseFactor = max(0.0, dot(normal, lightRay));
 	
-	return vs_fs_light.diffuse * (diffuseColor * diffuseFactor);
+	return lightColor * (diffuseColor * diffuseFactor);
 }
-vec3 applySpecularLighting(vec3 specularColor, vec3 normal, vec3 lightRay)
+vec3 applySpecularLighting(vec3 lightColor, vec3 specularColor, vec3 normal, vec3 lightRay)
 {
 	vec3 cameraRay = normalize(-varying_onCameraPosition);
 	vec3 reflectionDirection = reflect(-lightRay, normal);
 	float shininess = 128 * (specularColor.r + specularColor.g + specularColor.b) + 1;
 	float specularFactor = pow(max(0.0, dot(cameraRay, reflectionDirection)), shininess);
 	
-	return vs_fs_light.specular * (specularColor * specularFactor);
+	return lightColor * (specularColor * specularFactor);
 }
-vec3 applyAmbientLighting(vec3 diffuseColor)
+vec3 applyAmbientLighting(vec3 lightColor, vec3 diffuseColor)
 {
-	return vs_fs_light.ambient * diffuseColor;
+	return lightColor * diffuseColor;
+}
+
+vec3 calculatePointLight(PointLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal)
+{
+	vec3 lightRay = normalize(light.position - varying_onCameraPosition);
+	
+	vec3 diffuseLight = applyDiffuseLighting(light.color.diffuse, diffuseColor, normal, lightRay);
+	vec3 specularLight = applySpecularLighting(light.color.specular, specularColor, normal, lightRay);
+	vec3 ambientLight = applyAmbientLighting(light.color.ambient, diffuseColor);
+	
+	float lightDistance = length(light.position - varying_onCameraPosition);
+	float attenuation = 1.0 / (light.constant + light.linear*lightDistance + light.quadric*pow(lightDistance, 2));
+	
+	return (diffuseLight + specularLight + ambientLight) * attenuation;
+}
+vec3 calculateDirectionalLight(DirectionalLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal)
+{
+	vec3 lightRay = normalize(-light.direction);
+	
+	vec3 diffuseLight = applyDiffuseLighting(light.color.diffuse, diffuseColor, normal, lightRay);
+	vec3 specularLight = applySpecularLighting(light.color.specular, specularColor, normal, lightRay);
+	vec3 ambientLight = applyAmbientLighting(light.color.ambient, diffuseColor);
+	
+	return diffuseLight + specularLight + ambientLight;
+}
+vec3 calculateSpotLight(SpotLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal)
+{
+	vec3 lightRay = normalize(light.position - varying_onCameraPosition);
+	vec3 spotRay = normalize(-light.direction);
+	float theta = dot(lightRay, spotRay);
+	
+	vec3 diffuseLight = vec3(0.0);
+	vec3 specularLight = vec3(0.0);
+	vec3 ambientLight = applyAmbientLighting(light.color.ambient, diffuseColor);
+	float attenuation = 1.0;
+	
+	if(theta > light.outerCutoff)
+	{
+		diffuseLight = applyDiffuseLighting(light.color.diffuse, diffuseColor, normal, lightRay);
+		specularLight = applySpecularLighting(light.color.specular, specularColor, lightRay, spotRay);
+		
+		if(theta < light.innerCutoff)
+		{
+			attenuation = (theta - light.outerCutoff) / (light.innerCutoff - light.outerCutoff);
+		}
+	}
+	else
+	{
+		attenuation = 0.0;
+	}
+	
+	return (diffuseLight + specularLight + ambientLight) * attenuation;
 }

@@ -1,5 +1,7 @@
 #include "AXengine/Game.h"
 
+#include <glm/gtx/rotate_vector.hpp>
+
 using namespace AX::Entity;
 using namespace AX::Gfx;
 using namespace AX::Model;
@@ -8,12 +10,15 @@ using namespace AX::Tool;
 class Demo : public AX::Game {
 public:
 	FreeCamera camera;
-	Light light;
+	DirectionalLight directionalLight;
+	PointLight pointLight;
+	SpotLight spotLight;
 
 	// Draw light to scene for debug
 	Mesh lightModel;
 	Material lightMaterial;
-	GameObject lightObject;
+	GameObject pointLightObject;
+	GameObject directionalLightObject;
 
 	Mesh cubeModel;
 	Texture cubeDiffuseTexture;
@@ -183,21 +188,47 @@ public:
 		surface = GameObject(surfaceModel, surfaceMaterial);
 		surface.transform.Scale(5);
 		
+		// Camera
 		camera.transform.Translate(0, 1, 0);
 		camera.SetMovementSpeed(1.5);
 		camera.SetRotationSpeed(1.5);
 
-		light.transform.SetPosition(0, 2, 0);
+		// Lights
+		directionalLight.transform.SetRotation(-75, -45, 30);
+		directionalLight.SetDiffuseIntensity(0.2, 0.2, 0.2);
+		directionalLight.SetSpecularIntensity(0.5, 0.5, 0.5);
+		directionalLight.SetAmbientIntensity(0.05, 0.05, 0.05);
+
+		spotLight.transform.SetPosition(2, 5, -3);
+		spotLight.transform.SetRotation(-90, 0, 0);
+		spotLight.SetDiffuseIntensity(0.4, 0.4, 0.1);
+		spotLight.SetSpecularIntensity(0.6, 0.6, 0.15);
+		spotLight.SetAmbientIntensity(0.1, 0.1, 0.05);
+
+		pointLight.transform.SetPosition(0, 2, 0);
+		pointLight.SetDiffuseIntensity(0.3, 0.1, 0.5);
+		pointLight.SetSpecularIntensity(0.5, 0.1, 0.8);
+		pointLight.SetAmbientIntensity(0.05, 0.01, 0.1);
+		pointLight.linear = 0.5;
+		pointLight.quadric = 0.4;
 		// Light model (debug)
 		lightModel  = Loader::LoadMesh(vertexList, sizeof(vertexList), indexList, sizeof(indexList));
-		lightMaterial.diffuseMap.value = light.diffuseIntensity;
-		lightObject = GameObject(lightModel, lightMaterial);
-		lightObject.transform.Scale(0.125);
+		lightMaterial.diffuseMap.value = pointLight.diffuseIntensity;
+		pointLightObject = GameObject(lightModel, lightMaterial);
+		pointLightObject.transform.Scale(0.125);
+		directionalLightObject = GameObject(lightModel, lightMaterial);
+		glm::vec3 directionalLightDirection = glm::vec3(0, 0, -1);
+		directionalLightDirection = glm::rotate(directionalLightDirection, glm::radians(directionalLight.transform.rotation.x), glm::vec3(1, 0, 0));
+		directionalLightDirection = glm::rotate(directionalLightDirection, glm::radians(directionalLight.transform.rotation.y), glm::vec3(0, 1, 0));
+		directionalLightDirection = glm::rotate(directionalLightDirection, glm::radians(directionalLight.transform.rotation.z), glm::vec3(0, 0, 1));
+		directionalLightObject.transform.Translate(glm::vec3(-50, -50, -50) * directionalLightDirection);
 
 		Input::ActivateMouseMotion(false);
 	}
 	void Dispose()
 	{
+		lightModel.Dispose();
+
 		cubeModel.Dispose();
 		cubeDiffuseTexture.Dispose();
 		cubeSpecularTexture.Dispose();
@@ -242,20 +273,28 @@ public:
 			lightTranslation.y += 1;
 		if(Input::GetKey(SDL_SCANCODE_KP_ENTER))
 			lightTranslation.y -= 1;
-		light.transform.Translate(lightTranslation * Time::GetDeltaTime());
+		pointLight.transform.Translate(lightTranslation * Time::GetDeltaTime());
+		pointLightObject.transform.position = pointLight.transform.position;
 		
 		camera.Update();
 	}
 	
 	void Draw()
 	{
-		lightObject.transform.position = light.transform.position;
-		lightObject.Render(camera);
+		Renderer::Clear(0.1, 0.1, 0.1);
 
-		surface.Render(camera, light);
+		const Light* lightList[] = {&directionalLight, &pointLight, &spotLight};
+
+		lightMaterial.diffuseMap.value = directionalLight.diffuseIntensity * 10.0f;
+		directionalLightObject.Render(camera);
+
+		lightMaterial.diffuseMap.value = pointLight.diffuseIntensity;
+		pointLightObject.Render(camera);
+
+		surface.Render(camera, lightList, sizeof(lightList));
 
 		for( GameObject& cube : cubeList )
-			cube.Render(camera, light);
+			cube.Render(camera, lightList, sizeof(lightList));
 	}
 	
 };

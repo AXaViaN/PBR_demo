@@ -131,5 +131,14 @@
     <ClInclude Include="AXengine\Model\PhongMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AXengine\Entity\DirectionalLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Entity\PointLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Entity\SpotLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

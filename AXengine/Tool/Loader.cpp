@@ -7,15 +7,15 @@
 
 namespace AX { namespace Tool {
 
-Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, U32 indexList[], U32 indexListSize)
+Model::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, U32 indexList[], SIZE indexListSize)
 {
 	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, indexList, indexListSize);
 }
-Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
+Model::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
 	return loadMesh(positionList, positionListSize, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
-Model::Mesh Loader::LoadMesh(F32 positionList[], U32 positionListSize, F32 normalList[], U32 normalListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
+Model::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
 	return loadMesh(positionList, positionListSize, normalList, normalListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
@@ -107,7 +107,7 @@ void Loader::Terminate()
 
 /***** PRIVATE *****/
 
-Model::Mesh Loader::loadMesh(F32 positionList[], U32 positionListSize, F32 normalList[], U32 normalListSize, F32 uvCoordList[], U32 uvCoordListSize, U32 indexList[], U32 indexListSize)
+Model::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
 	U32 vaoID;
 	glGenVertexArrays(1, &vaoID);
@@ -131,25 +131,25 @@ Model::Mesh Loader::loadMesh(F32 positionList[], U32 positionListSize, F32 norma
 
 	return Model::Mesh(vaoID, vboIDList, indexListSize);
 }
-U32 Loader::storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], U32 dataSize)
+U32 Loader::storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize)
 {
 	U32 vboID;
 	glGenBuffers(1, &vboID);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboID);
 	if(data)
-		glBufferData(GL_ARRAY_BUFFER, dataSize*sizeof(F32), &data[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, dataSize, &data[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(attributeNumber, dimension, GL_FLOAT, GL_FALSE, 0, nullptr);
 	
 	return vboID;
 }
-U32 Loader::bindIndexBuffer(U32 indexList[], U32 indexListSize)
+U32 Loader::bindIndexBuffer(U32 indexList[], SIZE indexListSize)
 {
 	U32 vboID;
 	glGenBuffers(1, &vboID);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexListSize*sizeof(U32), &indexList[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexListSize, &indexList[0], GL_STATIC_DRAW);
 	
 	return vboID;
 }

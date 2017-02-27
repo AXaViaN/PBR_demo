@@ -151,9 +151,12 @@
     <ClInclude Include="AXengine\Core\Engine.h" />
     <ClInclude Include="AXengine\Core\Window.h" />
     <ClInclude Include="AXengine\Entity\Camera.h" />
+    <ClInclude Include="AXengine\Entity\DirectionalLight.h" />
     <ClInclude Include="AXengine\Entity\GameObject.h" />
     <ClInclude Include="AXengine\Entity\FreeCamera.h" />
     <ClInclude Include="AXengine\Entity\Light.h" />
+    <ClInclude Include="AXengine\Entity\PointLight.h" />
+    <ClInclude Include="AXengine\Entity\SpotLight.h" />
     <ClInclude Include="AXengine\Entity\Transform.h" />
     <ClInclude Include="AXengine\Game.h" />
     <ClInclude Include="AXengine\Gfx\Renderer.h" />
