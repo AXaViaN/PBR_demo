@@ -9,7 +9,6 @@
 #ifndef __AX__GAME_H
 #define __AX__GAME_H
 
-#include "AXengine/Entity/Camera.h"
 #include "AXengine/Entity/FreeCamera.h"
 #include "AXengine/Entity/GameObject.h"
 #include "AXengine/Entity/DirectionalLight.h"

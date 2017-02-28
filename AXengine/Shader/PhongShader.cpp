@@ -104,11 +104,8 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 	glm::mat4 viewMatrix;
 	if(camera)
 	{
-		viewMatrix = glm::scale(viewMatrix, glm::vec3(1, 1, 1)/camera->transform.scale);
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.x), glm::vec3(1, 0, 0));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.y), glm::vec3(0, 1, 0));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.z), glm::vec3(0, 0, -1));
-		viewMatrix = glm::translate(viewMatrix, -camera->transform.position);
+		glm::vec3 center = camera->transform.position + camera->GetForwardDirection();
+		viewMatrix = glm::lookAt(camera->transform.position, center, camera->GetUpDirection());
 	}
 	
 	glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;
@@ -118,12 +115,8 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 	// Process lights
 	if(directionalLight)
 	{
-		glm::vec3 lightDirectionOnCamera = glm::vec3(0, 0, -1);
-		lightDirectionOnCamera = glm::rotate(lightDirectionOnCamera, glm::radians(directionalLight->transform.rotation.x), glm::vec3(1, 0, 0));
-		lightDirectionOnCamera = glm::rotate(lightDirectionOnCamera, glm::radians(directionalLight->transform.rotation.y), glm::vec3(0, 1, 0));
-		lightDirectionOnCamera = glm::rotate(lightDirectionOnCamera, glm::radians(directionalLight->transform.rotation.z), glm::vec3(0, 0, 1));
-		lightDirectionOnCamera = glm::vec3(viewMatrix * glm::vec4(lightDirectionOnCamera, 0.0f));
-
+		glm::vec3 lightDirectionOnCamera = glm::vec3(viewMatrix * glm::vec4(directionalLight->direction, 0.0f));
+		
 		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_direction, lightDirectionOnCamera);
 		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_diffuse, directionalLight->diffuseIntensity);
 		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_specular, directionalLight->specularIntensity);
@@ -137,7 +130,7 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 	{
 		if(pointLight[i])
 		{
-			glm::vec3 lightPositionOnCamera = glm::vec3(viewMatrix * glm::vec4(pointLight[i]->transform.position, 1.0f));
+			glm::vec3 lightPositionOnCamera = glm::vec3(viewMatrix * glm::vec4(pointLight[i]->position, 1.0f));
 
 			ShaderProgram::LoadUniform(_uniform_fs_pointLight_position[i], lightPositionOnCamera);
 			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_diffuse[i], pointLight[i]->diffuseIntensity);
@@ -156,12 +149,8 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 	{
 		if(spotLight[i])
 		{
-			glm::vec3 lightPositionOnCamera = glm::vec3(viewMatrix * glm::vec4(spotLight[i]->transform.position, 1.0f));
-			glm::vec3 lightDirectionOnCamera = glm::vec3(0, 0, -1);
-			lightDirectionOnCamera = glm::rotate(lightDirectionOnCamera, glm::radians(spotLight[i]->transform.rotation.x), glm::vec3(1, 0, 0));
-			lightDirectionOnCamera = glm::rotate(lightDirectionOnCamera, glm::radians(spotLight[i]->transform.rotation.y), glm::vec3(0, 1, 0));
-			lightDirectionOnCamera = glm::rotate(lightDirectionOnCamera, glm::radians(spotLight[i]->transform.rotation.z), glm::vec3(0, 0, 1));
-			lightDirectionOnCamera = glm::vec3(viewMatrix * glm::vec4(lightDirectionOnCamera, 0.0f));
+			glm::vec3 lightPositionOnCamera = glm::vec3(viewMatrix * glm::vec4(spotLight[i]->position, 1.0f));
+			glm::vec3 lightDirectionOnCamera = glm::vec3(viewMatrix * glm::vec4(spotLight[i]->direction, 0.0f));
 
 			ShaderProgram::LoadUniform(_uniform_fs_spotLight_position[i], lightPositionOnCamera);
 			ShaderProgram::LoadUniform(_uniform_fs_spotLight_direction[i], lightDirectionOnCamera);

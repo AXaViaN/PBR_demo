@@ -6,7 +6,6 @@
 #ifndef __AX__ENTITY__LIGHT_H
 #define __AX__ENTITY__LIGHT_H
 
-#include "AXengine/Entity/Transform.h"
 #include "AXengine/Tool/Utility.h"
 #include <glm/glm.hpp>
 
@@ -26,7 +25,6 @@ public:
 	void SetAmbientIntensity(Tool::F32 r, Tool::F32 g, Tool::F32 b) { ambientIntensity.r = r; ambientIntensity.g = g; ambientIntensity.b = b; }
 
 	const Type type;
-	Transform transform;
 	glm::vec3 diffuseIntensity = glm::vec3(0.9, 0.9, 0.9);
 	glm::vec3 specularIntensity = glm::vec3(1, 1, 1);
 	glm::vec3 ambientIntensity = glm::vec3(0.1, 0.1, 0.1);

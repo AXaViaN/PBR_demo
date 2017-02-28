@@ -40,11 +40,8 @@ void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, con
 	glm::mat4 viewMatrix;
 	if(camera)
 	{
-		viewMatrix = glm::scale(viewMatrix, glm::vec3(1, 1, 1)/camera->transform.scale);
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.x), glm::vec3(1, 0, 0));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.y), glm::vec3(0, 1, 0));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(camera->transform.rotation.z), glm::vec3(0, 0, -1));
-		viewMatrix = glm::translate(viewMatrix, -camera->transform.position);
+		glm::vec3 center = camera->transform.position + camera->GetForwardDirection();
+		viewMatrix = glm::lookAt(camera->transform.position, center, camera->GetUpDirection());
 	}
 
 	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * viewMatrix * modelMatrix);
