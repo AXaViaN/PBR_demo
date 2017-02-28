@@ -223,12 +223,12 @@ public:
 	
 	void Draw()
 	{
-		const Light* lightList[] = {&directionalLight};
-		
-		surface.Render(camera, lightList, sizeof(lightList));
+		Renderer::PrepareScene(camera, directionalLight);
+
+		surface.Render();
 
 		for( GameObject& cube : cubeList )
-			cube.Render(camera, lightList, sizeof(lightList));
+			cube.Render();
 	}
 	
 };

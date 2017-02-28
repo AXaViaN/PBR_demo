@@ -27,15 +27,6 @@ public:
 	GameObject(Model::Mesh& mesh, Model::Material& material) : mesh(&mesh), material(&material) { }
 
 	void Render() const;
-	void Render(const Camera& camera) const;
-	void Render(const Camera* camera) const;
-	void Render(const Light& light) const;
-	void Render(const Light* light) const;
-	void Render(const Light** lightList, Tool::SIZE lightListSize) const;
-	void Render(const Camera& camera, const Light& light) const;
-	void Render(const Camera* camera, const Light* light) const;
-	void Render(const Camera& camera, const Light** lightList, Tool::SIZE lightListSize) const;
-	void Render(const Camera* camera, const Light** lightList, Tool::SIZE lightListSize) const;
 
 	Transform transform;
 

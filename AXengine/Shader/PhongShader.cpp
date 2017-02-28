@@ -10,14 +10,15 @@
 
 namespace AX { namespace Shader {
 
-void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light**& lightList, Tool::SIZE lightCount)
+void PhongShader::ProcessScene(const Entity::Scene& scene)
 {
 	const Entity::DirectionalLight* directionalLight = nullptr;
 	const Entity::PointLight* pointLight[POINT_LIGHT_COUNT] = {nullptr};
 	const Entity::SpotLight* spotLight[SPOT_LIGHT_COUNT] = {nullptr};
 	Tool::SIZE activePointLightCount = 0;
 	Tool::SIZE activeSpotLightCount = 0;
-	for( int i=0 ; i<lightCount ; i++ )
+	auto& lightList = scene.GetLightList();
+	for( int i=0 ; i<lightList.size() ; i++ )
 	{
 		if(lightList[i]->type == Entity::Light::DIRECTIONAL)
 		{
@@ -37,11 +38,6 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 
 	if(isDebugMode)
 	{
-		// Give green diffuse in debug mode
-		ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, glm::vec3(0, 1, 0));
-		ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, glm::vec3(0, 1, 0));
-		ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(0, 1, 0));
-
 		directionalLight = nullptr;
 		for( int i=0 ; i<activePointLightCount ; i++ )
 			pointLight[i] = nullptr;
@@ -49,6 +45,81 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 		for( int i=0 ; i<activeSpotLightCount ; i++ )
 			spotLight[i] = nullptr;
 		activeSpotLightCount = 0;
+	}
+
+	// Process camera
+	if(scene.camera)
+	{
+		glm::vec3 center = scene.camera->transform.position + scene.camera->GetForwardDirection();
+		_viewMatrix = glm::lookAt(scene.camera->transform.position, center, scene.camera->GetUpDirection());
+	}
+	else
+	{
+		_viewMatrix = glm::mat4();
+	}
+
+	// Process lights
+	if(directionalLight)
+	{
+		glm::vec3 lightDirectionOnCamera = glm::vec3(_viewMatrix * glm::vec4(directionalLight->direction, 0.0f));
+
+		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_direction, lightDirectionOnCamera);
+		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_diffuse, directionalLight->diffuseIntensity);
+		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_specular, directionalLight->specularIntensity);
+		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_ambient, directionalLight->ambientIntensity);
+	}
+	else
+	{
+		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_diffuse, glm::vec3(-1, -1, -1));
+	}
+	for( int i=0 ; i<POINT_LIGHT_COUNT ; i++ )
+	{
+		if(pointLight[i])
+		{
+			glm::vec3 lightPositionOnCamera = glm::vec3(_viewMatrix * glm::vec4(pointLight[i]->position, 1.0f));
+
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_position[i], lightPositionOnCamera);
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_diffuse[i], pointLight[i]->diffuseIntensity);
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_specular[i], pointLight[i]->specularIntensity);
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_ambient[i], pointLight[i]->ambientIntensity);
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_constant[i], pointLight[i]->constant);
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_linear[i], pointLight[i]->linear);
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_quadric[i], pointLight[i]->quadric);
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_diffuse[i], glm::vec3(-1, -1, -1));
+		}
+	}
+	for( int i=0 ; i<SPOT_LIGHT_COUNT ; i++ )
+	{
+		if(spotLight[i])
+		{
+			glm::vec3 lightPositionOnCamera = glm::vec3(_viewMatrix * glm::vec4(spotLight[i]->position, 1.0f));
+			glm::vec3 lightDirectionOnCamera = glm::vec3(_viewMatrix * glm::vec4(spotLight[i]->direction, 0.0f));
+
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_position[i], lightPositionOnCamera);
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_direction[i], lightDirectionOnCamera);
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_diffuse[i], spotLight[i]->diffuseIntensity);
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_specular[i], spotLight[i]->specularIntensity);
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_ambient[i], spotLight[i]->ambientIntensity);
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_innerCutoff[i], glm::cos(glm::radians(spotLight[i]->cutoff)));
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_outerCutoff[i], glm::cos(glm::radians(spotLight[i]->cutoff * spotLight[i]->outerCutoffFactor)));
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_diffuse[i], glm::vec3(-1, -1, -1));
+		}
+	}
+}
+void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject)
+{
+	if(isDebugMode)
+	{
+		// Give green diffuse in debug mode
+		ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, glm::vec3(0, 1, 0));
+		ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, glm::vec3(0, 1, 0));
+		ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(0, 1, 0));
 	}
 	else
 	{
@@ -100,72 +171,10 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject, const 
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(gameObject.transform.rotation.z), glm::vec3(0, 0, 1));
 	modelMatrix = glm::scale(modelMatrix, gameObject.transform.scale);
 
-	// Process camera
-	glm::mat4 viewMatrix;
-	if(camera)
-	{
-		glm::vec3 center = camera->transform.position + camera->GetForwardDirection();
-		viewMatrix = glm::lookAt(camera->transform.position, center, camera->GetUpDirection());
-	}
-	
-	glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;
+	glm::mat4 modelViewMatrix = _viewMatrix * modelMatrix;
 	ShaderProgram::LoadUniform(_uniform_vs_modelViewMatrix, modelViewMatrix);
 	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * modelViewMatrix);
 
-	// Process lights
-	if(directionalLight)
-	{
-		glm::vec3 lightDirectionOnCamera = glm::vec3(viewMatrix * glm::vec4(directionalLight->direction, 0.0f));
-		
-		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_direction, lightDirectionOnCamera);
-		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_diffuse, directionalLight->diffuseIntensity);
-		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_specular, directionalLight->specularIntensity);
-		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_ambient, directionalLight->ambientIntensity);
-	}
-	else
-	{
-		ShaderProgram::LoadUniform(_uniform_fs_directionalLight_color_diffuse, glm::vec3(-1, -1, -1));
-	}
-	for( int i=0 ; i<POINT_LIGHT_COUNT ; i++ )
-	{
-		if(pointLight[i])
-		{
-			glm::vec3 lightPositionOnCamera = glm::vec3(viewMatrix * glm::vec4(pointLight[i]->position, 1.0f));
-
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_position[i], lightPositionOnCamera);
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_diffuse[i], pointLight[i]->diffuseIntensity);
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_specular[i], pointLight[i]->specularIntensity);
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_ambient[i], pointLight[i]->ambientIntensity);
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_constant[i], pointLight[i]->constant);
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_linear[i], pointLight[i]->linear);
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_quadric[i], pointLight[i]->quadric);
-		}
-		else
-		{
-			ShaderProgram::LoadUniform(_uniform_fs_pointLight_color_diffuse[i], glm::vec3(-1, -1, -1));
-		}
-	}
-	for( int i=0 ; i<SPOT_LIGHT_COUNT ; i++ )
-	{
-		if(spotLight[i])
-		{
-			glm::vec3 lightPositionOnCamera = glm::vec3(viewMatrix * glm::vec4(spotLight[i]->position, 1.0f));
-			glm::vec3 lightDirectionOnCamera = glm::vec3(viewMatrix * glm::vec4(spotLight[i]->direction, 0.0f));
-
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_position[i], lightPositionOnCamera);
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_direction[i], lightDirectionOnCamera);
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_diffuse[i], spotLight[i]->diffuseIntensity);
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_specular[i], spotLight[i]->specularIntensity);
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_ambient[i], spotLight[i]->ambientIntensity);
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_innerCutoff[i], glm::cos(glm::radians(spotLight[i]->cutoff)));
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_outerCutoff[i], glm::cos(glm::radians(spotLight[i]->cutoff * spotLight[i]->outerCutoffFactor)));
-		}
-		else
-		{
-			ShaderProgram::LoadUniform(_uniform_fs_spotLight_color_diffuse[i], glm::vec3(-1, -1, -1));
-		}
-	}
-	
 	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelViewMatrix));
 	ShaderProgram::LoadUniform(_uniform_vs_normalMatrix, normalMatrix);
 }

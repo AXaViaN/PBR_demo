@@ -156,6 +156,7 @@
     <ClInclude Include="AXengine\Entity\FreeCamera.h" />
     <ClInclude Include="AXengine\Entity\Light.h" />
     <ClInclude Include="AXengine\Entity\PointLight.h" />
+    <ClInclude Include="AXengine\Entity\Scene.h" />
     <ClInclude Include="AXengine\Entity\SpotLight.h" />
     <ClInclude Include="AXengine\Entity\Transform.h" />
     <ClInclude Include="AXengine\Game.h" />

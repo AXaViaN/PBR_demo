@@ -140,5 +140,8 @@
     <ClInclude Include="AXengine\Entity\SpotLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AXengine\Entity\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

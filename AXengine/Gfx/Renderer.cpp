@@ -12,6 +12,93 @@ void Renderer::Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void Renderer::PrepareScene()
+{
+	instance->_scene.ResetScene();
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Camera& camera)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.camera = &camera;
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Camera* camera)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.camera = camera;
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Light& light)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.AddLight(&light);
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Light* light)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.AddLight(light);
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Light** lightList, Tool::SIZE lightListSize)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.AddLight(lightList, lightListSize/sizeof(Entity::Light*));
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Camera& camera, const Entity::Light& light)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.camera = &camera;
+	instance->_scene.AddLight(&light);
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Camera* camera, const Entity::Light* light)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.camera = camera;
+	instance->_scene.AddLight(light);
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Camera& camera, const Entity::Light** lightList, Tool::SIZE lightListSize)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.camera = &camera;
+	instance->_scene.AddLight(lightList, lightListSize/sizeof(Entity::Light*));
+
+	prepareScene();
+}
+void Renderer::PrepareScene(const Entity::Camera* camera, const Entity::Light** lightList, Tool::SIZE lightListSize)
+{
+	instance->_scene.ResetScene();
+	instance->_scene.camera = camera;
+	instance->_scene.AddLight(lightList, lightListSize/sizeof(Entity::Light*));
+
+	prepareScene();
+}
+
+void Renderer::PrepareShader(Shader::ShaderProgram* shaderProgram)
+{
+	if(instance->_shaderReadyMap.find(shaderProgram) == instance->_shaderReadyMap.end())
+		instance->_shaderReadyMap.insert(std::pair<const Shader::ShaderProgram*, bool>(shaderProgram, false));
+
+	if(instance->_shaderReadyMap[shaderProgram] == false)
+	{
+		shaderProgram->ProcessScene(instance->_scene);
+
+		instance->_shaderReadyMap[shaderProgram] = true;
+	}
+}
+
 void Renderer::Render(const Model::Mesh& mesh)
 {
 	glBindVertexArray(mesh.GetVaoID());
@@ -55,8 +142,16 @@ glm::mat4 Renderer::CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, T
 void Renderer::Init()
 {
 	_projectionMatrix = CreateProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
-
+	
 	glEnable(GL_DEPTH_TEST);
+}
+
+/***** PRIVATE *****/
+
+void Renderer::prepareScene()
+{
+	for( auto& readyMap : instance->_shaderReadyMap )
+		readyMap.second = false;
 }
 
 } } // namespace AX::Render

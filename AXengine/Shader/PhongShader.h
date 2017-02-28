@@ -18,7 +18,8 @@ namespace AX { namespace Shader {
 
 class PhongShader : public ShaderProgram {
 public:
-	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light**& lightList, Tool::SIZE lightCount) override;
+	virtual void ProcessScene(const Entity::Scene& scene) override;
+	virtual void ProcessGameObject(const Entity::GameObject& gameObject) override;
 
 protected:
 	/**
@@ -37,6 +38,8 @@ protected:
 
 private:
 	glm::mat4 _projectionMatrix;
+	glm::mat4 _viewMatrix;
+
 	Tool::U32 _uniform_vs_ModelViewProjectionMatrix;
 	Tool::U32 _uniform_vs_modelViewMatrix;
 	Tool::U32 _uniform_vs_normalMatrix;

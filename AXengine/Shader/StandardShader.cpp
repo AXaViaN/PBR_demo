@@ -6,7 +6,20 @@
 
 namespace AX { namespace Shader {
 
-void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light**& lightList, Tool::SIZE lightCount)
+void StandardShader::ProcessScene(const Entity::Scene& scene)
+{
+	// Process camera
+	if(scene.camera)
+	{
+		glm::vec3 center = scene.camera->transform.position + scene.camera->GetForwardDirection();
+		_viewMatrix = glm::lookAt(scene.camera->transform.position, center, scene.camera->GetUpDirection());
+	}
+	else
+	{
+		_viewMatrix = glm::mat4();
+	}
+}
+void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject)
 {
 	if(isDebugMode)
 	{
@@ -27,7 +40,7 @@ void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, con
 			ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, gameObject.material->diffuseMap.value);
 		}
 	}
-	
+
 	// Process transform
 	glm::mat4 modelMatrix;
 	modelMatrix = glm::translate(modelMatrix, gameObject.transform.position);
@@ -36,15 +49,7 @@ void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject, con
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(gameObject.transform.rotation.z), glm::vec3(0, 0, 1));
 	modelMatrix = glm::scale(modelMatrix, gameObject.transform.scale);
 
-	// Process camera
-	glm::mat4 viewMatrix;
-	if(camera)
-	{
-		glm::vec3 center = camera->transform.position + camera->GetForwardDirection();
-		viewMatrix = glm::lookAt(camera->transform.position, center, camera->GetUpDirection());
-	}
-
-	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * viewMatrix * modelMatrix);
+	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * _viewMatrix * modelMatrix);
 }
 
 } } // namespace AX::Shader
