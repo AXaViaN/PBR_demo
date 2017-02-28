@@ -11,7 +11,7 @@
 #include "AXengine/Entity/Transform.h"
 #include <glm/glm.hpp>
 
-namespace AX { namespace Model {
+namespace AX { namespace Asset {
 class Material;
 class Mesh;
 } }
@@ -21,17 +21,17 @@ namespace AX { namespace Entity {
 class GameObject {
 public:
 	GameObject() : mesh(nullptr), material(nullptr) { }
-	explicit GameObject(Model::Mesh* mesh) : mesh(mesh), material(nullptr) { }
-	explicit GameObject(Model::Mesh& mesh) : mesh(&mesh), material(nullptr) { }
-	GameObject(Model::Mesh* mesh, Model::Material* material) : mesh(mesh), material(material) { }
-	GameObject(Model::Mesh& mesh, Model::Material& material) : mesh(&mesh), material(&material) { }
+	explicit GameObject(Asset::Mesh* mesh) : mesh(mesh), material(nullptr) { }
+	explicit GameObject(Asset::Mesh& mesh) : mesh(&mesh), material(nullptr) { }
+	GameObject(Asset::Mesh* mesh, Asset::Material* material) : mesh(mesh), material(material) { }
+	GameObject(Asset::Mesh& mesh, Asset::Material& material) : mesh(&mesh), material(&material) { }
 
 	void Render() const;
 
 	Transform transform;
 
-	Model::Mesh* mesh;
-	Model::Material* material;
+	Asset::Mesh* mesh;
+	Asset::Material* material;
 
 };
 

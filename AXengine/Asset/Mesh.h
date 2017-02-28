@@ -1,25 +1,26 @@
 /**
- *	File: AXengine/Model/Mesh.h
+ *	File: AXengine/Asset/Mesh.h
  *	Purpose: Provide basic model data for renderer
  */
 
-#ifndef __AX__MODEL__MESH_H
-#define __AX__MODEL__MESH_H
+#ifndef __AX__ASSET__MESH_H
+#define __AX__ASSET__MESH_H
 
 #include "AXengine/Tool/Utility.h"
 #include <vector>
 
-namespace AX { namespace Model {
-
-enum VBOlayout {
-	POSITION,
-	UVCOORD,
-	NORMAL,
-
-	LAYOUT_SIZE
-};
+namespace AX { namespace Asset {
 
 class Mesh {
+public:
+	enum VBOlayout {
+		POSITION,
+		UVCOORD,
+		NORMAL,
+
+		LAYOUT_SIZE
+	};
+
 public:
 	Mesh() : _vaoID(0), _vertexCount(0) { }
 	/**
@@ -46,6 +47,6 @@ private:
 
 };
 
-} } // namespace AX::Model
+} } // namespace AX::Asset
 
-#endif // __AX__MODEL__MESH_H
+#endif // __AX__ASSET__MESH_H

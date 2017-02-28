@@ -7,26 +7,13 @@
 
 namespace AX { namespace Tool {
 
-Model::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, U32 indexList[], SIZE indexListSize)
-{
-	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, indexList, indexListSize);
-}
-Model::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
-{
-	return loadMesh(positionList, positionListSize, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
-}
-Model::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
-{
-	return loadMesh(positionList, positionListSize, normalList, normalListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
-}
-
-Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
+Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 {
 	SDL_Surface* texture = IMG_Load(filePath);
 	if(texture == nullptr)
 	{
 		Debug::LogWarning("Loading texture from %s failed!", filePath);
-		return Model::Texture(0);
+		return Asset::Texture(0);
 	}
 
 	GLuint textureID;
@@ -34,7 +21,7 @@ Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 	if(textureID == 0)
 	{
 		Debug::LogWarning("OpenGL texture generator failed!");
-		return Model::Texture(0);
+		return Asset::Texture(0);
 	}
 
 	// Decide pixel format for texture
@@ -58,15 +45,15 @@ Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 			break;
 		default:
 			Debug::LogWarning("PixelFormat is not supported for texture %s! BytesPerPixel = %d", filePath, texture->format->BytesPerPixel);
-			
+
 			SDL_FreeSurface(texture);
 			glDeleteTextures(1, &textureID);
-			return Model::Texture();
+			return Asset::Texture();
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, texture->format->BytesPerPixel, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
-	
+
 	if(addMipmap)
 	{
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -83,7 +70,20 @@ Model::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 
 	SDL_FreeSurface(texture);
 
-	return Model::Texture(textureID);
+	return Asset::Texture(textureID);
+}
+
+Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, U32 indexList[], SIZE indexListSize)
+{
+	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, indexList, indexListSize);
+}
+Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
+{
+	return loadMesh(positionList, positionListSize, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
+}
+Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
+{
+	return loadMesh(positionList, positionListSize, normalList, normalListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
 
 /***** PRIVATE *****/
@@ -107,29 +107,29 @@ void Loader::Terminate()
 
 /***** PRIVATE *****/
 
-Model::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
+Asset::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
 	U32 vaoID;
 	glGenVertexArrays(1, &vaoID);
 
 	U32 vboID;
 	std::vector<U32> vboIDList;
-	vboIDList.reserve(Model::VBOlayout::LAYOUT_SIZE);
+	vboIDList.reserve(Asset::Mesh::VBOlayout::LAYOUT_SIZE);
 
 	glBindVertexArray(vaoID);
-	vboID = storeInVBO(Model::VBOlayout::POSITION, 3, positionList, positionListSize);
+	vboID = storeInVBO(Asset::Mesh::VBOlayout::POSITION, 3, positionList, positionListSize);
 	vboIDList.push_back(vboID);
 
-	vboID = storeInVBO(Model::VBOlayout::UVCOORD, 2, uvCoordList, uvCoordListSize);
+	vboID = storeInVBO(Asset::Mesh::VBOlayout::UVCOORD, 2, uvCoordList, uvCoordListSize);
 	vboIDList.push_back(vboID);
 
-	vboID = storeInVBO(Model::VBOlayout::NORMAL, 3, normalList, normalListSize);
+	vboID = storeInVBO(Asset::Mesh::VBOlayout::NORMAL, 3, normalList, normalListSize);
 	vboIDList.push_back(vboID);
 
 	vboID = bindIndexBuffer(indexList, indexListSize);
 	vboIDList.push_back(vboID);
 
-	return Model::Mesh(vaoID, vboIDList, indexListSize);
+	return Asset::Mesh(vaoID, vboIDList, indexListSize);
 }
 U32 Loader::storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize)
 {

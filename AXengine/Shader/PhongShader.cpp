@@ -1,9 +1,9 @@
 #include "AXengine/Shader/PhongShader.h"
 
+#include "AXengine/Asset/PhongMaterial.h"
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
-#include "AXengine/Model/PhongMaterial.h"
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -124,7 +124,7 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject)
 	else
 	{
 		// Process material
-		Model::PhongMaterial* material = static_cast<Model::PhongMaterial*>(gameObject.material);
+		Asset::PhongMaterial* material = static_cast<Asset::PhongMaterial*>(gameObject.material);
 		
 		// Diffuse Map
 		if(material->diffuseMap.texture)
@@ -201,9 +201,9 @@ bool PhongShader::Init(const glm::mat4& projectionMatrix)
 
 void PhongShader::BindShaderAttributes()
 {
-	ShaderProgram::BindAttribute(Model::VBOlayout::POSITION, "attrib_position");
-	ShaderProgram::BindAttribute(Model::VBOlayout::UVCOORD, "attrib_uvCoord");
-	ShaderProgram::BindAttribute(Model::VBOlayout::NORMAL, "attrib_normal");
+	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::POSITION, "attrib_position");
+	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::UVCOORD, "attrib_uvCoord");
+	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::NORMAL, "attrib_normal");
 }
 void PhongShader::GetShaderUniformLocations()
 {

@@ -6,8 +6,8 @@
 #ifndef __AX__TOOL__LOADER_H
 #define __AX__TOOL__LOADER_H
 
-#include "AXengine/Model/Mesh.h"
-#include "AXengine/Model/Texture.h"
+#include "AXengine/Asset/Mesh.h"
+#include "AXengine/Asset/Texture.h"
 #include "AXengine/Tool/Utility.h"
 
 namespace AX { namespace Core {
@@ -18,17 +18,17 @@ namespace AX { namespace Tool {
 
 class Loader {
 public:
-	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap);
+
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								U32 indexList[], SIZE indexListSize);
-	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
-	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 normalList[], SIZE normalListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
-
-	static Model::Texture LoadTexture(const CHR* filePath, bool addMipmap);
 
 protected:
 	/**
@@ -42,7 +42,7 @@ protected:
 	static void Terminate();
 
 private:
-	static Model::Mesh loadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Mesh loadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 normalList[], SIZE normalListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);

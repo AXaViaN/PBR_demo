@@ -6,9 +6,9 @@
 #ifndef __AX__GFX__RENDERER_H
 #define __AX__GFX__RENDERER_H
 
+#include "AXengine/Asset/Mesh.h"
+#include "AXengine/Asset/Texture.h"
 #include "AXengine/Entity/Scene.h"
-#include "AXengine/Model/Mesh.h"
-#include "AXengine/Model/Texture.h"
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
@@ -38,8 +38,8 @@ public:
 
 	static void PrepareShader(Shader::ShaderProgram* shaderProgram);
 
-	static void Render(const Model::Mesh& mesh);
-	static void Render(const Model::Mesh& mesh, const Model::Texture& texture);
+	static void Render(const Asset::Mesh& mesh);
+	static void Render(const Asset::Mesh& mesh, const Asset::Texture& texture);
 
 	/**
 	 * In debug mode objects are rendered as wireframes

@@ -1,8 +1,8 @@
 #include "AXengine/Entity/GameObject.h"
 
+#include "AXengine/Asset/Material.h"
+#include "AXengine/Asset/Mesh.h"
 #include "AXengine/Gfx/Renderer.h"
-#include "AXengine/Model/Material.h"
-#include "AXengine/Model/Mesh.h"
 #include "AXengine/Shader/ShaderProgram.h"
 
 namespace AX { namespace Entity {

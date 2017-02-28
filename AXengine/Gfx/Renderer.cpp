@@ -99,7 +99,7 @@ void Renderer::PrepareShader(Shader::ShaderProgram* shaderProgram)
 	}
 }
 
-void Renderer::Render(const Model::Mesh& mesh)
+void Renderer::Render(const Asset::Mesh& mesh)
 {
 	glBindVertexArray(mesh.GetVaoID());
 
@@ -113,7 +113,7 @@ void Renderer::Render(const Model::Mesh& mesh)
 	for( Tool::U32 vbo=0 ; vbo<mesh.GetVboCount()-1 ; vbo++ )
 		glDisableVertexAttribArray(vbo);
 }
-void Renderer::Render(const Model::Mesh& mesh, const Model::Texture& texture)
+void Renderer::Render(const Asset::Mesh& mesh, const Asset::Texture& texture)
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.GetTextureID());

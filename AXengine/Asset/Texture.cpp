@@ -1,8 +1,8 @@
-#include "AXengine/Model/Texture.h"
+#include "AXengine/Asset/Texture.h"
 
 #include <GL/glew.h>
 
-namespace AX { namespace Model {
+namespace AX { namespace Asset {
 
 void Texture::Dispose()
 {
@@ -13,4 +13,4 @@ void Texture::Dispose()
 	}
 }
 
-} } // namespace AX::Model
+} } // namespace AX::Asset

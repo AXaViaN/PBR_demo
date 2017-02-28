@@ -1,24 +1,24 @@
 /**
- *	File: AXengine/Model/Material.h
+ *	File: AXengine/Asset/Material.h
  *	Purpose: Keeps the necessary information for rendering of models
  */
 
-#ifndef __AX__MODEL__MATERIAL_H
-#define __AX__MODEL__MATERIAL_H
+#ifndef __AX__ASSET__MATERIAL_H
+#define __AX__ASSET__MATERIAL_H
 
 #include <glm/glm.hpp>
 
 namespace AX {
 namespace Shader { class ShaderProgram; }
-namespace Model { class Texture; }
+namespace Asset { class Texture; }
 }
 
-namespace AX { namespace Model {
+namespace AX { namespace Asset {
 
 class Material {
 public:
 	template<typename ValueType>struct TextureMap {
-		Model::Texture* texture = nullptr;
+		Texture* texture = nullptr;
 		ValueType value;
 	};
 
@@ -33,6 +33,6 @@ public:
 
 };
 
-} } // namespace AX::Model
+} } // namespace AX::Asset
 
-#endif // __AX__MODEL__MATERIAL_H
+#endif // __AX__ASSET__MATERIAL_H

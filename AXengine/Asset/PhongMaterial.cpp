@@ -1,12 +1,12 @@
-#include "AXengine/Model/PhongMaterial.h"
+#include "AXengine/Asset/PhongMaterial.h"
 
 #include "AXengine/Core/Engine.h"
 
-namespace AX { namespace Model {
+namespace AX { namespace Asset {
 
 PhongMaterial::PhongMaterial() : Material(&Core::Engine::Instance().phongShader)
 {
 
 }
 
-} } // namespace AX::Model
+} } // namespace AX::Asset

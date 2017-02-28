@@ -2,7 +2,7 @@
 
 using namespace AX::Entity;
 using namespace AX::Gfx;
-using namespace AX::Model;
+using namespace AX::Asset;
 using namespace AX::Tool;
 
 class Demo : public AX::Game {
