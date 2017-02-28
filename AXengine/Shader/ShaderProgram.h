@@ -37,7 +37,7 @@ public:
 	/**
 	 * Implemented in derived to use game object according to shader program
 	 */
-	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera) = 0;
+	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light**& lightList, Tool::SIZE lightCount) = 0;
 
 protected:
 	bool Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragmentFilePath);

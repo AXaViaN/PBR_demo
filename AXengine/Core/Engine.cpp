@@ -49,6 +49,13 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	initResult = phongShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("PhongShader cannot be initialized!");
+		return false;
+	}
+
 	return true;
 }
 /*	Terminate subsystems		*/

@@ -18,7 +18,7 @@ namespace AX { namespace Shader {
 
 class StandardShader : public ShaderProgram {
 public:
-	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera) override;
+	virtual void ProcessGameObject(const Entity::GameObject& gameObject, const Entity::Camera*& camera, const Entity::Light**& lightList, Tool::SIZE lightCount) override;
 
 protected:
 	/**

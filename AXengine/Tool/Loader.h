@@ -18,11 +18,15 @@ namespace AX { namespace Tool {
 
 class Loader {
 public:
-	static Model::Mesh LoadMesh(F32 positionList[], U32 positionListSize, 
-								U32 indexList[], U32 indexListSize);
-	static Model::Mesh LoadMesh(F32 positionList[], U32 positionListSize, 
-								F32 uvCoordList[], U32 uvCoordListSize, 
-								U32 indexList[], U32 indexListSize);
+	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+								U32 indexList[], SIZE indexListSize);
+	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+								F32 uvCoordList[], SIZE uvCoordListSize, 
+								U32 indexList[], SIZE indexListSize);
+	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+								F32 normalList[], SIZE normalListSize, 
+								F32 uvCoordList[], SIZE uvCoordListSize, 
+								U32 indexList[], SIZE indexListSize);
 
 	static Model::Texture LoadTexture(const CHR* filePath, bool addMipmap);
 
@@ -38,11 +42,12 @@ protected:
 	static void Terminate();
 
 private:
-	static Model::Mesh loadMesh(F32 positionList[], U32 positionListSize, 
-								F32 uvCoordList[], U32 uvCoordListSize, 
-								U32 indexList[], U32 indexListSize);
-	static U32 storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], U32 dataSize);
-	static U32 bindIndexBuffer(U32 indexList[], U32 indexListSize);
+	static Model::Mesh loadMesh(F32 positionList[], SIZE positionListSize, 
+								F32 normalList[], SIZE normalListSize, 
+								F32 uvCoordList[], SIZE uvCoordListSize, 
+								U32 indexList[], SIZE indexListSize);
+	static U32 storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize);
+	static U32 bindIndexBuffer(U32 indexList[], SIZE indexListSize);
 
 };
 

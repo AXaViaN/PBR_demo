@@ -7,6 +7,7 @@
 #define __AX__ENTITY__GAME_OBJECT_H
 
 #include "AXengine/Entity/Camera.h"
+#include "AXengine/Entity/Light.h"
 #include "AXengine/Entity/Transform.h"
 #include <glm/glm.hpp>
 
@@ -28,6 +29,13 @@ public:
 	void Render() const;
 	void Render(const Camera& camera) const;
 	void Render(const Camera* camera) const;
+	void Render(const Light& light) const;
+	void Render(const Light* light) const;
+	void Render(const Light** lightList, Tool::SIZE lightListSize) const;
+	void Render(const Camera& camera, const Light& light) const;
+	void Render(const Camera* camera, const Light* light) const;
+	void Render(const Camera& camera, const Light** lightList, Tool::SIZE lightListSize) const;
+	void Render(const Camera* camera, const Light** lightList, Tool::SIZE lightListSize) const;
 
 	Transform transform;
 
