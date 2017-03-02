@@ -11,6 +11,7 @@
 
 #include "AXengine/Asset/Material.h"
 #include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Asset/Model.h"
 #include "AXengine/Asset/Mesh.h"
 #include "AXengine/Asset/Texture.h"
 #include "AXengine/Entity/FreeCamera.h"

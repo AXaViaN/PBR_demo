@@ -8,7 +8,11 @@
 
 #include "AXengine/Asset/Mesh.h"
 #include "AXengine/Asset/Texture.h"
+#include "AXengine/Asset/Model.h"
+#include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
+#include <assimp/Importer.hpp>
 
 namespace AX { namespace Core {
 class Engine;
@@ -16,8 +20,10 @@ class Engine;
 
 namespace AX { namespace Tool {
 
-class Loader {
+class Loader : public Singleton<Loader> {
 public:
+	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath);
+
 	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap);
 
 	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
@@ -48,6 +54,10 @@ private:
 								U32 indexList[], SIZE indexListSize);
 	static U32 storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize);
 	static U32 bindIndexBuffer(U32 indexList[], SIZE indexListSize);
+
+	Assimp::Importer _modelImporter;
+	
+	class Helper;
 
 };
 

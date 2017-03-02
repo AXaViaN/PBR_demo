@@ -26,6 +26,19 @@ void GameObject::Render() const
 			Gfx::Renderer::Render(*mesh);
 		}
 	}
+
+	// Render child objects with relative transforms
+	for( auto& childObject : _childList )
+	{
+		Transform childTransform = childObject->transform;
+
+		childObject->transform.position += transform.position;
+		childObject->transform.rotation += transform.rotation;
+		childObject->transform.scale *= transform.scale;
+		childObject->Render();
+
+		childObject->transform = childTransform;
+	}
 }
 
 } } // namespace AX::Entity
