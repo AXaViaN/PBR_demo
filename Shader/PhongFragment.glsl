@@ -176,7 +176,7 @@ vec3 calculateSpotLight(SpotLight light, vec3 diffuseColor, vec3 specularColor, 
 	if(theta > light.outerCutoff)
 	{
 		diffuseLight = applyDiffuseLighting(light.color.diffuse, diffuseColor, normal, lightRay);
-		specularLight = applySpecularLighting(light.color.specular, specularColor, lightRay, spotRay);
+		specularLight = applySpecularLighting(light.color.specular, specularColor, normal, spotRay);
 		
 		if(theta < light.innerCutoff)
 		{

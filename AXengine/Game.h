@@ -9,16 +9,17 @@
 #ifndef __AX__GAME_H
 #define __AX__GAME_H
 
+#include "AXengine/Asset/Material.h"
+#include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Asset/Model.h"
+#include "AXengine/Asset/Mesh.h"
+#include "AXengine/Asset/Texture.h"
 #include "AXengine/Entity/FreeCamera.h"
 #include "AXengine/Entity/GameObject.h"
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
 #include "AXengine/Gfx/Renderer.h"
-#include "AXengine/Model/Material.h"
-#include "AXengine/Model/PhongMaterial.h"
-#include "AXengine/Model/Mesh.h"
-#include "AXengine/Model/Texture.h"
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"

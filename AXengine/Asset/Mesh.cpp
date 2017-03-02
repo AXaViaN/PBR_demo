@@ -1,8 +1,8 @@
-#include "AXengine/Model/Mesh.h"
+#include "AXengine/Asset/Mesh.h"
 
 #include <GL/glew.h>
 
-namespace AX { namespace Model {
+namespace AX { namespace Asset {
 
 void Mesh::Dispose()
 {
@@ -19,4 +19,4 @@ void Mesh::Dispose()
 	}
 }
 
-} } // namespace AX::Model
+} } // namespace AX::Asset

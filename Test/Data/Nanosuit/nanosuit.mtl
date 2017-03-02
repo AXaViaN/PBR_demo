@@ -1,0 +1,79 @@
+# Blender MTL File: 'nanosuit.blend'
+# Material Count: 6
+newmtl Arm
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Texture/arm_dif.png
+map_Bump Texture/arm_showroom_ddn.png
+map_Ks Texture/arm_showroom_spec.png
+
+
+newmtl Body
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Texture/body_dif.png
+map_Bump Texture/body_showroom_ddn.png
+map_Ks Texture/body_showroom_spec.png
+
+
+newmtl Glass
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Texture/glass_dif.png
+map_Bump Texture/glass_ddn.png
+
+
+newmtl Hand
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Texture/hand_dif.png
+map_Bump Texture/hand_showroom_ddn.png
+map_Ks Texture/hand_showroom_spec.png
+
+
+newmtl Helmet
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Texture/helmet_diff.png
+map_Bump Texture/helmet_showroom_ddn.png
+map_Ks Texture/helmet_showroom_spec.png
+
+
+newmtl Leg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Texture/leg_dif.png
+map_Bump Texture/leg_showroom_ddn.png
+map_Ks Texture/leg_showroom_spec.png
+
+

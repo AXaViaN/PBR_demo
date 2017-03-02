@@ -1,14 +1,14 @@
 /**
- *	File: AXengine/Model/Texture.h
+ *	File: AXengine/Asset/Texture.h
  *	Purpose: Texture info for models
  */
 
-#ifndef __AX__MODEL__TEXTURE_H
-#define __AX__MODEL__TEXTURE_H
+#ifndef __AX__ASSET__TEXTURE_H
+#define __AX__ASSET__TEXTURE_H
 
 #include "AXengine/Tool/Utility.h"
 
-namespace AX { namespace Model {
+namespace AX { namespace Asset {
 
 class Texture {
 public:
@@ -29,6 +29,6 @@ private:
 
 };
 
-} } // namespace AX::Model
+} } // namespace AX::Asset
 
-#endif // __AX__MODEL__TEXTURE_H
+#endif // __AX__ASSET__TEXTURE_H

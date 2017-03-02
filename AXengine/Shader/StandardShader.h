@@ -47,8 +47,8 @@ protected:
 	// Called by base class
 	virtual void BindShaderAttributes() override
 	{
-		ShaderProgram::BindAttribute(Model::VBOlayout::POSITION, "attrib_position");
-		ShaderProgram::BindAttribute(Model::VBOlayout::UVCOORD, "attrib_uvCoord");
+		ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::POSITION, "attrib_position");
+		ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::UVCOORD, "attrib_uvCoord");
 	}
 
 	virtual void GetShaderUniformLocations() override

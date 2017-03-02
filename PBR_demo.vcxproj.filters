@@ -24,9 +24,6 @@
     <ClCompile Include="AXengine\Gfx\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AXengine\Model\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AXengine\Shader\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,16 +36,10 @@
     <ClCompile Include="AXengine\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AXengine\Model\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AXengine\Entity\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AXengine\Shader\StandardShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AXengine\Model\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AXengine\Entity\FreeCamera.cpp">
@@ -63,7 +54,16 @@
     <ClCompile Include="AXengine\Shader\PhongShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AXengine\Model\PhongMaterial.cpp">
+    <ClCompile Include="AXengine\Asset\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Asset\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Asset\PhongMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Asset\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AXengine\Gfx\Renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AXengine\Model\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AXengine\Shader\ShaderProgram.h">
@@ -104,13 +101,7 @@
     <ClInclude Include="AXengine\Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AXengine\Model\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AXengine\Entity\GameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AXengine\Model\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AXengine\Entity\Transform.h">
@@ -128,9 +119,6 @@
     <ClInclude Include="AXengine\Shader\PhongShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AXengine\Model\PhongMaterial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AXengine\Entity\DirectionalLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,6 +129,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AXengine\Entity\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Asset\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Asset\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Asset\PhongMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Asset\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Asset\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #include "AXengine/Shader/StandardShader.h"
 
-#include "AXengine/Model/Material.h"
+#include "AXengine/Asset/Material.h"
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 

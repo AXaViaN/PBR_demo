@@ -6,9 +6,13 @@
 #ifndef __AX__TOOL__LOADER_H
 #define __AX__TOOL__LOADER_H
 
-#include "AXengine/Model/Mesh.h"
-#include "AXengine/Model/Texture.h"
+#include "AXengine/Asset/Mesh.h"
+#include "AXengine/Asset/Texture.h"
+#include "AXengine/Asset/Model.h"
+#include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
+#include <assimp/Importer.hpp>
 
 namespace AX { namespace Core {
 class Engine;
@@ -16,19 +20,21 @@ class Engine;
 
 namespace AX { namespace Tool {
 
-class Loader {
+class Loader : public Singleton<Loader> {
 public:
-	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath);
+
+	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap);
+
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								U32 indexList[], SIZE indexListSize);
-	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
-	static Model::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 normalList[], SIZE normalListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
-
-	static Model::Texture LoadTexture(const CHR* filePath, bool addMipmap);
 
 protected:
 	/**
@@ -42,12 +48,16 @@ protected:
 	static void Terminate();
 
 private:
-	static Model::Mesh loadMesh(F32 positionList[], SIZE positionListSize, 
+	static Asset::Mesh loadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 normalList[], SIZE normalListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
 	static U32 storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize);
 	static U32 bindIndexBuffer(U32 indexList[], SIZE indexListSize);
+
+	Assimp::Importer _modelImporter;
+	
+	class Helper;
 
 };
 
