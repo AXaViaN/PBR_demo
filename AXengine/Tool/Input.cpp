@@ -45,7 +45,7 @@ void Input::ActivateMouseMotion(bool isActive)
 	SDL_ShowCursor(!isActive);
 
 	if(isActive)
-		instance->_windowCenter = Core::Window::GetWindowSize() / 2;
+		instance->_windowCenter = Core::Window::Instance().WarpMouse();
 	else
 		instance->_mouseDelta = glm::ivec2();
 }
@@ -62,6 +62,7 @@ void Input::Init()
 
 	_isWindowClosed = false;
 	_isMouseActive = false;
+	_hasFocus = true;
 }
 void Input::Update()
 {
@@ -75,8 +76,29 @@ void Input::Update()
 				_isWindowClosed = true;
 				break;
 			}
+			case SDL_WINDOWEVENT:
+			{
+				switch(event.window.event)
+				{
+					case SDL_WINDOWEVENT_FOCUS_GAINED:
+					{
+						_hasFocus = true;
+						_windowCenter = Core::Window::Instance().WarpMouse();
+						break;
+					}
+					case SDL_WINDOWEVENT_FOCUS_LOST:
+					{
+						_hasFocus = false;
+						break;
+					}
+				}
+				break;
+			}
 		}
 	}
+
+	if(_hasFocus == false)
+		return;
 
 	const U8* keyboardState = SDL_GetKeyboardState(NULL);
 	for( U32 key=0 ; key<sizeof(_keyState) ; key++ )

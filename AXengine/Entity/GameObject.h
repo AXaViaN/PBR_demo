@@ -11,6 +11,7 @@
 #include "AXengine/Entity/Transform.h"
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
 
 namespace AX { namespace Asset {
 class Material;
@@ -32,6 +33,8 @@ public:
 	void AddChild(GameObject& child) { _childList.push_back(&child); }
 	void AddChild(GameObject* child) { _childList.push_back(child); }
 	GameObject* GetChild(Tool::SIZE index) { return index<_childList.size() ? _childList.at(index) : nullptr; }
+
+	std::string name;
 
 	Transform transform;
 

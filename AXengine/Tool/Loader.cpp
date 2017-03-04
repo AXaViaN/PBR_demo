@@ -225,6 +225,8 @@ const aiScene* Loader::Helper::LoadScene(const CHR* filePath)
 
 void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& scene, aiNode* currentNode, Asset::Model<Asset::PhongMaterial>& model, U32 currentObjectIndex, PhongModelConnections& modelConnections)
 {
+	model.modelParts[currentObjectIndex].name = currentNode->mName.C_Str();
+
 	for( SIZE i=0 ; i<currentNode->mNumMeshes ; i++ )
 	{
 		if(i > 0)
@@ -238,6 +240,9 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 		}
 
 		aiMesh* mesh = scene->mMeshes[currentNode->mMeshes[i]];
+		model.modelParts[currentObjectIndex].name = currentNode->mName.C_Str();
+		model.modelParts[currentObjectIndex].name += "::";
+		model.modelParts[currentObjectIndex].name += mesh->mName.C_Str();
 
 		// Process mesh
 		model.meshList.push_back(getModelMesh(mesh));
@@ -258,18 +263,39 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
 				modelConnections.materialDiffuseMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
 			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].diffuseMap.value = glm::vec3(color.r, color.g, color.b);
+			}
+
 			if(material->GetTextureCount(aiTextureType_SPECULAR) > 0)
 			{
 				material->GetTexture(aiTextureType_SPECULAR, 0, &texturePath);
 				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
 				modelConnections.materialSpecularMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
 			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].specularMap.value = glm::vec3(color.r, color.g, color.b);
+			}
+
 			if(material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
 			{
 				material->GetTexture(aiTextureType_EMISSIVE, 0, &texturePath);
 				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
 				modelConnections.materialEmissionMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
 			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_EMISSIVE, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].emissionMap.value = glm::vec3(color.r, color.g, color.b);
+			}
+
 		}
 
 		modelConnections.objectMaterialMap.insert(std::pair<U32, U32>(currentObjectIndex, currentMaterialIndex));

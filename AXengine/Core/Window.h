@@ -28,6 +28,10 @@ public:
 	 */
 	void Destroy();
 	
+	void SetTitle(const Tool::CHR* title);
+	void SetWindowSize(glm::ivec2 size);
+	void SetFullScreen(bool isFullScreen);
+
 	void RenderPresent() const;
 	void SyncFPS(Tool::U32 fps) const;
 	

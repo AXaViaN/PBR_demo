@@ -128,6 +128,18 @@ void Renderer::SetDebugMode(bool isDebugMode)
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
+void Renderer::SetFullScreen(bool isFullScreen)
+{
+	Core::Window::Instance().SetFullScreen(isFullScreen);
+}
+void Renderer::SetWindowTitle(const Tool::CHR* title)
+{
+	Core::Window::Instance().SetTitle(title);
+}
+void Renderer::SetWindowSize(glm::ivec2 size)
+{
+	Core::Window::Instance().SetWindowSize(size);
+}
 
 glm::mat4 Renderer::CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, Tool::F32 farPlane)
 {

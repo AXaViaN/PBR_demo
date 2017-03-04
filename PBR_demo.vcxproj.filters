@@ -48,9 +48,6 @@
     <ClCompile Include="AXengine\Tool\Time.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test\Demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AXengine\Shader\PhongShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -64,6 +61,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AXengine\Asset\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Asset\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\Demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

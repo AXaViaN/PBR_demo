@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AXengine\Asset\Model.cpp" />
     <ClCompile Include="AXengine\Core\Engine.cpp" />
     <ClCompile Include="AXengine\Core\Window.cpp" />
     <ClCompile Include="AXengine\Entity\FreeCamera.cpp" />

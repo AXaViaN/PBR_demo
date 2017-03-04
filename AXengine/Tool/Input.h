@@ -78,6 +78,7 @@ private:
 	glm::ivec2 _windowCenter;
 	glm::ivec2 _mouseDelta;
 	bool _isMouseActive;
+	bool _hasFocus;
 	U8 _mouseState[NUM_MOUSE_BUTTONS];
 
 	U8 _keyState[SDL_NUM_SCANCODES];

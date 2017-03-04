@@ -26,14 +26,19 @@ bool Window::Create(const Tool::CHR* title, const Tool::U32 width, const Tool::U
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	
+
 	_glContext = SDL_GL_CreateContext(_handle);
 	if(_glContext == nullptr)
 	{
 		Tool::Debug::LogWarning("OpenGL context creation failed: %s", SDL_GetError());
 		return false;
 	}
-	
+
+	if(SDL_GL_SetSwapInterval(1) == -1)
+		Tool::Debug::LogInfo("VSYNC is off.");
+	else
+		Tool::Debug::LogInfo("VSYNC is on.");
+
 	glewExperimental = GL_TRUE;
 	GLenum glewInitResult = glewInit();
 	if(glewInitResult != GLEW_OK)
@@ -63,6 +68,27 @@ void Window::Destroy()
 	}
 	
 	SDL_Quit();
+}
+
+void Window::SetTitle(const Tool::CHR* title)
+{
+	SDL_SetWindowTitle(_handle, title);
+}
+void Window::SetWindowSize(glm::ivec2 size)
+{
+	SDL_SetWindowSize(_handle, size.x, size.y);
+	glViewport(0, 0, size.x, size.y);
+}
+void Window::SetFullScreen(bool isFullScreen)
+{
+	if(isFullScreen)
+		SDL_SetWindowFullscreen(_handle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	else
+		SDL_SetWindowFullscreen(_handle, 0);
+	
+	Tool::I32 width, height;
+	SDL_GetWindowSize(instance->_handle, &width, &height);
+	glViewport(0, 0, width, height);
 }
 
 void Window::RenderPresent() const

@@ -8,6 +8,7 @@
 
 #include "AXengine/Entity/GameObject.h"
 #include "AXengine/Asset/Texture.h"
+#include "AXengine/Tool/Utility.h"
 #include <vector>
 
 namespace AX { namespace Tool {
@@ -21,6 +22,8 @@ public:
 	Model() { modelParts.push_back(Entity::GameObject()); }
 
 	Entity::GameObject InstantiateGameObject() { return modelParts[0]; }
+
+	void Load(const Tool::CHR* filePath);
 
 	void Dispose()
 	{

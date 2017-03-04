@@ -10,10 +10,12 @@ class Demo : public AX::Game {
 public:
 	ShaderProgram* phongShader;
 	FreeCamera camera;
-	SpotLight spotLight;
+	PointLight light[2];
+	PointLight roomLight;
+	bool isNightTime = false;
 
-	Model<PhongMaterial> nanosuitModel;
-	GameObject nanosuitList[20];
+	Model<PhongMaterial> bedroomModel;
+	GameObject bedroom;
 
 	void Start()
 	{
@@ -21,31 +23,33 @@ public:
 		phongShader = PhongMaterial().shader;
 
 		// Camera
-		camera.transform.SetPosition(-1.9, 3.5, -2.5);
-		camera.transform.SetRotation(7.5, 25.5, 0);
+		camera.transform.SetPosition(0, 5, -5);
+		camera.transform.SetRotation(0, 180, 0);
 		camera.SetMovementSpeed(1.5);
 		camera.SetRotationSpeed(1.5);
 
 		// Lights
-		spotLight.SetPosition(-3, 6, 0);
-		spotLight.SetDirection(0.5, -0.5, -1.0);
+		roomLight.SetPosition(0, 8, 0);
+		roomLight.linear = 0.005;
+		roomLight.quadric = 0.001;
 
-		nanosuitModel = Loader::LoadPhongModel("Test/Data/Nanosuit/nanosuit.obj");
-		for( GameObject& nanosuit : nanosuitList )
-			nanosuit = nanosuitModel.InstantiateGameObject();
-
-		for( SIZE y=0 ; y<5 ; y++ )
+		light[0].SetPosition(5, 4, 6.75);
+		light[1].SetPosition(-5, 4, 6.75);
+		for( auto& light_ : light )
 		{
-			for( SIZE x=0 ; x<4 ; x++ )
-			{
-				nanosuitList[y*4 + x].transform.SetPosition(-2.25+(x*2.25), 0, -4.0-(y*2));
-				nanosuitList[y*4 + x].transform.Scale(0.25);
-			}
+			light_.SetDiffuseIntensity(0.9, 0.9, 0.2);
+			light_.SetSpecularIntensity(1.0, 1.0, 0.3);
+			light_.SetAmbientIntensity(0.2, 0.2, 0.01);
+			light_.quadric = 0.01;
 		}
+		
+		// Models
+		bedroomModel.Load("Test/Data/Bedroom/Bedroom.obj");
+		bedroom = bedroomModel.InstantiateGameObject();
 	}
 	void Dispose()
 	{
-		nanosuitModel.Dispose();
+		bedroomModel.Dispose();
 	}
 	
 	void Update()
@@ -60,6 +64,11 @@ public:
 			static bool isDebugMode = false;
 			phongShader->SetDebugDrawMode(isDebugMode=!isDebugMode);
 		}
+		if(Input::GetKeyDown(SDL_SCANCODE_F))
+		{
+			static bool isFullScreen = false;
+			Renderer::SetFullScreen(isFullScreen=!isFullScreen);
+		}
 
 		if(Input::GetMouseButtonDown(Input::MouseButton::LEFT))
 		{
@@ -70,16 +79,26 @@ public:
 			Input::ActivateMouseMotion(false);
 		}
 
+		if(Input::GetKeyDown(SDL_SCANCODE_SPACE))
+			isNightTime = !isNightTime;
+
 		camera.Update();
 	}
 	
 	void Draw()
 	{
-		Renderer::Clear(0, 0, 0);
-		Renderer::PrepareScene(camera, spotLight);
+		Renderer::Clear(0.05, 0.05, 0.05);
+		if(isNightTime)
+		{
+			const Light* lightList[] = {&light[0], &light[1]};
+			Renderer::PrepareScene(camera, lightList, sizeof(lightList));
+		}
+		else
+		{
+			Renderer::PrepareScene(camera, roomLight);
+		}
 		
-		for( GameObject& nanosuit : nanosuitList )
-			nanosuit.Render();
+		bedroom.Render();
 	}
 	
 };
