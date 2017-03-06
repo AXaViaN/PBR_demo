@@ -17,14 +17,17 @@ public:
 	Model<PhongMaterial> bedroomModel;
 	GameObject bedroom;
 
+	Model<PhongMaterial> monkeyModel;
+	GameObject monkey;
+	GameObject monkey2;
+
 	void Start()
 	{
 		Input::ActivateMouseMotion(false);
 		phongShader = PhongMaterial().shader;
 
 		// Camera
-		camera.transform.SetPosition(0, 5, -5);
-		camera.transform.SetRotation(0, 180, 0);
+		camera.transform.SetPosition(0, 5, 5);
 		camera.SetMovementSpeed(1.5);
 		camera.SetRotationSpeed(1.5);
 
@@ -33,8 +36,8 @@ public:
 		roomLight.linear = 0.005;
 		roomLight.quadric = 0.001;
 
-		light[0].SetPosition(5, 4, 6.75);
-		light[1].SetPosition(-5, 4, 6.75);
+		light[0].SetPosition(5, 4, -6.75);
+		light[1].SetPosition(-5, 4, -6.75);
 		for( auto& light_ : light )
 		{
 			light_.SetDiffuseIntensity(0.9, 0.9, 0.2);
@@ -46,10 +49,23 @@ public:
 		// Models
 		bedroomModel.Load("Test/Data/Bedroom/Bedroom.obj");
 		bedroom = bedroomModel.InstantiateGameObject();
+		bedroom.transform.SetRotation(0, 180, 0);
+		
+		monkeyModel.Load("Test/Data/monkey.obj");
+		monkey = monkeyModel.InstantiateGameObject();
+		monkey.transform.SetPosition(-1.5, 4, 0);
+		monkey.transform.SetRotation(-30, 0, 0);
+		monkey.layer = 2;
+
+		monkey2 = monkeyModel.InstantiateGameObject();
+		monkey2.transform.SetPosition(1.5, 4, 0);
+		monkey2.transform.SetRotation(-30, 0, 0);
+		monkey2.layer = 3;
 	}
 	void Dispose()
 	{
 		bedroomModel.Dispose();
+		monkeyModel.Dispose();
 	}
 	
 	void Update()
@@ -99,6 +115,12 @@ public:
 		}
 		
 		bedroom.Render();
+
+		monkey.Render();
+		monkey2.Render();
+
+		monkey.RenderOutline(glm::vec3(0.8, 0.8, 0), 0.1);
+		monkey2.RenderOutline(glm::vec3(0.8, 0, 0.8), 0.25);
 	}
 	
 };

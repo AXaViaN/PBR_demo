@@ -10,8 +10,9 @@
 #include "AXengine/Entity/Light.h"
 #include "AXengine/Entity/Transform.h"
 #include <glm/glm.hpp>
-#include <vector>
 #include <string>
+#include <vector>
+#include <map>
 
 namespace AX { namespace Asset {
 class Material;
@@ -29,12 +30,15 @@ public:
 	GameObject(Asset::Mesh& mesh, Asset::Material& material) : mesh(&mesh), material(&material) { }
 	
 	void Render() const;
+	void RenderOutline(glm::vec3 outlineColor, Tool::F32 outlineScale);
 
 	void AddChild(GameObject& child) { _childList.push_back(&child); }
 	void AddChild(GameObject* child) { _childList.push_back(child); }
-	GameObject* GetChild(Tool::SIZE index) { return index<_childList.size() ? _childList.at(index) : nullptr; }
+	GameObject* GetChild(Tool::SIZE index) const { return index<_childList.size() ? _childList.at(index) : nullptr; }
+	Tool::SIZE GetChildCount() const { return _childList.size(); }
 
 	std::string name;
+	Tool::U8 layer = 1;
 
 	Transform transform;
 
@@ -42,7 +46,13 @@ public:
 	Asset::Material* material;
 
 private:
+	void renderObject() const;
+
+	void setOutlinedMaterial(GameObject* object, Asset::Material& material);
+	void restoreMaterial(GameObject* object);
+
 	std::vector<GameObject*> _childList;
+	std::map<GameObject*, Asset::Material*> _nonOutlinedMaterialMap;
 
 };
 

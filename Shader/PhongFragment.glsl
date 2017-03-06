@@ -46,6 +46,9 @@ in vec3 varying_normal;
 in vec2 varying_uvCoord;
 in vec3 varying_onCameraPosition;
 
+uniform float fs_nearPlane;
+uniform float fs_farPlane;
+
 uniform Material fs_material;
 
 uniform DirectionalLight fs_directionalLight;
@@ -54,14 +57,19 @@ uniform SpotLight fs_spotLight[SPOT_LIGHT_COUNT];
 
 out vec4 out_color;
 
+// Functions
+float getFragDepth();
 void getColorFromTextureMaps(inout vec3 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor);
+
 vec3 applyDiffuseLighting(vec3 lightColor, vec3 diffuseColor, vec3 normal, vec3 lightRay);
 vec3 applySpecularLighting(vec3 lightColor, vec3 specularColor, vec3 normal, vec3 lightRay);
 vec3 applyAmbientLighting(vec3 lightColor, vec3 diffuseColor);
+
 vec3 calculatePointLight(PointLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal);
 vec3 calculateDirectionalLight(DirectionalLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal);
 vec3 calculateSpotLight(SpotLight light, vec3 diffuseColor, vec3 specularColor, vec3 normal);
 
+// Program entry point
 void main()
 {
 	vec3 diffuseColor;
@@ -101,6 +109,10 @@ void main()
 
 ///////////////////////////////////////////////////////
 
+float getFragDepth()
+{
+	return (fs_nearPlane * fs_farPlane) / (fs_farPlane + gl_FragCoord.z * (fs_nearPlane - fs_farPlane));
+}
 void getColorFromTextureMaps(inout vec3 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor)
 {
 	if(fs_material.diffuseMap.value.r == -1)
@@ -176,7 +188,7 @@ vec3 calculateSpotLight(SpotLight light, vec3 diffuseColor, vec3 specularColor, 
 	if(theta > light.outerCutoff)
 	{
 		diffuseLight = applyDiffuseLighting(light.color.diffuse, diffuseColor, normal, lightRay);
-		specularLight = applySpecularLighting(light.color.specular, specularColor, normal, spotRay);
+		specularLight = applySpecularLighting(light.color.specular, specularColor, normal, lightRay);
 		
 		if(theta < light.innerCutoff)
 		{

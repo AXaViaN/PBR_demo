@@ -52,9 +52,9 @@ public:
 	static glm::mat4 CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, Tool::F32 farPlane);
 	static const glm::mat4& GetDefaultProjectionMatrix() { return instance->_projectionMatrix; }
 
-	const Tool::F32 FOV = 66.6;
-	const Tool::F32 NEAR_PLANE = 0.1f;
-	const Tool::F32 FAR_PLANE = 1000.0f;
+	static const Tool::F32 FOV;
+	static const Tool::F32 NEAR_PLANE;
+	static const Tool::F32 FAR_PLANE;
 
 protected:
 	/**

@@ -6,10 +6,14 @@
 
 namespace AX { namespace Gfx {
 
+const Tool::F32 Renderer::FOV = 66.6;
+const Tool::F32 Renderer::NEAR_PLANE = 0.1f;
+const Tool::F32 Renderer::FAR_PLANE = 1000.0f;
+
 void Renderer::Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue)
 {
 	glClearColor(red, green, blue, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void Renderer::PrepareScene()
@@ -156,8 +160,15 @@ void Renderer::Init()
 	_projectionMatrix = CreateProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
 	
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilMask(0xFF);
 }
 
 /***** PRIVATE *****/

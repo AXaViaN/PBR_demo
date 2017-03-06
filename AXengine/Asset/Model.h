@@ -21,6 +21,10 @@ template<typename MaterialType> class Model {
 public:
 	Model() { modelParts.push_back(Entity::GameObject()); }
 
+	/**
+	 * Instantiate GameObject for transform manipulation. All the changes
+	 * to the children will effect every instance.
+	 */
 	Entity::GameObject InstantiateGameObject() { return modelParts[0]; }
 
 	void Load(const Tool::CHR* filePath);

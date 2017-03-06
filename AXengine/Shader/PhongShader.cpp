@@ -4,6 +4,7 @@
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
+#include "AXengine/Gfx/Renderer.h"
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -191,6 +192,9 @@ bool PhongShader::Init(const glm::mat4& projectionMatrix)
 
 	// Set uniform texture positions
 	Start();
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_nearPlane"), Gfx::Renderer::NEAR_PLANE);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_farPlane"), Gfx::Renderer::FAR_PLANE);
+
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.diffuseMap.texture"), 0);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.specularMap.texture"), 1);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.emissionMap.texture"), 2);
