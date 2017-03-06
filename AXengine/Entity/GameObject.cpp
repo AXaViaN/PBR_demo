@@ -14,12 +14,12 @@ void GameObject::Render() const
 
 	renderObject();
 }
-void GameObject::RenderOutline(glm::vec3 outlineColor, Tool::F32 outlineScale)
+void GameObject::RenderOutline(glm::vec4 outlineColor, Tool::F32 outlineScale)
 {
 	glDisable(GL_DEPTH_TEST);
 	glStencilFunc(GL_GREATER, layer, 0xFF);
 	// Stencil writing is not disabled. Outlines will fill the buffer with
-	// layer info. This is done to adjust multiple outlined object with
+	// layer info. This is done to adjust multiple outlined objects with
 	// different layers.
 	
 	Transform transform_ = transform;
@@ -45,11 +45,15 @@ void GameObject::renderObject() const
 		if(material && material->shader)
 		{
 			material->shader->Start();
+			if(useTransparency)
+				glDisable(GL_CULL_FACE);
 
 			Gfx::Renderer::PrepareShader(material->shader);
 			material->shader->ProcessGameObject(*this);
 			Gfx::Renderer::Render(*mesh);
 
+			if(useTransparency)
+				glEnable(GL_CULL_FACE);
 			material->shader->Stop();
 		}
 		else

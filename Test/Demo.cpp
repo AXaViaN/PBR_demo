@@ -119,8 +119,8 @@ public:
 		monkey.Render();
 		monkey2.Render();
 
-		monkey.RenderOutline(glm::vec3(0.8, 0.8, 0), 0.1);
-		monkey2.RenderOutline(glm::vec3(0.8, 0, 0.8), 0.25);
+		monkey.RenderOutline(glm::vec4(0.8, 0.8, 0, 1.0), 0.1);
+		monkey2.RenderOutline(glm::vec4(0.8, 0, 0.8, 1.0), 0.25);
 	}
 	
 };

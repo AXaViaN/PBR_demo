@@ -24,7 +24,7 @@ void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject)
 	if(isDebugMode)
 	{
 		// Give green diffuse in debug mode
-		ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec3(0, 1, 0));
+		ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec4(0, 1, 0, 1));
 	}
 	else
 	{
@@ -33,7 +33,7 @@ void StandardShader::ProcessGameObject(const Entity::GameObject& gameObject)
 		{
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, gameObject.material->diffuseMap.texture->GetTextureID());
-			ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec3(-1, -1, -1));
+			ShaderProgram::LoadUniform(_uniform_fs_diffuseValue, glm::vec4(-1, -1, -1, -1));
 		}
 		else
 		{

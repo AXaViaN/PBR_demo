@@ -71,6 +71,7 @@ protected:
 	void LoadUniform(const Tool::U32& uniformLocation, bool value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec2 value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec3 value);
+	void LoadUniform(const Tool::U32& uniformLocation, glm::vec4 value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::mat4 value);
 
 	bool isDebugMode;

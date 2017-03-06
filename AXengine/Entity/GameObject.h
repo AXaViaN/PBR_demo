@@ -30,7 +30,7 @@ public:
 	GameObject(Asset::Mesh& mesh, Asset::Material& material) : mesh(&mesh), material(&material) { }
 	
 	void Render() const;
-	void RenderOutline(glm::vec3 outlineColor, Tool::F32 outlineScale);
+	void RenderOutline(glm::vec4 outlineColor, Tool::F32 outlineScale);
 
 	void AddChild(GameObject& child) { _childList.push_back(&child); }
 	void AddChild(GameObject* child) { _childList.push_back(child); }
@@ -39,6 +39,7 @@ public:
 
 	std::string name;
 	Tool::U8 layer = 1;
+	bool useTransparency = false;
 
 	Transform transform;
 

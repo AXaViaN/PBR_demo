@@ -105,7 +105,7 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, texture->format->BytesPerPixel, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
 
 	if(addMipmap)
 	{
@@ -267,7 +267,7 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 			{
 				aiColor4D color;
 				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color) == AI_SUCCESS)
-					model.materialList[currentMaterialIndex].diffuseMap.value = glm::vec3(color.r, color.g, color.b);
+					model.materialList[currentMaterialIndex].diffuseMap.value = glm::vec4(color.r, color.g, color.b, color.a);
 			}
 
 			if(material->GetTextureCount(aiTextureType_SPECULAR) > 0)
