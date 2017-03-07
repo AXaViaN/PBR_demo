@@ -16,6 +16,9 @@ public:
 	Model<PhongMaterial> testSceneModel;
 	GameObject testScene;
 
+	Model<PhongMaterial> windowModel;
+	GameObject windowList[4];
+
 	void Start()
 	{
 		Input::ActivateMouseMotion(false);
@@ -41,10 +44,23 @@ public:
 				testScene.GetChild(i)->useTransparency = true;
 			}
 		}
+
+		windowModel.Load("Test/Data/TransparentScene/window.obj");
+		for( SIZE i=0 ; i<4 ; i++ )
+			windowList[i] = windowModel.InstantiateGameObject();
+		windowList[0].GetChild(0)->useTransparency = true;
+
+		windowList[0].transform.SetPosition(-1, 1, -1.75);
+		windowList[1].transform.SetPosition(-3, 1, -1.75);
+		windowList[2].transform.SetPosition(-2, 1, -0.75);
+		windowList[2].transform.SetRotation(0, 90, 0);
+		windowList[3].transform.SetPosition(-2, 1, -2.75);
+		windowList[3].transform.SetRotation(0, 90, 0);
 	}
 	void Dispose()
 	{
 		testSceneModel.Dispose();
+		windowModel.Dispose();
 	}
 
 	void Update()
@@ -83,6 +99,14 @@ public:
 		Renderer::PrepareScene(camera, sunLight);
 
 		testScene.Render();
+		
+		std::map<float, GameObject*> winMap;
+		for( SIZE i=0 ; i<4 ; i++ )
+		{
+			winMap[glm::length(camera.transform.position - windowList[i].transform.position)] = &windowList[i];
+		}
+		for( std::map<float, GameObject*>::reverse_iterator it=winMap.rbegin() ; it!=winMap.rend() ; it++ )
+			it->second->Render();
 	}
 
 };

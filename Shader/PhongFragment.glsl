@@ -81,7 +81,7 @@ void main()
 	vec3 emissionColor;
 	getColorFromTextureMaps(diffuseColor, specularColor, emissionColor);
 	
-	if(diffuseColor.a < 0.1)
+	if(diffuseColor.a < 0.05)
 		discard;
 	
 	vec3 normal = normalize(varying_normal);
@@ -111,7 +111,7 @@ void main()
 		}
 	}
 	
-	out_color = vec4(directionalLight + pointLights + spotLights + emissionColor, 1.0);
+	out_color = vec4(directionalLight + pointLights + spotLights + emissionColor, diffuseColor.a);
 }
 
 ///////////////////////////////////////////////////////

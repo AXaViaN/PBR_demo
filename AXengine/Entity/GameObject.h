@@ -23,19 +23,20 @@ namespace AX { namespace Entity {
 
 class GameObject {
 public:
-	GameObject() : mesh(nullptr), material(nullptr) { }
-	explicit GameObject(Asset::Mesh* mesh) : mesh(mesh), material(nullptr) { }
-	explicit GameObject(Asset::Mesh& mesh) : mesh(&mesh), material(nullptr) { }
-	GameObject(Asset::Mesh* mesh, Asset::Material* material) : mesh(mesh), material(material) { }
-	GameObject(Asset::Mesh& mesh, Asset::Material& material) : mesh(&mesh), material(&material) { }
+	GameObject() : mesh(nullptr), material(nullptr), _parent(nullptr) { }
+	explicit GameObject(Asset::Mesh* mesh) : mesh(mesh), material(nullptr), _parent(nullptr) { }
+	explicit GameObject(Asset::Mesh& mesh) : mesh(&mesh), material(nullptr), _parent(nullptr) { }
+	GameObject(Asset::Mesh* mesh, Asset::Material* material) : mesh(mesh), material(material), _parent(nullptr) { }
+	GameObject(Asset::Mesh& mesh, Asset::Material& material) : mesh(&mesh), material(&material), _parent(nullptr) { }
 	
 	void Render() const;
 	void RenderOutline(glm::vec4 outlineColor, Tool::F32 outlineScale);
 
-	void AddChild(GameObject& child) { _childList.push_back(&child); }
-	void AddChild(GameObject* child) { _childList.push_back(child); }
+	void AddChild(GameObject& child) { _childList.push_back(&child); child._parent=this; }
+	void AddChild(GameObject* child) { _childList.push_back(child); child->_parent=this; }
 	GameObject* GetChild(Tool::SIZE index) const { return index<_childList.size() ? _childList.at(index) : nullptr; }
 	Tool::SIZE GetChildCount() const { return _childList.size(); }
+	GameObject* GetParent() const { return _parent; }
 
 	std::string name;
 	Tool::U8 layer = 1;
@@ -54,6 +55,8 @@ private:
 
 	std::vector<GameObject*> _childList;
 	std::map<GameObject*, Asset::Material*> _nonOutlinedMaterialMap;
+
+	GameObject* _parent;
 
 };
 
