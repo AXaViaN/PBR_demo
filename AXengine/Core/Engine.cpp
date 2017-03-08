@@ -88,8 +88,8 @@ void Engine::Run()
 		_game->Update();
 		
 		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
-		
 		_game->Draw();
+		Gfx::Renderer::RenderBatch();
 		
 		window.RenderPresent();
 		window.SyncFPS(60);

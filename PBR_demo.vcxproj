@@ -146,7 +146,7 @@
     <ClCompile Include="AXengine\Tool\Input.cpp" />
     <ClCompile Include="AXengine\Tool\Loader.cpp" />
     <ClCompile Include="AXengine\Tool\Time.h" />
-    <ClCompile Include="Test\Demo.cpp" />
+    <ClCompile Include="Test\TransparentScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AXengine\Asset\Model.h" />

@@ -105,7 +105,10 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, texture->format->BytesPerPixel, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+	
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	if(addMipmap)
 	{
@@ -267,7 +270,7 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 			{
 				aiColor4D color;
 				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color) == AI_SUCCESS)
-					model.materialList[currentMaterialIndex].diffuseMap.value = glm::vec3(color.r, color.g, color.b);
+					model.materialList[currentMaterialIndex].diffuseMap.value = glm::vec4(color.r, color.g, color.b, color.a);
 			}
 
 			if(material->GetTextureCount(aiTextureType_SPECULAR) > 0)
@@ -353,6 +356,10 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 
 		if(mesh->mTextureCoords[0])
 		{
+			while(mesh->mTextureCoords[0][j].x > 1)
+				mesh->mTextureCoords[0][j].x--;
+			while(mesh->mTextureCoords[0][j].y > 1)
+				mesh->mTextureCoords[0][j].y--;
 			uvList.push_back(mesh->mTextureCoords[0][j].x);
 			uvList.push_back(mesh->mTextureCoords[0][j].y);
 		}

@@ -135,6 +135,10 @@ void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, glm::vec3 valu
 {
 	glUniform3f(uniformLocation, value.x, value.y, value.z);
 }
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, glm::vec4 value)
+{
+	glUniform4f(uniformLocation, value.x, value.y, value.z, value.w);
+}
 void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, glm::mat4 value)
 {
 	glUniformMatrix4fv(uniformLocation, 1, false, glm::value_ptr(value));

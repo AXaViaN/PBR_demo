@@ -41,6 +41,10 @@ public:
 	static void Render(const Asset::Mesh& mesh);
 	static void Render(const Asset::Mesh& mesh, const Asset::Texture& texture);
 
+	static void RegisterToBatch(const Entity::GameObject* gameObject);
+	static void RegisterToBatch(const Entity::GameObject* gameObject, glm::vec4 outlineColor, Tool::F32 outlineScale);
+	static void RenderBatch();
+
 	/**
 	 * In debug mode objects are rendered as wireframes
 	 */
@@ -66,12 +70,24 @@ protected:
 	void Init();
 
 private:
+	struct BatchOutlineObject {
+		Entity::GameObject* object;
+		glm::vec4 color;
+		Tool::F32 scale;
+	};
+
+	static void renderObject(const Entity::GameObject* object);
+
+private:
 	static void prepareScene();
 
-	glm::mat4 _projectionMatrix;
-
 	std::map<const Shader::ShaderProgram*, bool> _shaderReadyMap;
+	std::vector<Entity::GameObject*> _objectRenderBatch;
+	std::vector<Entity::GameObject*> _transparentRenderBatch;
+	std::vector<BatchOutlineObject> _outlineRenderBatch;
+
 	Entity::Scene _scene;
+	glm::mat4 _projectionMatrix;
 
 };
 

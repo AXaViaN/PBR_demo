@@ -24,10 +24,10 @@ public:
 
 public:
 	Material();
-	explicit Material(Shader::ShaderProgram* shader) : shader(shader) { diffuseMap.value = glm::vec3(0.5, 0.5, 0.5); }
-	explicit Material(Shader::ShaderProgram& shader) : shader(&shader) { diffuseMap.value = glm::vec3(0.5, 0.5, 0.5); }
+	explicit Material(Shader::ShaderProgram* shader) : shader(shader) { diffuseMap.value = glm::vec4(0.5, 0.5, 0.5, 1.0); }
+	explicit Material(Shader::ShaderProgram& shader) : shader(&shader) { diffuseMap.value = glm::vec4(0.5, 0.5, 0.5, 1.0); }
 
-	TextureMap<glm::vec3> diffuseMap;
+	TextureMap<glm::vec4> diffuseMap;
 
 	Shader::ShaderProgram* shader;
 

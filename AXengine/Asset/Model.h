@@ -21,11 +21,7 @@ template<typename MaterialType> class Model {
 public:
 	Model() { modelParts.push_back(Entity::GameObject()); }
 
-	/**
-	 * Instantiate GameObject for transform manipulation. All the changes
-	 * to the children will effect every instance.
-	 */
-	Entity::GameObject InstantiateGameObject() { return modelParts[0]; }
+	Entity::GameObject* InstantiateGameObject();
 
 	void Load(const Tool::CHR* filePath);
 
@@ -51,6 +47,11 @@ protected:
 	std::vector<MaterialType> materialList;
 	std::vector<Mesh> meshList;
 	std::vector<Texture> textureList;
+
+private:
+	void reconnectChildren(Entity::GameObject* src, Entity::GameObject* dst);
+
+	std::vector<std::vector<Entity::GameObject>> _instantiatedList;
 	
 };
 

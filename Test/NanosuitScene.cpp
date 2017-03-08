@@ -13,11 +13,11 @@ public:
 	SpotLight spotLight;
 
 	Model<PhongMaterial> nanosuitModel;
-	GameObject nanosuitList[20];
+	GameObject* nanosuitList[20];
 
 	void Start()
 	{
-		Renderer::SetFullScreen(true);
+		//Renderer::SetFullScreen(true);
 		Renderer::SetWindowTitle("Nanosuit Demo Scene");
 		phongShader = PhongMaterial().shader;
 
@@ -33,15 +33,15 @@ public:
 
 		// Models
 		nanosuitModel = Loader::LoadPhongModel("Test/Data/Nanosuit/nanosuit.obj");
-		for( GameObject& nanosuit : nanosuitList )
+		for( auto& nanosuit : nanosuitList )
 			nanosuit = nanosuitModel.InstantiateGameObject();
 
 		for( SIZE y=0 ; y<5 ; y++ )
 		{
 			for( SIZE x=0 ; x<4 ; x++ )
 			{
-				nanosuitList[y*4 + x].transform.SetPosition(-2.25+(x*2.25), 0, -4.0-(y*2));
-				nanosuitList[y*4 + x].transform.Scale(0.25);
+				nanosuitList[y*4 + x]->transform.SetPosition(-2.25+(x*2.25), 0, -4.0-(y*2));
+				nanosuitList[y*4 + x]->transform.Scale(0.25);
 			}
 		}
 	}
@@ -71,8 +71,8 @@ public:
 		Renderer::Clear(0, 0, 0);
 		Renderer::PrepareScene(camera, spotLight);
 
-		for( GameObject& nanosuit : nanosuitList )
-			nanosuit.Render();
+		for( auto& nanosuit : nanosuitList )
+			nanosuit->Render();
 	}
 
 };

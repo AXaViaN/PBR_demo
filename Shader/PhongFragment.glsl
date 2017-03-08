@@ -3,14 +3,18 @@
 #define POINT_LIGHT_COUNT 8
 #define SPOT_LIGHT_COUNT 8
 
-struct TextureMap {
+struct TextureMapVec3 {
 	sampler2D texture;
 	vec3 value;
 };
+struct TextureMapVec4 {
+	sampler2D texture;
+	vec4 value;
+};
 struct Material {
-	TextureMap diffuseMap;
-	TextureMap specularMap;
-	TextureMap emissionMap;
+	TextureMapVec4 diffuseMap;
+	TextureMapVec3 specularMap;
+	TextureMapVec3 emissionMap;
 };
 
 struct Color {
@@ -59,7 +63,7 @@ out vec4 out_color;
 
 // Functions
 float getFragDepth();
-void getColorFromTextureMaps(inout vec3 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor);
+void getColorFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor);
 
 vec3 applyDiffuseLighting(vec3 lightColor, vec3 diffuseColor, vec3 normal, vec3 lightRay);
 vec3 applySpecularLighting(vec3 lightColor, vec3 specularColor, vec3 normal, vec3 lightRay);
@@ -72,7 +76,7 @@ vec3 calculateSpotLight(SpotLight light, vec3 diffuseColor, vec3 specularColor, 
 // Program entry point
 void main()
 {
-	vec3 diffuseColor;
+	vec4 diffuseColor;
 	vec3 specularColor;
 	vec3 emissionColor;
 	getColorFromTextureMaps(diffuseColor, specularColor, emissionColor);
@@ -83,7 +87,7 @@ void main()
 	vec3 directionalLight = vec3(0.0);
 	if(fs_directionalLight.color.diffuse.r != -1)
 	{
-		directionalLight = calculateDirectionalLight(fs_directionalLight, diffuseColor, specularColor, normal);
+		directionalLight = calculateDirectionalLight(fs_directionalLight, diffuseColor.rgb, specularColor, normal);
 	}
 	
 	vec3 pointLights = vec3(0.0);
@@ -91,7 +95,7 @@ void main()
 	{
 		if(fs_pointLight[i].color.diffuse.r != -1)
 		{
-			pointLights += calculatePointLight(fs_pointLight[i], diffuseColor, specularColor, normal);
+			pointLights += calculatePointLight(fs_pointLight[i], diffuseColor.rgb, specularColor, normal);
 		}
 	}
 	
@@ -100,11 +104,11 @@ void main()
 	{
 		if(fs_spotLight[i].color.diffuse.r != -1)
 		{
-			spotLights += calculateSpotLight(fs_spotLight[i], diffuseColor, specularColor, normal);
+			spotLights += calculateSpotLight(fs_spotLight[i], diffuseColor.rgb, specularColor, normal);
 		}
 	}
 	
-	out_color = vec4(directionalLight + pointLights + spotLights + emissionColor, 1.0);
+	out_color = vec4(directionalLight + pointLights + spotLights + emissionColor, diffuseColor.a);
 }
 
 ///////////////////////////////////////////////////////
@@ -113,10 +117,10 @@ float getFragDepth()
 {
 	return (fs_nearPlane * fs_farPlane) / (fs_farPlane + gl_FragCoord.z * (fs_nearPlane - fs_farPlane));
 }
-void getColorFromTextureMaps(inout vec3 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor)
+void getColorFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor)
 {
 	if(fs_material.diffuseMap.value.r == -1)
-		diffuseColor = texture(fs_material.diffuseMap.texture, varying_uvCoord).rgb;
+		diffuseColor = texture(fs_material.diffuseMap.texture, varying_uvCoord);
 	else
 		diffuseColor = fs_material.diffuseMap.value;
 	
