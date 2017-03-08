@@ -14,10 +14,13 @@ public:
 	DirectionalLight sunLight;
 
 	Model<PhongMaterial> testSceneModel;
-	GameObject testScene;
+	GameObject* testScene;
 
 	Model<PhongMaterial> windowModel;
-	GameObject windowList[4];
+	GameObject* windowList[4];
+
+	Model<PhongMaterial> grassModel;
+	GameObject* grassList[10];
 
 	void Start()
 	{
@@ -25,7 +28,7 @@ public:
 		phongShader = PhongMaterial().shader;
 
 		// Camera
-		camera.transform.SetPosition(-1, 2, 2);
+		camera.transform.SetPosition(0, 1, 2);
 		camera.SetMovementSpeed(1.5);
 		camera.SetRotationSpeed(1.5);
 
@@ -35,32 +38,47 @@ public:
 		// Models
 		testSceneModel.Load("Test/Data/TransparentScene/transparent_scene.obj");
 		testScene = testSceneModel.InstantiateGameObject();
-		testScene.transform.Rotate(0, -90, 0);
-
-		for( SIZE i=0 ; i<testScene.GetChildCount() ; i++ )
-		{
-			if(testScene.GetChild(i)->name.find("Grass") != std::string::npos)
-			{
-				testScene.GetChild(i)->useTransparency = true;
-			}
-		}
+		testScene->transform.Rotate(0, -90, 0);
 
 		windowModel.Load("Test/Data/TransparentScene/window.obj");
 		for( SIZE i=0 ; i<4 ; i++ )
+		{
 			windowList[i] = windowModel.InstantiateGameObject();
-		windowList[0].GetChild(0)->useTransparency = true;
+			windowList[i]->GetChild(0)->useTransparency = true;
+		}
 
-		windowList[0].transform.SetPosition(-1, 1, -1.75);
-		windowList[1].transform.SetPosition(-3, 1, -1.75);
-		windowList[2].transform.SetPosition(-2, 1, -0.75);
-		windowList[2].transform.SetRotation(0, 90, 0);
-		windowList[3].transform.SetPosition(-2, 1, -2.75);
-		windowList[3].transform.SetRotation(0, 90, 0);
+		windowList[0]->transform.SetPosition(-1, 1, -1.75);
+		windowList[1]->transform.SetPosition(-3, 1, -1.75);
+		windowList[2]->transform.SetPosition(-2, 1, -0.75);
+		windowList[2]->transform.SetRotation(0, 90, 0);
+		windowList[3]->transform.SetPosition(-2, 1, -2.75);
+		windowList[3]->transform.SetRotation(0, 90, 0);
+
+		grassModel.Load("Test/Data/TransparentScene/grass.obj");
+		for( SIZE i=0 ; i<10 ; i++ )
+		{
+			grassList[i] = grassModel.InstantiateGameObject();
+			grassList[i]->GetChild(0)->useTransparency = true;
+			grassList[i]->GetChild(1)->useTransparency = true;
+
+			grassList[i]->transform.SetRotation(0, std::rand()%360, 0);
+		}
+		grassList[0]->transform.SetPosition(0, 0, -2);
+		grassList[1]->transform.SetPosition(2, 0, -3.5);
+		grassList[2]->transform.SetPosition(-3, 0, -4);
+		grassList[3]->transform.SetPosition(3, 0, 2);
+		grassList[4]->transform.SetPosition(-4, 0, 3);
+		grassList[5]->transform.SetPosition(-1.25, 0, 0.5);
+		grassList[6]->transform.SetPosition(1, 0, 1);
+		grassList[7]->transform.SetPosition(-1.5, 0, 2);
+		grassList[8]->transform.SetPosition(1, 0, 4);
+		grassList[9]->transform.SetPosition(1, 0, -1.5);
 	}
 	void Dispose()
 	{
 		testSceneModel.Dispose();
 		windowModel.Dispose();
+		grassModel.Dispose();
 	}
 
 	void Update()
@@ -98,15 +116,12 @@ public:
 		Renderer::Clear(0.2, 0.4, 0.7);
 		Renderer::PrepareScene(camera, sunLight);
 
-		testScene.Render();
-		
-		std::map<float, GameObject*> winMap;
-		for( SIZE i=0 ; i<4 ; i++ )
-		{
-			winMap[glm::length(camera.transform.position - windowList[i].transform.position)] = &windowList[i];
-		}
-		for( std::map<float, GameObject*>::reverse_iterator it=winMap.rbegin() ; it!=winMap.rend() ; it++ )
-			it->second->Render();
+		testScene->Render();
+
+		for( auto& window : windowList )
+			window->Render();
+		for( auto& grass : grassList )
+			grass->Render();
 	}
 
 };

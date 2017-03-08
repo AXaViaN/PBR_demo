@@ -36,6 +36,7 @@ public:
 	void AddChild(GameObject* child) { _childList.push_back(child); child->_parent=this; }
 	GameObject* GetChild(Tool::SIZE index) const { return index<_childList.size() ? _childList.at(index) : nullptr; }
 	Tool::SIZE GetChildCount() const { return _childList.size(); }
+	void RemoveChildren() { _childList.clear(); }
 	GameObject* GetParent() const { return _parent; }
 
 	std::string name;
@@ -48,13 +49,7 @@ public:
 	Asset::Material* material;
 
 private:
-	void renderObject() const;
-
-	void setOutlinedMaterial(GameObject* object, Asset::Material& material);
-	void restoreMaterial(GameObject* object);
-
 	std::vector<GameObject*> _childList;
-	std::map<GameObject*, Asset::Material*> _nonOutlinedMaterialMap;
 
 	GameObject* _parent;
 

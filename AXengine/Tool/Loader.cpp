@@ -356,6 +356,10 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 
 		if(mesh->mTextureCoords[0])
 		{
+			while(mesh->mTextureCoords[0][j].x > 1)
+				mesh->mTextureCoords[0][j].x--;
+			while(mesh->mTextureCoords[0][j].y > 1)
+				mesh->mTextureCoords[0][j].y--;
 			uvList.push_back(mesh->mTextureCoords[0][j].x);
 			uvList.push_back(mesh->mTextureCoords[0][j].y);
 		}

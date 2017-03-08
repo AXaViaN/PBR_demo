@@ -28,6 +28,41 @@ public:
 	void Scale(Tool::F32 scale) { this->scale *= scale; }
 	void Scale(glm::vec3 scale) { this->scale *= scale; }
 
+	Transform operator+(const Transform& other)
+	{
+		Transform transform;
+		transform.position = this->position + other.position;
+		transform.rotation = this->rotation + other.rotation;
+		transform.scale = this->scale * other.scale;
+		return transform;
+	}
+	Transform& operator+=(const Transform& other)
+	{
+		position += other.position;
+		rotation += other.rotation;
+		scale *= other.scale;
+		return *this;
+	}
+	Transform operator-(const Transform& other)
+	{
+		Transform transform;
+		transform.position = this->position - other.position;
+		transform.rotation = this->rotation - other.rotation;
+		if(other.scale.x!=0 && other.scale.y!=0 && other.scale.z!=0)
+			transform.scale = this->scale / other.scale;
+		return transform;
+	}
+	Transform& operator-=(const Transform& other)
+	{
+		position -= other.position;
+		rotation -= other.rotation;
+		if(other.scale.x==0 || other.scale.y==0 || other.scale.z==0)
+			scale = glm::vec3();
+		else
+			scale /= other.scale;
+		return *this;
+	}
+
 	glm::vec3 position;
 	glm::vec3 rotation;
 	glm::vec3 scale = glm::vec3(1, 1, 1);

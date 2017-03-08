@@ -81,9 +81,6 @@ void main()
 	vec3 emissionColor;
 	getColorFromTextureMaps(diffuseColor, specularColor, emissionColor);
 	
-	if(diffuseColor.a < 0.05)
-		discard;
-	
 	vec3 normal = normalize(varying_normal);
 	
 	// Lighting

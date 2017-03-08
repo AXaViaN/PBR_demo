@@ -13,7 +13,4 @@ void main()
 		out_color = texture(fs_diffuseTexture, uvCoord);
 	else
 		out_color = fs_diffuseValue;
-	
-	if(out_color.a < 0.1)
-		discard;
 }

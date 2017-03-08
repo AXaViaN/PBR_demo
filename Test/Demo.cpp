@@ -15,11 +15,11 @@ public:
 	bool isNightTime = false;
 
 	Model<PhongMaterial> bedroomModel;
-	GameObject bedroom;
+	GameObject* bedroom;
 
 	Model<PhongMaterial> monkeyModel;
-	GameObject monkey;
-	GameObject monkey2;
+	GameObject* monkey;
+	GameObject* monkey2;
 
 	void Start()
 	{
@@ -49,18 +49,18 @@ public:
 		// Models
 		bedroomModel.Load("Test/Data/Bedroom/Bedroom.obj");
 		bedroom = bedroomModel.InstantiateGameObject();
-		bedroom.transform.SetRotation(0, 180, 0);
+		bedroom->transform.SetRotation(0, 180, 0);
 		
 		monkeyModel.Load("Test/Data/monkey.obj");
 		monkey = monkeyModel.InstantiateGameObject();
-		monkey.transform.SetPosition(-1.5, 4, 0);
-		monkey.transform.SetRotation(-30, 0, 0);
-		monkey.layer = 2;
+		monkey->transform.SetPosition(-1.5, 4, 0);
+		monkey->transform.SetRotation(-30, 0, 0);
+		monkey->layer = 2;
 
 		monkey2 = monkeyModel.InstantiateGameObject();
-		monkey2.transform.SetPosition(1.5, 4, 0);
-		monkey2.transform.SetRotation(-30, 0, 0);
-		monkey2.layer = 3;
+		monkey2->transform.SetPosition(1.5, 4, 0);
+		monkey2->transform.SetRotation(-30, 0, 0);
+		monkey2->layer = 3;
 	}
 	void Dispose()
 	{
@@ -114,13 +114,13 @@ public:
 			Renderer::PrepareScene(camera, roomLight);
 		}
 		
-		bedroom.Render();
+		bedroom->Render();
 
-		monkey.Render();
-		monkey2.Render();
+		monkey->Render();
+		monkey->RenderOutline(glm::vec4(0.8, 0.8, 0, 1.0), 0.1);
 
-		monkey.RenderOutline(glm::vec4(0.8, 0.8, 0, 1.0), 0.1);
-		monkey2.RenderOutline(glm::vec4(0.8, 0, 0.8, 1.0), 0.25);
+		monkey2->Render();
+		monkey2->RenderOutline(glm::vec4(0.8, 0, 0.8, 1.0), 0.25);
 	}
 	
 };
