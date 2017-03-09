@@ -17,7 +17,7 @@ public:
 
 	void Start()
 	{
-		//Renderer::SetFullScreen(true);
+		Renderer::SetFullScreen(true);
 		Renderer::SetWindowTitle("Nanosuit Demo Scene");
 		phongShader = PhongMaterial().shader;
 

@@ -10,8 +10,7 @@ namespace AX { namespace Entity {
 
 void GameObject::Render() const
 {
-	if(mesh)
-		Gfx::Renderer::RegisterToBatch(this);
+	Gfx::Renderer::RegisterToBatch(this);
 
 	for( auto& childObject : _childList )
 	{
@@ -22,8 +21,7 @@ void GameObject::Render() const
 }
 void GameObject::RenderOutline(glm::vec4 outlineColor, Tool::F32 outlineScale)
 {
-	if(mesh)
-		Gfx::Renderer::RegisterToBatch(this, outlineColor, outlineScale);
+	Gfx::Renderer::RegisterToBatch(this, outlineColor, outlineScale);
 
 	for( auto& childObject : _childList )
 	{

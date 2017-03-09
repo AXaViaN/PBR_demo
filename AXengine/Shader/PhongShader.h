@@ -19,7 +19,8 @@ namespace AX { namespace Shader {
 class PhongShader : public ShaderProgram {
 public:
 	virtual void ProcessScene(const Entity::Scene& scene) override;
-	virtual void ProcessGameObject(const Entity::GameObject& gameObject) override;
+	virtual void ProcessMaterial(const Asset::Material& material) override;
+	virtual void ProcessTransform(const Entity::Transform& transform) override;
 
 protected:
 	/**

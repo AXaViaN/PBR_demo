@@ -113,7 +113,7 @@ void PhongShader::ProcessScene(const Entity::Scene& scene)
 		}
 	}
 }
-void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject)
+void PhongShader::ProcessMaterial(const Asset::Material& material)
 {
 	if(isDebugMode)
 	{
@@ -125,52 +125,53 @@ void PhongShader::ProcessGameObject(const Entity::GameObject& gameObject)
 	else
 	{
 		// Process material
-		Asset::PhongMaterial* material = static_cast<Asset::PhongMaterial*>(gameObject.material);
-		
+		const Asset::PhongMaterial* phongMaterial = static_cast<const Asset::PhongMaterial*>(&material);
+
 		// Diffuse Map
-		if(material->diffuseMap.texture)
+		if(phongMaterial->diffuseMap.texture)
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, material->diffuseMap.texture->GetTextureID());
+			glBindTexture(GL_TEXTURE_2D, phongMaterial->diffuseMap.texture->GetTextureID());
 			ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, glm::vec4(-1, -1, -1, -1));
 		}
 		else
 		{
-			ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, material->diffuseMap.value);
+			ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, phongMaterial->diffuseMap.value);
 		}
-		
+
 		// Specular Map
-		if(material->specularMap.texture)
+		if(phongMaterial->specularMap.texture)
 		{
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, material->specularMap.texture->GetTextureID());
+			glBindTexture(GL_TEXTURE_2D, phongMaterial->specularMap.texture->GetTextureID());
 			ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, glm::vec3(-1, -1, -1));
 		}
 		else
 		{
-			ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, material->specularMap.value);
+			ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, phongMaterial->specularMap.value);
 		}
 
 		// Emission Map
-		if(material->emissionMap.texture)
+		if(phongMaterial->emissionMap.texture)
 		{
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, material->emissionMap.texture->GetTextureID());
+			glBindTexture(GL_TEXTURE_2D, phongMaterial->emissionMap.texture->GetTextureID());
 			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(-1, -1, -1));
 		}
 		else
 		{
-			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, material->emissionMap.value);
+			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, phongMaterial->emissionMap.value);
 		}
 	}
-	
-	// Process transform
+}
+void PhongShader::ProcessTransform(const Entity::Transform& transform)
+{
 	glm::mat4 modelMatrix;
-	modelMatrix = glm::translate(modelMatrix, gameObject.transform.position);
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(gameObject.transform.rotation.x), glm::vec3(1, 0, 0));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(gameObject.transform.rotation.y), glm::vec3(0, 1, 0));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(gameObject.transform.rotation.z), glm::vec3(0, 0, 1));
-	modelMatrix = glm::scale(modelMatrix, gameObject.transform.scale);
+	modelMatrix = glm::translate(modelMatrix, transform.position);
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
+	modelMatrix = glm::scale(modelMatrix, transform.scale);
 
 	glm::mat4 modelViewMatrix = _viewMatrix * modelMatrix;
 	ShaderProgram::LoadUniform(_uniform_vs_modelViewMatrix, modelViewMatrix);

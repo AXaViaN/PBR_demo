@@ -7,7 +7,7 @@
 #define __AX__SHADER__SHADER_PROGRAM_H
 
 #include "AXengine/Entity/Scene.h"
-#include "AXengine/Entity/GameObject.h"
+#include "AXengine/Asset/Material.h"
 #include "AXengine/Tool/Utility.h"
 #include <glm/glm.hpp>
 
@@ -38,7 +38,8 @@ public:
 	 * Implemented in derived to use scene and game object according to shader program
 	 */
 	virtual void ProcessScene(const Entity::Scene& scene) = 0;
-	virtual void ProcessGameObject(const Entity::GameObject& gameObject) = 0;
+	virtual void ProcessMaterial(const Asset::Material& material) = 0;
+	virtual void ProcessTransform(const Entity::Transform& transform) = 0;
 
 protected:
 	bool Init(const Tool::CHR* vertexFilePath, const Tool::CHR* fragmentFilePath);

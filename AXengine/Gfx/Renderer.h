@@ -15,9 +15,11 @@
 #include <glm/glm.hpp>
 #include <map>
 
-namespace AX { namespace Core {
-class Engine;
-} }
+namespace AX {
+namespace Asset { class Material; }
+namespace Core { class Engine; }
+namespace Entity { class GameObject; }
+}
 
 namespace AX { namespace Gfx {
 
@@ -76,13 +78,16 @@ private:
 		Tool::F32 scale;
 	};
 
+	static void renderObjectBatch();
+	static void renderTransparentBatch();
+	static void renderOutlineBatch();
 	static void renderObject(const Entity::GameObject* object);
 
 private:
 	static void prepareScene();
 
 	std::map<const Shader::ShaderProgram*, bool> _shaderReadyMap;
-	std::vector<Entity::GameObject*> _objectRenderBatch;
+	std::map<Shader::ShaderProgram*, std::map<Asset::Material*, std::vector<Entity::GameObject*>>> _objectRenderBatch;
 	std::vector<Entity::GameObject*> _transparentRenderBatch;
 	std::vector<BatchOutlineObject> _outlineRenderBatch;
 
