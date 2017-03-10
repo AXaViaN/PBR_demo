@@ -167,6 +167,8 @@ void Renderer::SetDebugMode(bool isDebugMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	instance->_isDebugMode = isDebugMode;
 }
 void Renderer::SetFullScreen(bool isFullScreen)
 {
@@ -193,6 +195,7 @@ glm::mat4 Renderer::CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, T
 
 void Renderer::Init()
 {
+	_isDebugMode = false;
 	_projectionMatrix = CreateProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
 	
 	glEnable(GL_DEPTH_TEST);

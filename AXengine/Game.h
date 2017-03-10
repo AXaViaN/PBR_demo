@@ -19,6 +19,7 @@
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
+#include "AXengine/Entity/Text.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Debug.h"

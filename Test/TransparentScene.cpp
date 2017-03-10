@@ -22,8 +22,11 @@ public:
 	Model<PhongMaterial> grassModel;
 	GameObject* grassList[10];
 
+	Text engineText;
+
 	void Start()
 	{
+		TextRenderer::Init("Test/Data/arial.ttf");
 		Input::ActivateMouseMotion(false);
 		phongShader = PhongMaterial().shader;
 
@@ -73,12 +76,22 @@ public:
 		grassList[7]->transform.SetPosition(-1.5, 0, 2);
 		grassList[8]->transform.SetPosition(1, 0, 4);
 		grassList[9]->transform.SetPosition(1, 0, -1.5);
+
+		// Text
+		engineText.text = "AXengine Gfx Demo";
+		engineText.size = 28;
+		engineText.color = glm::vec3(0.5, 0.3, 1.0);
+		engineText.position = glm::vec2(1000, 10);
+		engineText.backgroundColor = glm::vec4(0, 0, 0, 0.7);
+		engineText.backgroundBorder = glm::vec2(5, 5);
 	}
 	void Dispose()
 	{
 		testSceneModel.Dispose();
 		windowModel.Dispose();
 		grassModel.Dispose();
+
+		TextRenderer::Terminate();
 	}
 
 	void Update()
@@ -122,6 +135,8 @@ public:
 			window->Render();
 		for( auto& grass : grassList )
 			grass->Render();
+
+		engineText.Render();
 	}
 
 };

@@ -8,6 +8,7 @@
 
 #include "AXengine/Shader/StandardShader.h"
 #include "AXengine/Shader/PhongShader.h"
+#include "AXengine/Shader/TextShader.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 
@@ -46,6 +47,7 @@ public:
 	
 	Shader::StandardShader standardShader;
 	Shader::PhongShader phongShader;
+	Shader::TextShader textShader;
 
 	const Tool::CHR* name = "PBR Demo Engine";
 

@@ -52,7 +52,8 @@ public:
 	static void SetLogTarget(const CHR* filePath, const CHR* startMessage)
 	{
 		std::freopen(filePath, "a", stderr);
-		
+
+		fseek(stderr, 0, SEEK_END);
 		if(std::ftell(stderr) > 10000000)
 			std::freopen(filePath, "w", stderr);
 		

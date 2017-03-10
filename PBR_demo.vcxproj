@@ -70,14 +70,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\_build\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\ThirdParty\assimp-3.3.1\lib\Release\x64;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\lib\x64;$(SolutionDir)\ThirdParty\SDL2-2.0.5\lib\x64;$(SolutionDir)\ThirdParty\glew-2.0.0\lib\Release\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)\ThirdParty\freetype-2.7.1\include;$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\ThirdParty\freetype-2.7.1\lib\Release Multithreaded\x64;$(SolutionDir)\ThirdParty\assimp-3.3.1\lib\Release\x64;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\lib\x64;$(SolutionDir)\ThirdParty\SDL2-2.0.5\lib\x64;$(SolutionDir)\ThirdParty\glew-2.0.0\lib\Release\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <IntDir>$(SolutionDir)\_build\obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\_build\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\ThirdParty\assimp-3.3.1\lib\Release\x64;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\lib\x64;$(SolutionDir)\ThirdParty\SDL2-2.0.5\lib\x64;$(SolutionDir)\ThirdParty\glew-2.0.0\lib\Release\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)\ThirdParty\freetype-2.7.1\include;$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\ThirdParty\freetype-2.7.1\lib\Release Multithreaded\x64;$(SolutionDir)\ThirdParty\assimp-3.3.1\lib\Release\x64;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\lib\x64;$(SolutionDir)\ThirdParty\SDL2-2.0.5\lib\x64;$(SolutionDir)\ThirdParty\glew-2.0.0\lib\Release\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <IntDir>$(SolutionDir)\_build\obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -96,7 +96,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;assimp-vc140-mt.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;assimp-vc140-mt.lib;zlibstatic.lib;freetype271MT.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,7 +125,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;assimp-vc140-mt.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;assimp-vc140-mt.lib;zlibstatic.lib;freetype271MT.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -140,9 +140,11 @@
     <ClCompile Include="AXengine\Asset\Mesh.cpp" />
     <ClCompile Include="AXengine\Asset\PhongMaterial.cpp" />
     <ClCompile Include="AXengine\Asset\Texture.cpp" />
+    <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
     <ClCompile Include="AXengine\Shader\PhongShader.cpp" />
     <ClCompile Include="AXengine\Shader\ShaderProgram.cpp" />
     <ClCompile Include="AXengine\Shader\StandardShader.cpp" />
+    <ClCompile Include="AXengine\Shader\TextShader.cpp" />
     <ClCompile Include="AXengine\Tool\Input.cpp" />
     <ClCompile Include="AXengine\Tool\Loader.cpp" />
     <ClCompile Include="AXengine\Tool\Time.h" />
@@ -160,6 +162,7 @@
     <ClInclude Include="AXengine\Entity\PointLight.h" />
     <ClInclude Include="AXengine\Entity\Scene.h" />
     <ClInclude Include="AXengine\Entity\SpotLight.h" />
+    <ClInclude Include="AXengine\Entity\Text.h" />
     <ClInclude Include="AXengine\Entity\Transform.h" />
     <ClInclude Include="AXengine\Game.h" />
     <ClInclude Include="AXengine\Gfx\Renderer.h" />
@@ -167,9 +170,12 @@
     <ClInclude Include="AXengine\Asset\Mesh.h" />
     <ClInclude Include="AXengine\Asset\PhongMaterial.h" />
     <ClInclude Include="AXengine\Asset\Texture.h" />
+    <ClInclude Include="AXengine\Gfx\Renderer2D.h" />
+    <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
     <ClInclude Include="AXengine\Shader\PhongShader.h" />
     <ClInclude Include="AXengine\Shader\ShaderProgram.h" />
     <ClInclude Include="AXengine\Shader\StandardShader.h" />
+    <ClInclude Include="AXengine\Shader\TextShader.h" />
     <ClInclude Include="AXengine\Tool\Debug.h" />
     <ClInclude Include="AXengine\Tool\Input.h" />
     <ClInclude Include="AXengine\Tool\Loader.h" />

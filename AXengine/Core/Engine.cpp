@@ -3,6 +3,8 @@
 #include "AXengine/Game.h"
 #include "AXengine/Core/Window.h"
 #include "AXengine/Gfx/Renderer.h"
+#include "AXengine/Gfx/Renderer2D.h"
+#include "AXengine/Gfx/TextRenderer.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 #include "AXengine/Tool/Loader.h"
@@ -56,11 +58,21 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	glm::ivec2 windowSize = Window::GetWindowSize();
+	initResult = textShader.Init(Gfx::Renderer2D::CreateProjectionMatrix(windowSize.x, windowSize.y));
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("TextShader cannot be initialized!");
+		return false;
+	}
+
 	return true;
 }
 /*	Terminate subsystems		*/
 void Engine::Terminate()
 {
+	textShader.Terminate();
+	phongShader.Terminate();
 	standardShader.Terminate();
 
 	Tool::Loader::Terminate();
@@ -90,6 +102,7 @@ void Engine::Run()
 		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
 		_game->Draw();
 		Gfx::Renderer::RenderBatch();
+		Gfx::TextRenderer::RenderBatch();
 		
 		window.RenderPresent();
 		window.SyncFPS(60);

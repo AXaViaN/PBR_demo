@@ -55,6 +55,8 @@ public:
 	static void SetWindowTitle(const Tool::CHR* title);
 	static void SetWindowSize(glm::ivec2 size);
 
+	static bool GetDebugMode() { return instance->_isDebugMode; }
+
 	static glm::mat4 CreateProjectionMatrix(Tool::F32 fov, Tool::F32 nearPlane, Tool::F32 farPlane);
 	static const glm::mat4& GetDefaultProjectionMatrix() { return instance->_projectionMatrix; }
 
@@ -93,6 +95,8 @@ private:
 
 	Entity::Scene _scene;
 	glm::mat4 _projectionMatrix;
+
+	bool _isDebugMode;
 
 };
 

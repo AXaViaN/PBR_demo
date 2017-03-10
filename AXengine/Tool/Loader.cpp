@@ -187,7 +187,7 @@ Asset::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 norm
 	vboID = bindIndexBuffer(indexList, indexListSize);
 	vboIDList.push_back(vboID);
 
-	return Asset::Mesh(vaoID, vboIDList, indexListSize);
+	return Asset::Mesh(vaoID, vboIDList, indexListSize / sizeof(U32));
 }
 U32 Loader::storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize)
 {
