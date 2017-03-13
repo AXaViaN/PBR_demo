@@ -23,6 +23,8 @@ public:
 	GameObject* grassList[10];
 
 	Text engineText;
+	Text cameraPositionText;
+	Text cameraRotationText;
 
 	void Start()
 	{
@@ -84,6 +86,15 @@ public:
 		engineText.position = glm::vec2(1000, 10);
 		engineText.backgroundColor = glm::vec4(0, 0, 0, 0.7);
 		engineText.backgroundBorder = glm::vec2(5, 5);
+
+		cameraPositionText.size = 20;
+		cameraPositionText.color = glm::vec3(1, 1, 1);
+		cameraPositionText.position = glm::vec2(10, 690);
+		cameraPositionText.backgroundColor = glm::vec4(0, 0, 0, 0.5);
+		cameraPositionText.backgroundBorder = glm::vec2(5, 5);
+
+		cameraRotationText = cameraPositionText;
+		cameraRotationText.position.y -= 35;
 	}
 	void Dispose()
 	{
@@ -122,6 +133,22 @@ public:
 		}
 
 		camera.Update();
+
+		cameraPositionText.text = "CamPos:";
+		cameraPositionText.text += " x=";
+		cameraPositionText.text += std::to_string(camera.transform.position.x);
+		cameraPositionText.text += " y=";
+		cameraPositionText.text += std::to_string(camera.transform.position.y);
+		cameraPositionText.text += " z=";
+		cameraPositionText.text += std::to_string(camera.transform.position.z);
+
+		cameraRotationText.text = "CamRot:";
+		cameraRotationText.text += " x=";
+		cameraRotationText.text += std::to_string(camera.transform.rotation.x);
+		cameraRotationText.text += " y=";
+		cameraRotationText.text += std::to_string(camera.transform.rotation.y);
+		cameraRotationText.text += " z=";
+		cameraRotationText.text += std::to_string(camera.transform.rotation.z);
 	}
 
 	void Draw()
@@ -136,7 +163,10 @@ public:
 		for( auto& grass : grassList )
 			grass->Render();
 
+		// Render text
 		engineText.Render();
+		cameraPositionText.Render();
+		cameraRotationText.Render();
 	}
 
 };

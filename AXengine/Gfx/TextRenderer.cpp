@@ -105,11 +105,11 @@ void TextRenderer::RegisterToBatch(const Entity::Text* text)
 }
 void TextRenderer::RenderBatch()
 {
-	bool isRendererDebugMode = Renderer::GetDebugMode();
-	Renderer::SetDebugMode(false);
-
 	if(instance==nullptr || instance->_characterMap.size()==0)
 		return;
+
+	bool isRendererDebugMode = Renderer::GetDebugMode();
+	Renderer::SetDebugMode(false);
 
 	for( auto& text : instance->_textRenderBatch )
 		Render(*text);

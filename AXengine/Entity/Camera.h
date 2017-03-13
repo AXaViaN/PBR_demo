@@ -14,16 +14,7 @@ namespace AX { namespace Entity {
 
 class Camera {
 public:
-	const glm::vec3& GetForwardDirection() const { return forward; }
-	const glm::vec3& GetUpDirection() const { return up; }
-
 	Transform transform;
-
-protected:
-	Camera() { }
-
-	glm::vec3 forward = glm::vec3(0, 0, -1);
-	glm::vec3 up = glm::vec3(0, 1, 0);
 
 };
 

@@ -134,21 +134,26 @@
     <ClCompile Include="AXengine\Core\Window.cpp" />
     <ClCompile Include="AXengine\Entity\FreeCamera.cpp" />
     <ClCompile Include="AXengine\Entity\GameObject.cpp" />
+    <ClCompile Include="AXengine\Entity\Quad.cpp" />
     <ClCompile Include="AXengine\Game.cpp" />
+    <ClCompile Include="AXengine\Gfx\FrameBuffer.cpp" />
     <ClCompile Include="AXengine\Gfx\Renderer.cpp" />
     <ClCompile Include="AXengine\Asset\Material.cpp" />
     <ClCompile Include="AXengine\Asset\Mesh.cpp" />
     <ClCompile Include="AXengine\Asset\PhongMaterial.cpp" />
     <ClCompile Include="AXengine\Asset\Texture.cpp" />
+    <ClCompile Include="AXengine\Gfx\Renderer2D.cpp" />
     <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
+    <ClCompile Include="AXengine\Shader\KernelShader.cpp" />
     <ClCompile Include="AXengine\Shader\PhongShader.cpp" />
     <ClCompile Include="AXengine\Shader\ShaderProgram.cpp" />
     <ClCompile Include="AXengine\Shader\StandardShader.cpp" />
+    <ClCompile Include="AXengine\Shader\StandardShader2D.cpp" />
     <ClCompile Include="AXengine\Shader\TextShader.cpp" />
     <ClCompile Include="AXengine\Tool\Input.cpp" />
     <ClCompile Include="AXengine\Tool\Loader.cpp" />
     <ClCompile Include="AXengine\Tool\Time.h" />
-    <ClCompile Include="Test\TransparentScene.cpp" />
+    <ClCompile Include="Test\PostProcessScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AXengine\Asset\Model.h" />
@@ -160,11 +165,13 @@
     <ClInclude Include="AXengine\Entity\FreeCamera.h" />
     <ClInclude Include="AXengine\Entity\Light.h" />
     <ClInclude Include="AXengine\Entity\PointLight.h" />
+    <ClInclude Include="AXengine\Entity\Quad.h" />
     <ClInclude Include="AXengine\Entity\Scene.h" />
     <ClInclude Include="AXengine\Entity\SpotLight.h" />
     <ClInclude Include="AXengine\Entity\Text.h" />
     <ClInclude Include="AXengine\Entity\Transform.h" />
     <ClInclude Include="AXengine\Game.h" />
+    <ClInclude Include="AXengine\Gfx\FrameBuffer.h" />
     <ClInclude Include="AXengine\Gfx\Renderer.h" />
     <ClInclude Include="AXengine\Asset\Material.h" />
     <ClInclude Include="AXengine\Asset\Mesh.h" />
@@ -172,9 +179,11 @@
     <ClInclude Include="AXengine\Asset\Texture.h" />
     <ClInclude Include="AXengine\Gfx\Renderer2D.h" />
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
+    <ClInclude Include="AXengine\Shader\KernelShader.h" />
     <ClInclude Include="AXengine\Shader\PhongShader.h" />
     <ClInclude Include="AXengine\Shader\ShaderProgram.h" />
     <ClInclude Include="AXengine\Shader\StandardShader.h" />
+    <ClInclude Include="AXengine\Shader\StandardShader2D.h" />
     <ClInclude Include="AXengine\Shader\TextShader.h" />
     <ClInclude Include="AXengine\Tool\Debug.h" />
     <ClInclude Include="AXengine\Tool\Input.h" />

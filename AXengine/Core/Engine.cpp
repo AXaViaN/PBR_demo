@@ -2,6 +2,7 @@
 
 #include "AXengine/Game.h"
 #include "AXengine/Core/Window.h"
+#include "AXengine/Entity/Quad.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Gfx/Renderer2D.h"
 #include "AXengine/Gfx/TextRenderer.h"
@@ -58,6 +59,9 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	Gfx::Renderer2D::Instance().Init();
+	Entity::Quad::InitMesh();
+
 	glm::ivec2 windowSize = Window::GetWindowSize();
 	initResult = textShader.Init(Gfx::Renderer2D::CreateProjectionMatrix(windowSize.x, windowSize.y));
 	if(initResult == false)
@@ -66,11 +70,29 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	initResult = standardShader2D.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("StandardShader2D cannot be initialized!");
+		return false;
+	}
+
+	initResult = kernelShader.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("KernelShader cannot be initialized!");
+		return false;
+	}
+
 	return true;
 }
 /*	Terminate subsystems		*/
 void Engine::Terminate()
 {
+	Entity::Quad::DisposeMesh();
+
+	kernelShader.Terminate();
+	standardShader2D.Terminate();
 	textShader.Terminate();
 	phongShader.Terminate();
 	standardShader.Terminate();
@@ -102,6 +124,7 @@ void Engine::Run()
 		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
 		_game->Draw();
 		Gfx::Renderer::RenderBatch();
+		Gfx::Renderer2D::RenderBatch();
 		Gfx::TextRenderer::RenderBatch();
 		
 		window.RenderPresent();

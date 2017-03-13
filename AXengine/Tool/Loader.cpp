@@ -69,7 +69,7 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 		return Asset::Texture(0);
 	}
 
-	GLuint textureID;
+	U32 textureID;
 	glGenTextures(1, &textureID);
 	if(textureID == 0)
 	{

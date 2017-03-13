@@ -49,10 +49,14 @@ void PhongShader::ProcessScene(const Entity::Scene& scene)
 	}
 
 	// Process camera
+	_viewMatrix = glm::mat4();
 	if(scene.camera)
 	{
-		glm::vec3 center = scene.camera->transform.position + scene.camera->GetForwardDirection();
-		_viewMatrix = glm::lookAt(scene.camera->transform.position, center, scene.camera->GetUpDirection());
+		_viewMatrix = glm::scale(_viewMatrix, glm::vec3(1, 1, 1)/scene.camera->transform.scale);
+		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.x), glm::vec3(1, 0, 0));
+		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.y), glm::vec3(0, 1, 0));
+		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.z), glm::vec3(0, 0, -1));
+		_viewMatrix = glm::translate(_viewMatrix, -scene.camera->transform.position);
 	}
 	else
 	{

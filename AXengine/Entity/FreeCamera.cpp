@@ -21,7 +21,7 @@ void FreeCamera::Update()
 		transform.rotation.x = 90;
 
 	// Process movement
-	forward = glm::vec3(0, 0, -1);
+	glm::vec3 forward = glm::vec3(0, 0, -1);
 	forward = glm::rotate(forward, glm::radians(transform.rotation.x), glm::vec3(-1, 0, 0));
 	forward = glm::rotate(forward, glm::radians(transform.rotation.y), glm::vec3(0, -1, 0));
 
@@ -29,7 +29,7 @@ void FreeCamera::Update()
 	right = glm::rotate(right, glm::radians(transform.rotation.x), glm::vec3(-1, 0, 0));
 	right = glm::rotate(right, glm::radians(transform.rotation.y), glm::vec3(0, -1, 0));
 
-	up = glm::cross(right, forward);
+	glm::vec3 up = glm::cross(right, forward);
 
 	glm::vec3 movement;
 	if(Tool::Input::GetKey(SDL_SCANCODE_W))
