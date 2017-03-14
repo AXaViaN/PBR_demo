@@ -12,6 +12,8 @@ Quad::Quad()
 	material.shader = &Core::Engine::Instance().standardShader2D;
 }
 
+/***** PROTECTED *****/
+
 void Quad::InitMesh()
 {
 	Tool::F32 positionList[] = {

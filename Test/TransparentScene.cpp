@@ -26,6 +26,8 @@ public:
 	Text cameraPositionText;
 	Text cameraRotationText;
 
+	Cubemap skybox;
+
 	void Start()
 	{
 		TextRenderer::Init("Test/Data/arial.ttf");
@@ -95,9 +97,19 @@ public:
 
 		cameraRotationText = cameraPositionText;
 		cameraRotationText.position.y -= 35;
+
+		// Skybox
+		skybox.Load("Test/Data/Skybox/Above The Sea/right.png",
+					"Test/Data/Skybox/Above The Sea/left.png",
+					"Test/Data/Skybox/Above The Sea/top.png",
+					"Test/Data/Skybox/Above The Sea/bottom.png",
+					"Test/Data/Skybox/Above The Sea/back.png",
+					"Test/Data/Skybox/Above The Sea/front.png");
 	}
 	void Dispose()
 	{
+		skybox.Dispose();
+
 		testSceneModel.Dispose();
 		windowModel.Dispose();
 		grassModel.Dispose();
@@ -153,8 +165,8 @@ public:
 
 	void Draw()
 	{
-		Renderer::Clear(0.2, 0.4, 0.7);
 		Renderer::PrepareScene(camera, sunLight);
+		SkyboxRenderer::Render(skybox);
 
 		testScene->Render();
 

@@ -107,8 +107,8 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
 	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	if(addMipmap)
 	{
@@ -125,6 +125,72 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	SDL_FreeSurface(texture);
+
+	return Asset::Texture(textureID);
+}
+Asset::Texture Loader::LoadCubeMapTexture(std::vector<const CHR*> filePathList)
+{
+	U32 textureID;
+	glGenTextures(1, &textureID);
+	if(textureID == 0)
+	{
+		Debug::LogWarning("OpenGL texture generator failed!");
+		return Asset::Texture(0);
+	}
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	SIZE fileCount = filePathList.size();
+	if(fileCount > 6)
+		fileCount = 6;
+	for( SIZE i=0 ; i<fileCount ; i++ )
+	{
+		SDL_Surface* texture = IMG_Load(filePathList[i]);
+		if(texture == nullptr)
+		{
+			Debug::LogWarning("Loading texture from %s failed!", filePathList[i]);
+
+			glDeleteTextures(1, &textureID);
+			return Asset::Texture();
+		}
+
+		// Decide pixel format for texture
+		GLenum pixelFormat;
+		switch(texture->format->BytesPerPixel)
+		{
+			case 1:
+				pixelFormat = GL_R;
+				break;
+			case 3:
+				if(texture->format->Rmask == 0x000000ff)
+					pixelFormat = GL_RGB;
+				else
+					pixelFormat = GL_BGR;
+				break;
+			case 4:
+				if(texture->format->Rmask == 0x000000ff)
+					pixelFormat = GL_RGBA;
+				else
+					pixelFormat = GL_BGRA;
+				break;
+			default:
+				Debug::LogWarning("PixelFormat is not supported for texture %s! BytesPerPixel = %d", filePathList[i], texture->format->BytesPerPixel);
+
+				SDL_FreeSurface(texture);
+				glDeleteTextures(1, &textureID);
+				return Asset::Texture();
+		}
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+
+		SDL_FreeSurface(texture);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	return Asset::Texture(textureID);
 }

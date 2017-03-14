@@ -11,6 +11,7 @@
 #include "AXengine/Shader/PhongShader.h"
 #include "AXengine/Shader/KernelShader.h"
 #include "AXengine/Shader/TextShader.h"
+#include "AXengine/Shader/SkyboxShader.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 
@@ -52,6 +53,7 @@ public:
 	Shader::PhongShader phongShader;
 	Shader::KernelShader kernelShader;
 	Shader::TextShader textShader;
+	Shader::SkyboxShader skyboxShader;
 
 	const Tool::CHR* name = "PBR Demo Engine";
 

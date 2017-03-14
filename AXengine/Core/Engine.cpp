@@ -3,6 +3,7 @@
 #include "AXengine/Game.h"
 #include "AXengine/Core/Window.h"
 #include "AXengine/Entity/Quad.h"
+#include "AXengine/Entity/Cubemap.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Gfx/Renderer2D.h"
 #include "AXengine/Gfx/TextRenderer.h"
@@ -59,8 +60,16 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	initResult = skyboxShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("SkyboxShader cannot be initialized!");
+		return false;
+	}
+	
 	Gfx::Renderer2D::Instance().Init();
 	Entity::Quad::InitMesh();
+	Entity::Cubemap::InitMesh();
 
 	glm::ivec2 windowSize = Window::GetWindowSize();
 	initResult = textShader.Init(Gfx::Renderer2D::CreateProjectionMatrix(windowSize.x, windowSize.y));
@@ -90,7 +99,9 @@ bool Engine::Init(Game* game)
 void Engine::Terminate()
 {
 	Entity::Quad::DisposeMesh();
+	Entity::Cubemap::DisposeMesh();
 
+	skyboxShader.Terminate();
 	kernelShader.Terminate();
 	standardShader2D.Terminate();
 	textShader.Terminate();

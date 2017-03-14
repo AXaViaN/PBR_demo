@@ -13,6 +13,7 @@
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 #include <assimp/Importer.hpp>
+#include <vector>
 
 namespace AX { namespace Core {
 class Engine;
@@ -25,6 +26,7 @@ public:
 	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath);
 
 	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap);
+	static Asset::Texture LoadCubeMapTexture(std::vector<const CHR*> filePathList);
 
 	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								U32 indexList[], SIZE indexListSize);
