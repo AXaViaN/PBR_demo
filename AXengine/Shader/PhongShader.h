@@ -43,17 +43,21 @@ private:
 
 	Tool::U32 _uniform_vs_ModelViewProjectionMatrix;
 	Tool::U32 _uniform_vs_modelViewMatrix;
+	Tool::U32 _uniform_vs_modelMatrix;
 	Tool::U32 _uniform_vs_normalMatrix;
+
+	Tool::U32 _uniform_fs_cameraPosition;
 
 	Tool::U32 _uniform_fs_material_diffuseMap_value;
 	Tool::U32 _uniform_fs_material_specularMap_value;
 	Tool::U32 _uniform_fs_material_emissionMap_value;
+	Tool::U32 _uniform_fs_material_reflectionMap_value;
 
 	Tool::U32 _uniform_fs_directionalLight_direction;
 	Tool::U32 _uniform_fs_directionalLight_color_diffuse;
 	Tool::U32 _uniform_fs_directionalLight_color_specular;
 	Tool::U32 _uniform_fs_directionalLight_color_ambient;
-	
+
 	static const Tool::SIZE POINT_LIGHT_COUNT = 8;
 	Tool::U32 _uniform_fs_pointLight_position[POINT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_pointLight_color_diffuse[POINT_LIGHT_COUNT];

@@ -17,6 +17,7 @@ public:
 		std::map<U32, U32> objectMeshMap;
 		std::map<U32, U32> objectMaterialMap;
 		std::map<U32, U32> materialDiffuseMap;
+		std::map<U32, U32> materialReflectionMap;
 	};
 	struct PhongModelConnections : public ModelConnections {
 		std::map<U32, U32> materialSpecularMap;
@@ -365,6 +366,19 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 					model.materialList[currentMaterialIndex].emissionMap.value = glm::vec3(color.r, color.g, color.b);
 			}
 
+			if(material->GetTextureCount(aiTextureType_AMBIENT) > 0)
+			{
+				material->GetTexture(aiTextureType_AMBIENT, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
+				modelConnections.materialReflectionMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].reflectionMap.value = color.r;
+			}
+
 		}
 
 		modelConnections.objectMaterialMap.insert(std::pair<U32, U32>(currentObjectIndex, currentMaterialIndex));
@@ -391,6 +405,8 @@ void Loader::Helper::ConnectModel(Asset::Model<Asset::PhongMaterial>& model, Mod
 		model.modelParts[objectMaterial.first].material = &model.materialList[objectMaterial.second];
 	for( auto materialDiffuse : modelConnections.materialDiffuseMap )
 		model.materialList[materialDiffuse.first].diffuseMap.texture = &model.textureList[materialDiffuse.second];
+	for( auto materialReflection : modelConnections.materialReflectionMap )
+		model.materialList[materialReflection.first].reflectionMap.texture = &model.textureList[materialReflection.second];
 }
 void Loader::Helper::ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model, PhongModelConnections& modelConnections)
 {

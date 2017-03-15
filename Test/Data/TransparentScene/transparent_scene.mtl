@@ -9,6 +9,7 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Ka Texture/crate_refl.png
 map_Kd Texture/crate_diff.png
 map_Ks Texture/crate_spec.png
 

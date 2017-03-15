@@ -46,7 +46,9 @@ public:
 		testSceneModel.Load("Test/Data/TransparentScene/transparent_scene.obj");
 		testScene = testSceneModel.InstantiateGameObject();
 		testScene->transform.Rotate(0, -90, 0);
-
+		for( SIZE i=0 ; i<testScene->GetChildCount() ; i++ )
+			testScene->GetChild(i)->material->environmentMap = &skybox;
+		
 		windowModel.Load("Test/Data/TransparentScene/window.obj");
 		for( SIZE i=0 ; i<4 ; i++ )
 		{

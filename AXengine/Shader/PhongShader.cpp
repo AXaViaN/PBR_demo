@@ -1,6 +1,7 @@
 #include "AXengine/Shader/PhongShader.h"
 
 #include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Entity/Cubemap.h"
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
@@ -10,6 +11,15 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 namespace AX { namespace Shader {
+
+enum PhongShaderTexture {
+	DIFFUSE,
+	SPECULAR,
+	EMISSION,
+	REFLECTION,
+
+	ENVIRONMENT
+};
 
 void PhongShader::ProcessScene(const Entity::Scene& scene)
 {
@@ -57,10 +67,12 @@ void PhongShader::ProcessScene(const Entity::Scene& scene)
 		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.y), glm::vec3(0, 1, 0));
 		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.z), glm::vec3(0, 0, -1));
 		_viewMatrix = glm::translate(_viewMatrix, -scene.camera->transform.position);
+
+		ShaderProgram::LoadUniform(_uniform_fs_cameraPosition, scene.camera->transform.position);
 	}
 	else
 	{
-		_viewMatrix = glm::mat4();
+		ShaderProgram::LoadUniform(_uniform_fs_cameraPosition, glm::vec3());
 	}
 
 	// Process lights
@@ -134,7 +146,7 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		// Diffuse Map
 		if(phongMaterial->diffuseMap.texture)
 		{
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::DIFFUSE);
 			glBindTexture(GL_TEXTURE_2D, phongMaterial->diffuseMap.texture->GetTextureID());
 			ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, glm::vec4(-1, -1, -1, -1));
 		}
@@ -146,7 +158,7 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		// Specular Map
 		if(phongMaterial->specularMap.texture)
 		{
-			glActiveTexture(GL_TEXTURE1);
+			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::SPECULAR);
 			glBindTexture(GL_TEXTURE_2D, phongMaterial->specularMap.texture->GetTextureID());
 			ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, glm::vec3(-1, -1, -1));
 		}
@@ -158,13 +170,32 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		// Emission Map
 		if(phongMaterial->emissionMap.texture)
 		{
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::EMISSION);
 			glBindTexture(GL_TEXTURE_2D, phongMaterial->emissionMap.texture->GetTextureID());
 			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(-1, -1, -1));
 		}
 		else
 		{
 			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, phongMaterial->emissionMap.value);
+		}
+		
+		// Reflection Map
+		if(phongMaterial->reflectionMap.texture)
+		{
+			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::REFLECTION);
+			glBindTexture(GL_TEXTURE_2D, phongMaterial->reflectionMap.texture->GetTextureID());
+			ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, -1.0f);
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, phongMaterial->reflectionMap.value);
+		}
+		
+		// Environment Map
+		if(phongMaterial->environmentMap)
+		{
+			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::ENVIRONMENT);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, phongMaterial->environmentMap->material.diffuseMap.texture->GetTextureID());
 		}
 	}
 }
@@ -178,6 +209,7 @@ void PhongShader::ProcessTransform(const Entity::Transform& transform)
 	modelMatrix = glm::scale(modelMatrix, transform.scale);
 
 	glm::mat4 modelViewMatrix = _viewMatrix * modelMatrix;
+	ShaderProgram::LoadUniform(_uniform_vs_modelMatrix, modelMatrix);
 	ShaderProgram::LoadUniform(_uniform_vs_modelViewMatrix, modelViewMatrix);
 	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * modelViewMatrix);
 
@@ -200,9 +232,13 @@ bool PhongShader::Init(const glm::mat4& projectionMatrix)
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_nearPlane"), Gfx::Renderer::NEAR_PLANE);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_farPlane"), Gfx::Renderer::FAR_PLANE);
 
-	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.diffuseMap.texture"), 0);
-	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.specularMap.texture"), 1);
-	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.emissionMap.texture"), 2);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.diffuseMap.texture"), PhongShaderTexture::DIFFUSE);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.specularMap.texture"), PhongShaderTexture::SPECULAR);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.emissionMap.texture"), PhongShaderTexture::EMISSION);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.reflectionMap.texture"), PhongShaderTexture::REFLECTION);
+
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentMap"), PhongShaderTexture::ENVIRONMENT);
+
 	Stop();
 
 	return true;
@@ -218,11 +254,15 @@ void PhongShader::GetShaderUniformLocations()
 {
 	_uniform_vs_ModelViewProjectionMatrix = ShaderProgram::GetUniformLocation("vs_ModelViewProjectionMatrix");
 	_uniform_vs_modelViewMatrix = ShaderProgram::GetUniformLocation("vs_modelViewMatrix");
+	_uniform_vs_modelMatrix = ShaderProgram::GetUniformLocation("vs_modelMatrix");
 	_uniform_vs_normalMatrix = ShaderProgram::GetUniformLocation("vs_normalMatrix");
+
+	_uniform_fs_cameraPosition = ShaderProgram::GetUniformLocation("fs_cameraPosition");
 
 	_uniform_fs_material_diffuseMap_value = ShaderProgram::GetUniformLocation("fs_material.diffuseMap.value");
 	_uniform_fs_material_specularMap_value = ShaderProgram::GetUniformLocation("fs_material.specularMap.value");
 	_uniform_fs_material_emissionMap_value = ShaderProgram::GetUniformLocation("fs_material.emissionMap.value");
+	_uniform_fs_material_reflectionMap_value = ShaderProgram::GetUniformLocation("fs_material.reflectionMap.value");
 
 	_uniform_fs_directionalLight_direction = ShaderProgram::GetUniformLocation("fs_directionalLight.direction");
 	_uniform_fs_directionalLight_color_diffuse = ShaderProgram::GetUniformLocation("fs_directionalLight.color.diffuse");

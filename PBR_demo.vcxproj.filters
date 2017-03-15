@@ -87,9 +87,6 @@
     <ClCompile Include="AXengine\Shader\KernelShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test\TransparentScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AXengine\Gfx\SkyboxRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -97,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AXengine\Shader\SkyboxShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\TransparentScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
