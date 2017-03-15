@@ -20,6 +20,8 @@ struct Material {
 	TextureMapVec3 specularMap;
 	TextureMapVec3 emissionMap;
 	TextureMapVec1 reflectionMap;
+	
+	float shininess;
 };
 
 struct Color {
@@ -189,9 +191,8 @@ vec3 applyDiffuseLighting(vec3 lightColor, vec3 diffuseColor, vec3 normal, vec3 
 vec3 applySpecularLighting(vec3 lightColor, vec3 specularColor, vec3 normal, vec3 lightRay)
 {
 	vec3 cameraRay = normalize(-varying_onCameraPosition);
-	vec3 reflectionDirection = reflect(-lightRay, normal);
-	float shininess = 128 * (specularColor.r + specularColor.g + specularColor.b) + 1;
-	float specularFactor = pow(max(0.0, dot(cameraRay, reflectionDirection)), shininess);
+	vec3 halfwayDirection = normalize(cameraRay + lightRay);
+	float specularFactor = pow(max(0.0, dot(normal, halfwayDirection)), fs_material.shininess);
 	
 	return lightColor * (specularColor * specularFactor);
 }

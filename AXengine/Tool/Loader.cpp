@@ -353,6 +353,10 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 					model.materialList[currentMaterialIndex].specularMap.value = glm::vec3(color.r, color.g, color.b);
 			}
 
+			F32 shininess;
+			if(aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess) == AI_SUCCESS)
+				model.materialList[currentMaterialIndex].shininess = shininess;
+
 			if(material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
 			{
 				material->GetTexture(aiTextureType_EMISSIVE, 0, &texturePath);

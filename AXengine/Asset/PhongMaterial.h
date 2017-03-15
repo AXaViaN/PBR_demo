@@ -16,6 +16,7 @@ public:
 
 	TextureMap<glm::vec3> specularMap;
 	TextureMap<glm::vec3> emissionMap;
+	Tool::F32 shininess;
 
 };
 

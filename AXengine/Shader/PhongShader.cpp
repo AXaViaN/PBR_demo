@@ -137,6 +137,8 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, glm::vec4(0, 1, 0, 1));
 		ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, glm::vec3(0, 1, 0));
 		ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(0, 1, 0));
+		ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, glm::vec3(0, 0, 0));
+		ShaderProgram::LoadUniform(_uniform_fs_material_shininess, 128.0f);
 	}
 	else
 	{
@@ -166,6 +168,7 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		{
 			ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, phongMaterial->specularMap.value);
 		}
+		ShaderProgram::LoadUniform(_uniform_fs_material_shininess, phongMaterial->shininess);
 
 		// Emission Map
 		if(phongMaterial->emissionMap.texture)
@@ -179,23 +182,27 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, phongMaterial->emissionMap.value);
 		}
 		
-		// Reflection Map
-		if(phongMaterial->reflectionMap.texture)
-		{
-			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::REFLECTION);
-			glBindTexture(GL_TEXTURE_2D, phongMaterial->reflectionMap.texture->GetTextureID());
-			ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, -1.0f);
-		}
-		else
-		{
-			ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, phongMaterial->reflectionMap.value);
-		}
-		
-		// Environment Map
+		// Environment Map && Reflection Map
+		// Don't use reflection map if no environment map is avaible
 		if(phongMaterial->environmentMap)
 		{
 			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::ENVIRONMENT);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, phongMaterial->environmentMap->material.diffuseMap.texture->GetTextureID());
+
+			if(phongMaterial->reflectionMap.texture)
+			{
+				glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::REFLECTION);
+				glBindTexture(GL_TEXTURE_2D, phongMaterial->reflectionMap.texture->GetTextureID());
+				ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, -1.0f);
+			}
+			else
+			{
+				ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, phongMaterial->reflectionMap.value);
+			}
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, 0.0f);
 		}
 	}
 }
@@ -263,6 +270,7 @@ void PhongShader::GetShaderUniformLocations()
 	_uniform_fs_material_specularMap_value = ShaderProgram::GetUniformLocation("fs_material.specularMap.value");
 	_uniform_fs_material_emissionMap_value = ShaderProgram::GetUniformLocation("fs_material.emissionMap.value");
 	_uniform_fs_material_reflectionMap_value = ShaderProgram::GetUniformLocation("fs_material.reflectionMap.value");
+	_uniform_fs_material_shininess = ShaderProgram::GetUniformLocation("fs_material.shininess");
 
 	_uniform_fs_directionalLight_direction = ShaderProgram::GetUniformLocation("fs_directionalLight.direction");
 	_uniform_fs_directionalLight_color_diffuse = ShaderProgram::GetUniformLocation("fs_directionalLight.color.diffuse");

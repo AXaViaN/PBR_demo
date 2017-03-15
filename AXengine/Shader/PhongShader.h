@@ -52,6 +52,7 @@ private:
 	Tool::U32 _uniform_fs_material_specularMap_value;
 	Tool::U32 _uniform_fs_material_emissionMap_value;
 	Tool::U32 _uniform_fs_material_reflectionMap_value;
+	Tool::U32 _uniform_fs_material_shininess;
 
 	Tool::U32 _uniform_fs_directionalLight_direction;
 	Tool::U32 _uniform_fs_directionalLight_color_diffuse;

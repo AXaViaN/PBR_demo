@@ -6,7 +6,7 @@ namespace AX { namespace Asset {
 
 PhongMaterial::PhongMaterial() : Material(&Core::Engine::Instance().phongShader)
 {
-
+	shininess = 128.0f;
 }
 
 } } // namespace AX::Asset
