@@ -1,6 +1,6 @@
 /**
  *	File: AXengine/Shader/SkyboxShader.h
- *	Purpose: Default shader program for game objects
+ *	Purpose: Shader program for skybox rendering
  */
 
 #ifndef __AX__SHADER__SKYBOX_SHADER_H

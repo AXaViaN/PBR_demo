@@ -13,6 +13,10 @@ const Tool::F32 Renderer::FOV = 66.6;
 const Tool::F32 Renderer::NEAR_PLANE = 0.1f;
 const Tool::F32 Renderer::FAR_PLANE = 1000.0f;
 
+void Renderer::Clear()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
 void Renderer::Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue)
 {
 	glClearColor(red, green, blue, 1.0f);

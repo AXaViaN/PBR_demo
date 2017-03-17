@@ -38,5 +38,4 @@ void KernelShader::ProcessTransform(const Entity::Transform& transform)
 	ShaderProgram::LoadUniform(_uniform_vs_modelMatrix, modelMatrix);
 }
 
-
 } } // namespace AX::Shader

@@ -10,6 +10,7 @@
 #include "AXengine/Shader/StandardShader2D.h"
 #include "AXengine/Shader/PhongShader.h"
 #include "AXengine/Shader/KernelShader.h"
+#include "AXengine/Shader/GammaShader.h"
 #include "AXengine/Shader/TextShader.h"
 #include "AXengine/Shader/SkyboxShader.h"
 #include "AXengine/Tool/Singleton.h"
@@ -52,6 +53,7 @@ public:
 	Shader::StandardShader2D standardShader2D;
 	Shader::PhongShader phongShader;
 	Shader::KernelShader kernelShader;
+	Shader::GammaShader gammaShader;
 	Shader::TextShader textShader;
 	Shader::SkyboxShader skyboxShader;
 

@@ -93,6 +93,13 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	initResult = gammaShader.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("GammaShader cannot be initialized!");
+		return false;
+	}
+
 	return true;
 }
 /*	Terminate subsystems		*/
@@ -101,6 +108,7 @@ void Engine::Terminate()
 	Entity::Quad::DisposeMesh();
 	Entity::Cubemap::DisposeMesh();
 
+	gammaShader.Terminate();
 	skyboxShader.Terminate();
 	kernelShader.Terminate();
 	standardShader2D.Terminate();
@@ -123,8 +131,21 @@ void Engine::Run()
 	Window& window = Window::Instance();
 	Tool::Input& input = Tool::Input::Instance();
 
+	gammaShader.SetGamma(2.0f);
 	_game->Start();
 	
+	Gfx::FrameBuffer renderBuffer;
+	bool initResult = renderBuffer.Init(window.GetWindowSize(), Gfx::FrameBuffer::COLOR_TEXTURE__DEPTH_STENCIL_BUFFER);
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("Engine FrameBuffer error.");
+		return;
+	}
+
+	Entity::Quad renderQuad;
+	renderQuad.material.shader = &gammaShader;
+	renderQuad.material.diffuseMap.texture = &renderBuffer.GetColorTexture();
+
 	_isRunning = true;
 	while(_isRunning && input.IsWindowClosed() == false)
 	{
@@ -134,8 +155,16 @@ void Engine::Run()
 		
 		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
 		_game->Draw();
+		
+		renderBuffer.Use();
+		Gfx::Renderer::Clear();
+		Gfx::SkyboxRenderer::RenderSkybox();
 		Gfx::Renderer::RenderBatch();
 		Gfx::Renderer2D::RenderBatch();
+
+		Gfx::FrameBuffer::UseDefault();
+		renderQuad.RenderImmediate();
+
 		Gfx::TextRenderer::RenderBatch();
 		
 		window.RenderPresent();

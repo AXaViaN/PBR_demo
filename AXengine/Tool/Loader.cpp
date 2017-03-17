@@ -80,22 +80,28 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 
 	// Decide pixel format for texture
 	GLenum pixelFormat;
+	GLenum internalFormat;
 	switch(texture->format->BytesPerPixel)
 	{
 		case 1:
-			pixelFormat = GL_R;
+			pixelFormat = GL_RED;
+			internalFormat = GL_RED;
 			break;
 		case 3:
 			if(texture->format->Rmask == 0x000000ff)
 				pixelFormat = GL_RGB;
 			else
 				pixelFormat = GL_BGR;
+
+			internalFormat = GL_SRGB;
 			break;
 		case 4:
 			if(texture->format->Rmask == 0x000000ff)
 				pixelFormat = GL_RGBA;
 			else
 				pixelFormat = GL_BGRA;
+
+			internalFormat = GL_SRGB_ALPHA;
 			break;
 		default:
 			Debug::LogWarning("PixelFormat is not supported for texture %s! BytesPerPixel = %d", filePath, texture->format->BytesPerPixel);
@@ -106,7 +112,7 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -159,9 +165,6 @@ Asset::Texture Loader::LoadCubeMapTexture(std::vector<const CHR*> filePathList)
 		GLenum pixelFormat;
 		switch(texture->format->BytesPerPixel)
 		{
-			case 1:
-				pixelFormat = GL_R;
-				break;
 			case 3:
 				if(texture->format->Rmask == 0x000000ff)
 					pixelFormat = GL_RGB;
@@ -182,7 +185,7 @@ Asset::Texture Loader::LoadCubeMapTexture(std::vector<const CHR*> filePathList)
 				return Asset::Texture();
 		}
 
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB, texture->w, texture->h, 0, pixelFormat, GL_UNSIGNED_BYTE, texture->pixels);
 
 		SDL_FreeSurface(texture);
 	}

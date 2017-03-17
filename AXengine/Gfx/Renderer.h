@@ -25,6 +25,7 @@ namespace AX { namespace Gfx {
 
 class Renderer : public Tool::Singleton<Renderer> {
 public:
+	static void Clear();
 	static void Clear(Tool::F32 red, Tool::F32 green, Tool::F32 blue);
 
 	static void PrepareScene();

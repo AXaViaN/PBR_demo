@@ -1,6 +1,6 @@
 /**
  *	File: AXengine/Shader/KernelShader.h
- *	Purpose: Default shader program for 2D rendering
+ *	Purpose: Shader program for kernel post-process effects
  */
 
 #ifndef __AX__SHADER__KERNEL_SHADER_H

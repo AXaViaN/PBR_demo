@@ -27,6 +27,7 @@ public:
 	Text cameraRotationText;
 
 	FrameBuffer sceneFBO;
+	FrameBuffer sceneRearFBO;
 	Quad sceneFBOquad;
 	Quad sceneRearFBOquad;
 
@@ -43,7 +44,9 @@ public:
 		sceneFBOquad.material.shader = kernelShader;
 		sceneFBOquad.material.diffuseMap.texture = &sceneFBO.GetColorTexture();
 
-		sceneRearFBOquad = sceneFBOquad;
+		sceneRearFBO.Init({1280, 720}, FrameBuffer::AttachmentType::COLOR_TEXTURE | FrameBuffer::AttachmentType::DEPTH_STENCIL_BUFFER);
+		sceneRearFBOquad.material.shader = kernelShader;
+		sceneRearFBOquad.material.diffuseMap.texture = &sceneRearFBO.GetColorTexture();
 		sceneRearFBOquad.transform.SetPosition(0, 0.75, 0);
 		sceneRearFBOquad.transform.SetScale(0.25, 0.2, 1);
 
@@ -123,6 +126,7 @@ public:
 
 		TextRenderer::Terminate();
 
+		sceneRearFBO.Terminate();
 		sceneFBO.Terminate();
 	}
 
@@ -185,10 +189,10 @@ public:
 		sceneRearFrame.RenderImmediate();
 
 		FrameBuffer::UseDefault();
-		sceneFBOquad.RenderImmediate();
+		sceneFBOquad.Render();
 
 		// Render rear mirror to sceneRearFBOquad
-		sceneFBO.Use();
+		sceneRearFBO.Use();
 		camera.transform.Rotate(0, 180, 0);
 		camera.transform.rotation.x *= -1;
 		RenderScene();
@@ -196,7 +200,7 @@ public:
 		camera.transform.Rotate(0, -180, 0);
 
 		FrameBuffer::UseDefault();
-		sceneRearFBOquad.RenderImmediate();
+		sceneRearFBOquad.Render();
 
 		// Render text
 		engineText.Render();

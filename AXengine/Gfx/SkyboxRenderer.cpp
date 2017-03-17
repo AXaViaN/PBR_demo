@@ -6,23 +6,30 @@
 
 namespace AX { namespace Gfx {
 
-void SkyboxRenderer::Render(Entity::Cubemap& skybox)
-{
-	glDisable(GL_DEPTH_TEST);
-	skybox.material.shader->Start();
+Entity::Cubemap* SkyboxRenderer::_skybox = nullptr;
 
-	Renderer::PrepareShader(skybox.material.shader);
-	skybox.material.shader->ProcessMaterial(skybox.material);
+void SkyboxRenderer::RenderSkybox()
+{
+	if(_skybox == nullptr)
+		return;
+
+	glDisable(GL_DEPTH_TEST);
+	_skybox->material.shader->Start();
+
+	Renderer::PrepareShader(_skybox->material.shader);
+	_skybox->material.shader->ProcessMaterial(_skybox->material);
 	
-	glBindVertexArray(skybox.mesh.GetVaoID());
+	glBindVertexArray(_skybox->mesh.GetVaoID());
 	glEnableVertexAttribArray(0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glDisableVertexAttribArray(0);
 
-	skybox.material.shader->Stop();
+	_skybox->material.shader->Stop();
 	glEnable(GL_DEPTH_TEST);
+
+	_skybox = nullptr;
 }
 
 } } // namespace AX::Gfx

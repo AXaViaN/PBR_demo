@@ -12,7 +12,12 @@ namespace AX { namespace Gfx {
 
 class SkyboxRenderer {
 public:
-	static void Render(Entity::Cubemap& skybox);
+	static void Render(Entity::Cubemap& skybox) { _skybox = &skybox; }
+
+	static void RenderSkybox();
+
+private:
+	static Entity::Cubemap* _skybox;
 
 };
 
