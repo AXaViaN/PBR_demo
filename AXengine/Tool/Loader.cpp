@@ -18,6 +18,7 @@ public:
 		std::map<U32, U32> objectMaterialMap;
 		std::map<U32, U32> materialDiffuseMap;
 		std::map<U32, U32> materialReflectionMap;
+		std::map<U32, U32> materialNormalMap;
 	};
 	struct PhongModelConnections : public ModelConnections {
 		std::map<U32, U32> materialSpecularMap;
@@ -61,7 +62,7 @@ Asset::Model<Asset::PhongMaterial> Loader::LoadPhongModel(const CHR* filePath)
 	return model;
 }
 
-Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
+Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap, bool isSRGB)
 {
 	SDL_Surface* texture = IMG_Load(filePath);
 	if(texture == nullptr)
@@ -93,7 +94,10 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 			else
 				pixelFormat = GL_BGR;
 
-			internalFormat = GL_SRGB;
+			if(isSRGB)
+				internalFormat = GL_SRGB;
+			else
+				internalFormat = GL_RGB;
 			break;
 		case 4:
 			if(texture->format->Rmask == 0x000000ff)
@@ -101,7 +105,10 @@ Asset::Texture Loader::LoadTexture(const CHR* filePath, bool addMipmap)
 			else
 				pixelFormat = GL_BGRA;
 
-			internalFormat = GL_SRGB_ALPHA;
+			if(isSRGB)
+				internalFormat = GL_SRGB_ALPHA;
+			else
+				internalFormat = GL_RGBA;
 			break;
 		default:
 			Debug::LogWarning("PixelFormat is not supported for texture %s! BytesPerPixel = %d", filePath, texture->format->BytesPerPixel);
@@ -201,15 +208,19 @@ Asset::Texture Loader::LoadCubeMapTexture(std::vector<const CHR*> filePathList)
 
 Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, U32 indexList[], SIZE indexListSize)
 {
-	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, indexList, indexListSize);
+	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, nullptr, 0, indexList, indexListSize);
 }
 Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
-	return loadMesh(positionList, positionListSize, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
+	return loadMesh(positionList, positionListSize, nullptr, 0, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
 Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
-	return loadMesh(positionList, positionListSize, normalList, normalListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
+	return loadMesh(positionList, positionListSize, normalList, normalListSize, nullptr, 0, uvCoordList, uvCoordListSize, indexList, indexListSize);
+}
+Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 tangentList[], SIZE tangentListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
+{
+	return loadMesh(positionList, positionListSize, normalList, normalListSize, tangentList, tangentListSize, uvCoordList, uvCoordListSize, indexList, indexListSize);
 }
 
 /***** PROTECTED *****/
@@ -235,7 +246,7 @@ void Loader::Terminate()
 
 /***** PRIVATE *****/
 
-Asset::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
+Asset::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 normalList[], SIZE normalListSize, F32 tangentList[], SIZE tangentListSize, F32 uvCoordList[], SIZE uvCoordListSize, U32 indexList[], SIZE indexListSize)
 {
 	U32 vaoID;
 	glGenVertexArrays(1, &vaoID);
@@ -252,6 +263,9 @@ Asset::Mesh Loader::loadMesh(F32 positionList[], SIZE positionListSize, F32 norm
 	vboIDList.push_back(vboID);
 
 	vboID = storeInVBO(Asset::Mesh::VBOlayout::NORMAL, 3, normalList, normalListSize);
+	vboIDList.push_back(vboID);
+
+	vboID = storeInVBO(Asset::Mesh::VBOlayout::TANGENT, 3, tangentList, tangentListSize);
 	vboIDList.push_back(vboID);
 
 	vboID = bindIndexBuffer(indexList, indexListSize);
@@ -286,7 +300,7 @@ U32 Loader::bindIndexBuffer(U32 indexList[], SIZE indexListSize)
 
 const aiScene* Loader::Helper::LoadScene(const CHR* filePath)
 {
-	const aiScene* scene = instance->_modelImporter.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+	const aiScene* scene = instance->_modelImporter.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
 	if(scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
 	{
 		Debug::LogWarning("%s", instance->_modelImporter.GetErrorString());
@@ -373,6 +387,7 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 					model.materialList[currentMaterialIndex].emissionMap.value = glm::vec3(color.r, color.g, color.b);
 			}
 
+			// Reflection Maps loaded as ambient map
 			if(material->GetTextureCount(aiTextureType_AMBIENT) > 0)
 			{
 				material->GetTexture(aiTextureType_AMBIENT, 0, &texturePath);
@@ -386,6 +401,13 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 					model.materialList[currentMaterialIndex].reflectionMap.value = color.r;
 			}
 
+			// Normal Maps loaded as height map
+			if(material->GetTextureCount(aiTextureType_HEIGHT) > 0)
+			{
+				material->GetTexture(aiTextureType_HEIGHT, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true, false));
+				modelConnections.materialNormalMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
 		}
 
 		modelConnections.objectMaterialMap.insert(std::pair<U32, U32>(currentObjectIndex, currentMaterialIndex));
@@ -414,6 +436,8 @@ void Loader::Helper::ConnectModel(Asset::Model<Asset::PhongMaterial>& model, Mod
 		model.materialList[materialDiffuse.first].diffuseMap.texture = &model.textureList[materialDiffuse.second];
 	for( auto materialReflection : modelConnections.materialReflectionMap )
 		model.materialList[materialReflection.first].reflectionMap.texture = &model.textureList[materialReflection.second];
+	for( auto materialNormal : modelConnections.materialNormalMap )
+		model.materialList[materialNormal.first].normalMap.texture = &model.textureList[materialNormal.second];
 }
 void Loader::Helper::ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model, PhongModelConnections& modelConnections)
 {
@@ -431,6 +455,7 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 {
 	std::vector<F32> positionList;
 	std::vector<F32> normalList;
+	std::vector<F32> tangentList;
 	std::vector<F32> uvList;
 	std::vector<U32> indexList;
 	for( SIZE j=0 ; j<mesh->mNumVertices ; j++ )
@@ -442,6 +467,10 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 		normalList.push_back(mesh->mNormals[j].x);
 		normalList.push_back(mesh->mNormals[j].y);
 		normalList.push_back(mesh->mNormals[j].z);
+
+		tangentList.push_back(mesh->mTangents[j].x);
+		tangentList.push_back(mesh->mTangents[j].y);
+		tangentList.push_back(mesh->mTangents[j].z);
 
 		if(mesh->mTextureCoords[0])
 		{
@@ -470,6 +499,7 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 
 	return Loader::LoadMesh(&positionList[0], positionList.size()*sizeof(F32), 
 							&normalList[0], normalList.size()*sizeof(F32),
+							&tangentList[0], tangentList.size()*sizeof(F32),
 							uvListPtr, uvListSize,
 							&indexList[0], indexList.size()*sizeof(U32));
 }

@@ -18,6 +18,7 @@ struct TextureMapVec4 {
 struct Material {
 	TextureMapVec4 diffuseMap;
 	TextureMapVec3 specularMap;
+	TextureMapVec3 normalMap;
 	TextureMapVec3 emissionMap;
 	TextureMapVec1 reflectionMap;
 	
@@ -54,6 +55,7 @@ struct SpotLight {
 };
 
 in vec3 varying_normal;
+in mat3 varying_TBN;
 in vec2 varying_uvCoord;
 in vec3 varying_onWorldNormal;
 in vec3 varying_onWorldPosition;
@@ -75,7 +77,7 @@ out vec4 out_color;
 
 // Functions
 float getFragDepth();
-void getValuesFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor, inout float reflectionFactor);
+void getValuesFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor, inout vec3 normalValue, inout vec3 emissionColor, inout float reflectionFactor);
 
 vec3 applyDiffuseLighting(vec3 lightColor, vec3 diffuseColor, vec3 normal, vec3 lightRay);
 vec3 applySpecularLighting(vec3 lightColor, vec3 specularColor, vec3 normal, vec3 lightRay);
@@ -92,11 +94,14 @@ void main()
 {
 	vec4 diffuseColor;
 	vec3 specularColor;
+	vec3 normalValue;
 	vec3 emissionColor;
 	float reflectionFactor;
-	getValuesFromTextureMaps(diffuseColor, specularColor, emissionColor, reflectionFactor);
+	getValuesFromTextureMaps(diffuseColor, specularColor, normalValue, emissionColor, reflectionFactor);
 	
 	vec3 normal = normalize(varying_normal);
+	if(normalValue.r >= 0)
+		normal = normalize(varying_TBN * (normalValue*2.0 - 1.0));
 	
 	// Lighting
 	Color directionalLight;
@@ -159,7 +164,7 @@ float getFragDepth()
 {
 	return (fs_nearPlane * fs_farPlane) / (fs_farPlane + gl_FragCoord.z * (fs_nearPlane - fs_farPlane));
 }
-void getValuesFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor, inout vec3 emissionColor, inout float reflectionFactor)
+void getValuesFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor, inout vec3 normalValue, inout vec3 emissionColor, inout float reflectionFactor)
 {
 	if(fs_material.diffuseMap.value.r == -1)
 		diffuseColor = texture(fs_material.diffuseMap.texture, varying_uvCoord);
@@ -170,6 +175,11 @@ void getValuesFromTextureMaps(inout vec4 diffuseColor, inout vec3 specularColor,
 		specularColor = texture(fs_material.specularMap.texture, varying_uvCoord).rgb;
 	else
 		specularColor = fs_material.specularMap.value;
+	
+	if(fs_material.normalMap.value.r == -1)
+		normalValue = texture(fs_material.normalMap.texture, varying_uvCoord).rgb;
+	else
+		normalValue = fs_material.normalMap.value;
 	
 	if(fs_material.emissionMap.value.r == -1)
 		emissionColor = texture(fs_material.emissionMap.texture, varying_uvCoord).rgb;

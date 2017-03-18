@@ -40,7 +40,7 @@ public:
 		camera.SetRotationSpeed(1.5);
 
 		// Lights
-		sunLight.SetDirection(0.4, -1, -0.6);
+		sunLight.SetDirection(0.4, -0.8, -0.75);
 
 		// Models
 		testSceneModel.Load("Test/Data/TransparentScene/transparent_scene.obj");

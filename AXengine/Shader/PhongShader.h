@@ -50,6 +50,7 @@ private:
 
 	Tool::U32 _uniform_fs_material_diffuseMap_value;
 	Tool::U32 _uniform_fs_material_specularMap_value;
+	Tool::U32 _uniform_fs_material_normalMap_value;
 	Tool::U32 _uniform_fs_material_emissionMap_value;
 	Tool::U32 _uniform_fs_material_reflectionMap_value;
 	Tool::U32 _uniform_fs_material_shininess;

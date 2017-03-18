@@ -25,7 +25,7 @@ class Loader : public Singleton<Loader> {
 public:
 	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath);
 
-	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap);
+	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap, bool isSRGB=true);
 	static Asset::Texture LoadCubeMapTexture(std::vector<const CHR*> filePathList);
 
 	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
@@ -35,6 +35,11 @@ public:
 								U32 indexList[], SIZE indexListSize);
 	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 normalList[], SIZE normalListSize, 
+								F32 uvCoordList[], SIZE uvCoordListSize, 
+								U32 indexList[], SIZE indexListSize);
+	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
+								F32 normalList[], SIZE normalListSize, 
+								F32 tangentList[], SIZE tangentListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
 
@@ -52,6 +57,7 @@ protected:
 private:
 	static Asset::Mesh loadMesh(F32 positionList[], SIZE positionListSize, 
 								F32 normalList[], SIZE normalListSize, 
+								F32 tangentList[], SIZE tangentListSize, 
 								F32 uvCoordList[], SIZE uvCoordListSize, 
 								U32 indexList[], SIZE indexListSize);
 	static U32 storeInVBO(U32 attributeNumber, U32 dimension, F32 data[], SIZE dataSize);

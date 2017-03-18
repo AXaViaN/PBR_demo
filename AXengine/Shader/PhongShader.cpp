@@ -15,6 +15,7 @@ namespace AX { namespace Shader {
 enum PhongShaderTexture {
 	DIFFUSE,
 	SPECULAR,
+	NORMAL,
 	EMISSION,
 	REFLECTION,
 
@@ -170,6 +171,22 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		}
 		ShaderProgram::LoadUniform(_uniform_fs_material_shininess, phongMaterial->shininess);
 
+		// Normal Map
+		if(phongMaterial->normalMap.texture)
+		{
+			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::NORMAL);
+			glBindTexture(GL_TEXTURE_2D, phongMaterial->normalMap.texture->GetTextureID());
+			ShaderProgram::LoadUniform(_uniform_fs_material_normalMap_value, glm::vec3(-1, -1, -1));
+		}
+		else if(phongMaterial->normalMap.value.r == -1)
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_material_normalMap_value, glm::vec3(-2, -2, -2));
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_material_normalMap_value, phongMaterial->normalMap.value);
+		}
+
 		// Emission Map
 		if(phongMaterial->emissionMap.texture)
 		{
@@ -241,6 +258,7 @@ bool PhongShader::Init(const glm::mat4& projectionMatrix)
 
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.diffuseMap.texture"), PhongShaderTexture::DIFFUSE);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.specularMap.texture"), PhongShaderTexture::SPECULAR);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.normalMap.texture"), PhongShaderTexture::NORMAL);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.emissionMap.texture"), PhongShaderTexture::EMISSION);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.reflectionMap.texture"), PhongShaderTexture::REFLECTION);
 
@@ -256,6 +274,7 @@ void PhongShader::BindShaderAttributes()
 	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::POSITION, "attrib_position");
 	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::UVCOORD, "attrib_uvCoord");
 	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::NORMAL, "attrib_normal");
+	ShaderProgram::BindAttribute(Asset::Mesh::VBOlayout::TANGENT, "attrib_tangent");
 }
 void PhongShader::GetShaderUniformLocations()
 {
@@ -268,6 +287,7 @@ void PhongShader::GetShaderUniformLocations()
 
 	_uniform_fs_material_diffuseMap_value = ShaderProgram::GetUniformLocation("fs_material.diffuseMap.value");
 	_uniform_fs_material_specularMap_value = ShaderProgram::GetUniformLocation("fs_material.specularMap.value");
+	_uniform_fs_material_normalMap_value = ShaderProgram::GetUniformLocation("fs_material.normalMap.value");
 	_uniform_fs_material_emissionMap_value = ShaderProgram::GetUniformLocation("fs_material.emissionMap.value");
 	_uniform_fs_material_reflectionMap_value = ShaderProgram::GetUniformLocation("fs_material.reflectionMap.value");
 	_uniform_fs_material_shininess = ShaderProgram::GetUniformLocation("fs_material.shininess");

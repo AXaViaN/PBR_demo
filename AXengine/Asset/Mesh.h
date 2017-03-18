@@ -17,6 +17,7 @@ public:
 		POSITION,
 		UVCOORD,
 		NORMAL,
+		TANGENT,
 
 		LAYOUT_SIZE
 	};
