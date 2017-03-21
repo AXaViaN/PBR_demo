@@ -29,6 +29,8 @@ public:
 	explicit Material(Shader::ShaderProgram* shader) : shader(shader) { setDefaults(); }
 	explicit Material(Shader::ShaderProgram& shader) : shader(&shader) { setDefaults(); }
 
+	template<typename T> T* Get() { return static_cast<T*>(this); }
+
 	TextureMap<glm::vec4> diffuseMap;
 	TextureMap<Tool::F32> reflectionMap;
 

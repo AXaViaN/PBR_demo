@@ -146,7 +146,7 @@
     <ClCompile Include="AXengine\Gfx\Renderer2D.cpp" />
     <ClCompile Include="AXengine\Gfx\SkyboxRenderer.cpp" />
     <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
-    <ClCompile Include="AXengine\Shader\GammaShader.cpp" />
+    <ClCompile Include="AXengine\Shader\ToneShader.cpp" />
     <ClCompile Include="AXengine\Shader\KernelShader.cpp" />
     <ClCompile Include="AXengine\Shader\PhongShader.cpp" />
     <ClCompile Include="AXengine\Shader\ShaderProgram.cpp" />
@@ -157,7 +157,7 @@
     <ClCompile Include="AXengine\Tool\Input.cpp" />
     <ClCompile Include="AXengine\Tool\Loader.cpp" />
     <ClCompile Include="AXengine\Tool\Time.h" />
-    <ClCompile Include="Test\TransparentScene.cpp" />
+    <ClCompile Include="Test\WarehouseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AXengine\Asset\Model.h" />
@@ -185,7 +185,7 @@
     <ClInclude Include="AXengine\Gfx\Renderer2D.h" />
     <ClInclude Include="AXengine\Gfx\SkyboxRenderer.h" />
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
-    <ClInclude Include="AXengine\Shader\GammaShader.h" />
+    <ClInclude Include="AXengine\Shader\ToneShader.h" />
     <ClInclude Include="AXengine\Shader\KernelShader.h" />
     <ClInclude Include="AXengine\Shader\PhongShader.h" />
     <ClInclude Include="AXengine\Shader\ShaderProgram.h" />

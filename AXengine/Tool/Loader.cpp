@@ -428,16 +428,16 @@ void Loader::Helper::ConnectModel(Asset::Model<Asset::PhongMaterial>& model, Mod
 {
 	for( SIZE i=0 ; i<modelConnections.objectChildMap.size() ; i+=2 )
 		model.modelParts[modelConnections.objectChildMap[i]].AddChild(model.modelParts[modelConnections.objectChildMap[i+1]]);
+
 	for( auto objectMesh : modelConnections.objectMeshMap )
 		model.modelParts[objectMesh.first].mesh = &model.meshList[objectMesh.second];
 	for( auto objectMaterial : modelConnections.objectMaterialMap )
 		model.modelParts[objectMaterial.first].material = &model.materialList[objectMaterial.second];
+
 	for( auto materialDiffuse : modelConnections.materialDiffuseMap )
 		model.materialList[materialDiffuse.first].diffuseMap.texture = &model.textureList[materialDiffuse.second];
 	for( auto materialReflection : modelConnections.materialReflectionMap )
 		model.materialList[materialReflection.first].reflectionMap.texture = &model.textureList[materialReflection.second];
-	for( auto materialNormal : modelConnections.materialNormalMap )
-		model.materialList[materialNormal.first].normalMap.texture = &model.textureList[materialNormal.second];
 }
 void Loader::Helper::ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model, PhongModelConnections& modelConnections)
 {
@@ -445,6 +445,8 @@ void Loader::Helper::ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model
 
 	for( auto materialSpecular : modelConnections.materialSpecularMap )
 		model.materialList[materialSpecular.first].specularMap.texture = &model.textureList[materialSpecular.second];
+	for( auto materialNormal : modelConnections.materialNormalMap )
+		model.materialList[materialNormal.first].normalMap.texture = &model.textureList[materialNormal.second];
 	for( auto materialEmission : modelConnections.materialEmissionMap )
 		model.materialList[materialEmission.first].emissionMap.texture = &model.textureList[materialEmission.second];
 }
@@ -468,10 +470,13 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 		normalList.push_back(mesh->mNormals[j].y);
 		normalList.push_back(mesh->mNormals[j].z);
 
-		tangentList.push_back(mesh->mTangents[j].x);
-		tangentList.push_back(mesh->mTangents[j].y);
-		tangentList.push_back(mesh->mTangents[j].z);
-
+		if(mesh->mTangents)
+		{
+			tangentList.push_back(mesh->mTangents[j].x);
+			tangentList.push_back(mesh->mTangents[j].y);
+			tangentList.push_back(mesh->mTangents[j].z);
+		}
+		
 		if(mesh->mTextureCoords[0])
 		{
 			while(mesh->mTextureCoords[0][j].x > 1)
@@ -497,9 +502,17 @@ Asset::Mesh Loader::Helper::getModelMesh(aiMesh* mesh)
 		uvListSize = uvList.size() * sizeof(F32);
 	}
 
+	F32* tangentListPtr = nullptr;
+	SIZE tangentListSize = 0;
+	if(tangentList.size() != 0)
+	{
+		tangentListPtr = &tangentList[0];
+		tangentListSize = tangentList.size() * sizeof(F32);
+	}
+
 	return Loader::LoadMesh(&positionList[0], positionList.size()*sizeof(F32), 
 							&normalList[0], normalList.size()*sizeof(F32),
-							&tangentList[0], tangentList.size()*sizeof(F32),
+							tangentListPtr, tangentListSize,
 							uvListPtr, uvListSize,
 							&indexList[0], indexList.size()*sizeof(U32));
 }

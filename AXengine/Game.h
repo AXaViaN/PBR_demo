@@ -28,6 +28,7 @@
 #include "AXengine/Gfx/FrameBuffer.h"
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Shader/KernelShader.h"
+#include "AXengine/Shader/ToneShader.h"
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 #include "AXengine/Tool/Loader.h"

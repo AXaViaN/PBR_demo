@@ -8,16 +8,18 @@ namespace AX { namespace Gfx {
 bool FrameBuffer::Init(glm::ivec2 frameSize, Tool::U32 attachmentFlags)
 {
 	_frameSize = frameSize;
+	// 1x1 mipmap level. It is used by GetAvarageBrightness()
+	_maxMipmapLevel = glm::floor(glm::log2(glm::max<Tool::F32>(_frameSize.x, _frameSize.y)));
 
 	glGenFramebuffers(1, &_fboID);
 	Use();
 
-	attachBuffer(attachmentFlags & COLOR_BUFFER);
+	attachBuffer((attachmentFlags & COLOR_BUFFER) | (attachmentFlags & HDR_COLOR));
 	attachBuffer(attachmentFlags & DEPTH_BUFFER);
 	attachBuffer(attachmentFlags & STENCIL_BUFFER);
 	attachBuffer(attachmentFlags & DEPTH_STENCIL_BUFFER);
 
-	_textureList[0] = attachTexture(attachmentFlags & COLOR_TEXTURE);
+	_textureList[0] = attachTexture((attachmentFlags & COLOR_TEXTURE) | (attachmentFlags & HDR_COLOR));
 	_textureList[1] = attachTexture(attachmentFlags & DEPTH_TEXTURE);
 	_textureList[2] = attachTexture(attachmentFlags & STENCIL_TEXTURE);
 	_textureList[3] = attachTexture(attachmentFlags & DEPTH_STENCIL_TEXTURE);
@@ -55,6 +57,20 @@ void FrameBuffer::UseDefault()
 	glViewport(0, 0, windowSize.x, windowSize.y);
 }
 
+Tool::F32 FrameBuffer::GetAvarageBrightness()
+{
+	if(_textureList[0].GetTextureID() == 0)
+		return 0;
+
+	glBindTexture(GL_TEXTURE_2D, _textureList[0].GetTextureID());
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+	Tool::F32 rgb[3];
+	glGetTexImage(GL_TEXTURE_2D, _maxMipmapLevel, GL_RGB, GL_FLOAT, &rgb);
+
+	return 0.2126f*rgb[0] + 0.7152f*rgb[1] + 0.0722f*rgb[2];
+}
+
 /***** PRIVATE *****/
 
 void FrameBuffer::attachBuffer(Tool::U32 attachmentType)
@@ -63,9 +79,13 @@ void FrameBuffer::attachBuffer(Tool::U32 attachmentType)
 	Tool::U32 attachmentFormat;
 	switch(attachmentType)
 	{
-		case COLOR_BUFFER:
+		case COLOR_BUFFER: case HDR_COLOR|COLOR_BUFFER:
 		{
-			bufferFormat = GL_RGBA;
+			if(attachmentType & HDR_COLOR)
+				bufferFormat = GL_RGBA16F;
+			else
+				bufferFormat = GL_RGBA;
+
 			attachmentFormat = GL_COLOR_ATTACHMENT0;
 
 			break;
@@ -114,9 +134,13 @@ Asset::Texture FrameBuffer::attachTexture(Tool::U32 attachmentType)
 	Tool::U32 attachmentFormat;
 	switch(attachmentType)
 	{
-		case COLOR_TEXTURE:
+		case COLOR_TEXTURE: case HDR_COLOR|COLOR_TEXTURE:
 		{
-			internalTextureFormat = GL_RGBA;
+			if(attachmentType & HDR_COLOR)
+				internalTextureFormat = GL_RGBA16F;
+			else
+				internalTextureFormat = GL_RGBA;
+
 			externalTextureFormat = GL_RGBA;
 			attachmentFormat = GL_COLOR_ATTACHMENT0;
 

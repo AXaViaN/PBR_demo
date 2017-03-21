@@ -10,6 +10,7 @@
 #include "AXengine/Tool/Debug.h"
 #include "AXengine/Tool/Input.h"
 #include "AXengine/Tool/Loader.h"
+#include <glm/gtx/compatibility.hpp>
 
 namespace AX { namespace Core {
 
@@ -93,10 +94,10 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
-	initResult = gammaShader.Init();
+	initResult = toneShader.Init();
 	if(initResult == false)
 	{
-		Tool::Debug::LogWarning("GammaShader cannot be initialized!");
+		Tool::Debug::LogWarning("ToneShader cannot be initialized!");
 		return false;
 	}
 
@@ -108,7 +109,7 @@ void Engine::Terminate()
 	Entity::Quad::DisposeMesh();
 	Entity::Cubemap::DisposeMesh();
 
-	gammaShader.Terminate();
+	toneShader.Terminate();
 	skyboxShader.Terminate();
 	kernelShader.Terminate();
 	standardShader2D.Terminate();
@@ -131,11 +132,13 @@ void Engine::Run()
 	Window& window = Window::Instance();
 	Tool::Input& input = Tool::Input::Instance();
 
-	gammaShader.SetGamma(2.0f);
+	Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
+	toneShader.SetGamma(2.0f);
+	Tool::F32 hdrExposure = 1.0f;
 	_game->Start();
 	
 	Gfx::FrameBuffer renderBuffer;
-	bool initResult = renderBuffer.Init(window.GetWindowSize(), Gfx::FrameBuffer::COLOR_TEXTURE__DEPTH_STENCIL_BUFFER);
+	bool initResult = renderBuffer.Init(window.GetWindowSize(), Gfx::FrameBuffer::HDR_COLOR | Gfx::FrameBuffer::COLOR_TEXTURE__DEPTH_STENCIL_BUFFER);
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("Engine FrameBuffer error.");
@@ -143,7 +146,7 @@ void Engine::Run()
 	}
 
 	Entity::Quad renderQuad;
-	renderQuad.material.shader = &gammaShader;
+	renderQuad.material.shader = &toneShader;
 	renderQuad.material.diffuseMap.texture = &renderBuffer.GetColorTexture();
 
 	_isRunning = true;
@@ -153,7 +156,7 @@ void Engine::Run()
 
 		_game->Update();
 		
-		Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
+		Gfx::Renderer::Clear();
 		_game->Draw();
 		
 		renderBuffer.Use();
@@ -166,7 +169,15 @@ void Engine::Run()
 		renderQuad.RenderImmediate();
 
 		Gfx::TextRenderer::RenderBatch();
-		
+
+		// Automatic exposure control
+		Tool::F32 averageBrightness = renderBuffer.GetAvarageBrightness();
+		if(averageBrightness > 0)
+		{
+			hdrExposure = glm::lerp<Tool::F32>(hdrExposure, 0.5f/averageBrightness, 0.1);
+			toneShader.SetHDRexposure(hdrExposure);
+		}
+
 		window.RenderPresent();
 		window.SyncFPS(60);
 	}

@@ -16,18 +16,20 @@ namespace AX { namespace Gfx {
 class FrameBuffer {
 public:
 	enum AttachmentType {
-		COLOR_BUFFER          = 0x01,
-		DEPTH_BUFFER          = 0x02,
-		STENCIL_BUFFER        = 0x04,
-		DEPTH_STENCIL_BUFFER  = 0x08,
+		COLOR_BUFFER          = 0x0001,
+		DEPTH_BUFFER          = 0x0002,
+		STENCIL_BUFFER        = 0x0004,
+		DEPTH_STENCIL_BUFFER  = 0x0008,
 		
-		COLOR_TEXTURE         = 0x10,
-		DEPTH_TEXTURE         = 0x20,
-		STENCIL_TEXTURE       = 0x40,
-		DEPTH_STENCIL_TEXTURE = 0x80,
+		COLOR_TEXTURE         = 0x0010,
+		DEPTH_TEXTURE         = 0x0020,
+		STENCIL_TEXTURE       = 0x0040,
+		DEPTH_STENCIL_TEXTURE = 0x0080,
 
-		COLOR_TEXTURE__DEPTH_STENCIL_BUFFER = 0x18,
-		COLOR_DEPTH_TEXTURE__STENCIL_BUFFER = 0x34
+		HDR_COLOR             = 0x0100,
+		
+		COLOR_TEXTURE__DEPTH_STENCIL_BUFFER = 0x0018,
+		COLOR_DEPTH_TEXTURE__STENCIL_BUFFER = 0x0034
 	};
 
 public:
@@ -38,6 +40,8 @@ public:
 
 	void Use();
 	static void UseDefault();
+
+	Tool::F32 GetAvarageBrightness();
 
 	Asset::Texture& GetColorTexture() { return _textureList[0]; }
 	Asset::Texture& GetDepthTexture() { return _textureList[1]; }
@@ -55,6 +59,7 @@ private:
 	glm::ivec2 _frameSize;
 
 	Tool::U32 _fboID;
+	Tool::I32 _maxMipmapLevel;
 
 };
 
