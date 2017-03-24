@@ -96,10 +96,10 @@
     <ClCompile Include="AXengine\Shader\SkyboxShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test\WarehouseScene.cpp">
+    <ClCompile Include="AXengine\Shader\ToneShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AXengine\Shader\ToneShader.cpp">
+    <ClCompile Include="Test\WarehouseScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

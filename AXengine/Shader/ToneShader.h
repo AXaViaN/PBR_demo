@@ -19,7 +19,7 @@ namespace AX { namespace Shader {
 class ToneShader : public ShaderProgram {
 public:
 	static void SetGamma(Tool::F32 gamma);
-	void SetHDRexposure(Tool::F32 exposure);
+	static void SetHDRexposure(Tool::F32 exposure);
 
 	virtual void ProcessScene(const Entity::Scene& scene) override { }
 	virtual void ProcessMaterial(const Asset::Material& material) override;
@@ -38,6 +38,8 @@ protected:
 		if(initResult == false)
 			return false;
 
+		_useAutoExposure = true;
+
 		Start();
 		ShaderProgram::LoadUniform(_uniform_fs_gamma, 1.0f);
 		ShaderProgram::LoadUniform(_uniform_fs_hdrExposure, 1.0f);
@@ -49,6 +51,7 @@ protected:
 	{
 		ShaderProgram::Terminate();
 	}
+	bool SetAutoExposure(Tool::F32 exposure);
 
 	// Called by base class
 	ToneShader() { }
@@ -67,6 +70,8 @@ protected:
 private:
 	Tool::U32 _uniform_fs_gamma;
 	Tool::U32 _uniform_fs_hdrExposure;
+
+	bool _useAutoExposure;
 
 };
 

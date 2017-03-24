@@ -20,6 +20,7 @@ public:
 		Renderer::SetFullScreen(true);
 		Renderer::SetWindowTitle("Nanosuit Demo Scene");
 		phongShader = PhongMaterial().shader;
+		ToneShader::SetHDRexposure(1);
 
 		// Camera
 		camera.transform.SetPosition(-1.9, 3.5, -2.5);

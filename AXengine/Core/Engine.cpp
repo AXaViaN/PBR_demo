@@ -134,6 +134,7 @@ void Engine::Run()
 
 	Gfx::Renderer::Clear(0.4f, 0.4f, 0.4f);
 	toneShader.SetGamma(2.0f);
+	bool useAutoExposure = true;
 	Tool::F32 hdrExposure = 1.0f;
 	_game->Start();
 	
@@ -171,13 +172,16 @@ void Engine::Run()
 		Gfx::TextRenderer::RenderBatch();
 
 		// Automatic exposure control
-		Tool::F32 averageBrightness = renderBuffer.GetAvarageBrightness();
-		if(averageBrightness > 0)
+		if(useAutoExposure)
 		{
-			hdrExposure = glm::lerp<Tool::F32>(hdrExposure, 0.5f/averageBrightness, 0.1);
-			toneShader.SetHDRexposure(hdrExposure);
+			Tool::F32 averageBrightness = renderBuffer.GetAvarageBrightness();
+			if(averageBrightness > 0)
+			{
+				hdrExposure = glm::lerp<Tool::F32>(hdrExposure, 0.5f/averageBrightness, 0.1);
+				useAutoExposure = toneShader.SetAutoExposure(hdrExposure);
+			}
 		}
-
+		
 		window.RenderPresent();
 		window.SyncFPS(60);
 	}
