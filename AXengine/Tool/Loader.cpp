@@ -26,7 +26,7 @@ public:
 	};
 
 public:
-	static const aiScene* LoadScene(const CHR* filePath);
+	static const aiScene* LoadScene(const CHR* filePath, bool useSmoothNormals);
 
 	static void ProcessPhongModel(std::string& directory, const aiScene*& scene, aiNode* currentNode, Asset::Model<Asset::PhongMaterial>& model, U32 currentObjectIndex, PhongModelConnections& modelConnections);
 	
@@ -40,11 +40,11 @@ private:
 
 /***** LOADER *****/
 
-Asset::Model<Asset::PhongMaterial> Loader::LoadPhongModel(const CHR* filePath)
+Asset::Model<Asset::PhongMaterial> Loader::LoadPhongModel(const CHR* filePath, bool useSmoothNormals)
 {
 	Asset::Model<Asset::PhongMaterial> model;
 
-	const aiScene* scene = Helper::LoadScene(filePath);
+	const aiScene* scene = Helper::LoadScene(filePath, useSmoothNormals);
 	if(scene == nullptr)
 	{
 		Debug::LogWarning("Loading model %s failed!", filePath);
@@ -298,9 +298,13 @@ U32 Loader::bindIndexBuffer(U32 indexList[], SIZE indexListSize)
 
 /***** HELPER PUBLIC *****/
 
-const aiScene* Loader::Helper::LoadScene(const CHR* filePath)
+const aiScene* Loader::Helper::LoadScene(const CHR* filePath, bool useSmoothNormals)
 {
-	const aiScene* scene = instance->_modelImporter.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
+	U32 normalFlag = aiProcess_GenNormals;
+	if(useSmoothNormals)
+		normalFlag = aiProcess_GenSmoothNormals;
+
+	const aiScene* scene = instance->_modelImporter.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | normalFlag | aiProcess_CalcTangentSpace);
 	if(scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr)
 	{
 		Debug::LogWarning("%s", instance->_modelImporter.GetErrorString());

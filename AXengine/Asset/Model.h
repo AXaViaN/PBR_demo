@@ -23,7 +23,7 @@ public:
 
 	Entity::GameObject* InstantiateGameObject();
 
-	void Load(const Tool::CHR* filePath);
+	void Load(const Tool::CHR* filePath, bool useSmoothNormals=false);
 
 	void Dispose()
 	{

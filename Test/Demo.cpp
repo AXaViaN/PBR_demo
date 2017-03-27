@@ -25,6 +25,7 @@ public:
 	{
 		Input::ActivateMouseMotion(false);
 		phongShader = PhongMaterial().shader;
+		ToneShader::SetHDRexposure(1);
 
 		// Camera
 		camera.transform.SetPosition(0, 5, 5);
@@ -51,7 +52,7 @@ public:
 		bedroom = bedroomModel.InstantiateGameObject();
 		bedroom->transform.SetRotation(0, 180, 0);
 		
-		monkeyModel.Load("Test/Data/monkey.obj");
+		monkeyModel.Load("Test/Data/monkey.obj", true);
 		monkey = monkeyModel.InstantiateGameObject();
 		monkey->transform.SetPosition(-1.5, 4, 0);
 		monkey->transform.SetRotation(-30, 0, 0);

@@ -7,9 +7,9 @@ namespace AX { namespace Asset {
 
 template class Model<PhongMaterial>;
 
-void Model<PhongMaterial>::Load(const Tool::CHR* filePath)
+void Model<PhongMaterial>::Load(const Tool::CHR* filePath, bool useSmoothNormals)
 {
-	*this = Tool::Loader::LoadPhongModel(filePath);
+	*this = Tool::Loader::LoadPhongModel(filePath, useSmoothNormals);
 }
 
 template<typename T> Entity::GameObject* Model<T>::InstantiateGameObject()

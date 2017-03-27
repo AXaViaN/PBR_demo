@@ -33,7 +33,7 @@ public:
 		spotLight.SetDirection(0.5, -0.5, -1.0);
 
 		// Models
-		nanosuitModel = Loader::LoadPhongModel("Test/Data/Nanosuit/nanosuit.obj");
+		nanosuitModel.Load("Test/Data/Nanosuit/nanosuit.obj");
 		for( auto& nanosuit : nanosuitList )
 			nanosuit = nanosuitModel.InstantiateGameObject();
 

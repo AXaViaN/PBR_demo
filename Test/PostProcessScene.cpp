@@ -53,6 +53,7 @@ public:
 		TextRenderer::Init("Test/Data/arial.ttf");
 		Input::ActivateMouseMotion(false);
 		phongShader = PhongMaterial().shader;
+		ToneShader::SetHDRexposure(1);
 
 		// Camera
 		camera.transform.SetPosition(0, 1, 2);

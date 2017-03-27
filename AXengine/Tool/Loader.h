@@ -23,7 +23,7 @@ namespace AX { namespace Tool {
 
 class Loader : public Singleton<Loader> {
 public:
-	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath);
+	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath, bool useSmoothNormals);
 
 	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap, bool isSRGB=true);
 	static Asset::Texture LoadCubeMapTexture(std::vector<const CHR*> filePathList);

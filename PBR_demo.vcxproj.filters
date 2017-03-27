@@ -99,7 +99,7 @@
     <ClCompile Include="AXengine\Shader\ToneShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test\WarehouseScene.cpp">
+    <ClCompile Include="Test\PBRscene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
