@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AXengine\Asset\Model.cpp" />
+    <ClCompile Include="AXengine\Asset\PBRMaterial.cpp" />
     <ClCompile Include="AXengine\Core\Engine.cpp" />
     <ClCompile Include="AXengine\Core\Window.cpp" />
     <ClCompile Include="AXengine\Entity\Cubemap.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="AXengine\Gfx\Renderer2D.cpp" />
     <ClCompile Include="AXengine\Gfx\SkyboxRenderer.cpp" />
     <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
+    <ClCompile Include="AXengine\Shader\PBRShader.cpp" />
     <ClCompile Include="AXengine\Shader\ToneShader.cpp" />
     <ClCompile Include="AXengine\Shader\KernelShader.cpp" />
     <ClCompile Include="AXengine\Shader\PhongShader.cpp" />
@@ -161,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AXengine\Asset\Model.h" />
+    <ClInclude Include="AXengine\Asset\PBRMaterial.h" />
     <ClInclude Include="AXengine\Core\Engine.h" />
     <ClInclude Include="AXengine\Core\Window.h" />
     <ClInclude Include="AXengine\Entity\Camera.h" />
@@ -185,6 +188,7 @@
     <ClInclude Include="AXengine\Gfx\Renderer2D.h" />
     <ClInclude Include="AXengine\Gfx\SkyboxRenderer.h" />
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
+    <ClInclude Include="AXengine\Shader\PBRShader.h" />
     <ClInclude Include="AXengine\Shader\ToneShader.h" />
     <ClInclude Include="AXengine\Shader\KernelShader.h" />
     <ClInclude Include="AXengine\Shader\PhongShader.h" />

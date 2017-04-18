@@ -7,7 +7,6 @@
 #include "AXengine/Entity/SpotLight.h"
 #include "AXengine/Gfx/Renderer.h"
 #include <GL/glew.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
 namespace AX { namespace Shader {

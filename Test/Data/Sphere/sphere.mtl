@@ -11,5 +11,5 @@ d 1.000000
 illum 2
 map_Kd Texture/albedo.png
 map_Bump Texture/normal.png
-# map_Ks Texture/metallic.png
-# map_Ka Texture/roughness.png
+map_Ks Texture/metallic.png
+map_Ka Texture/roughness.png

@@ -61,6 +61,13 @@ bool Engine::Init(Game* game)
 		return false;
 	}
 
+	initResult = pbrShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("PBRShader cannot be initialized!");
+		return false;
+	}
+
 	initResult = skyboxShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
 	if(initResult == false)
 	{
@@ -115,6 +122,7 @@ void Engine::Terminate()
 	standardShader2D.Terminate();
 	textShader.Terminate();
 	phongShader.Terminate();
+	pbrShader.Terminate();
 	standardShader.Terminate();
 
 	Tool::Loader::Terminate();
@@ -136,7 +144,6 @@ void Engine::Run()
 	toneShader.SetGamma(2.0f);
 	bool useAutoExposure = true;
 	Tool::F32 hdrExposure = 1.0f;
-	_game->Start();
 	
 	Gfx::FrameBuffer renderBuffer;
 	bool initResult = renderBuffer.Init(window.GetWindowSize(), Gfx::FrameBuffer::HDR_COLOR | Gfx::FrameBuffer::COLOR_TEXTURE__DEPTH_STENCIL_BUFFER);
@@ -151,7 +158,8 @@ void Engine::Run()
 	renderQuad.material.diffuseMap.texture = &renderBuffer.GetColorTexture();
 
 	_isRunning = true;
-	while(_isRunning && input.IsWindowClosed() == false)
+	_game->Start();
+	while(_isRunning && input.IsWindowClosed()==false)
 	{
 		input.Update();
 

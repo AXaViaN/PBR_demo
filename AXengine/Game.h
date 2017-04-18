@@ -68,11 +68,6 @@ public:
 
 // RegisterGameClass defines the program entry point
 #define RegisterGameClass(GameClass) \
-	int main(int argc, const char* argv[]) \
-	{ \
-		GameClass game; \
-		game.Run(); \
-		return 0; \
-	}
+	int main(int argc, const char* argv[]) { GameClass().Run(); return 0; }
 
 #endif // __AX__GAME_H

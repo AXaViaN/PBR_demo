@@ -9,6 +9,7 @@
 #include "AXengine/Shader/StandardShader.h"
 #include "AXengine/Shader/StandardShader2D.h"
 #include "AXengine/Shader/PhongShader.h"
+#include "AXengine/Shader/PBRShader.h"
 #include "AXengine/Shader/KernelShader.h"
 #include "AXengine/Shader/ToneShader.h"
 #include "AXengine/Shader/TextShader.h"
@@ -52,6 +53,7 @@ public:
 	Shader::StandardShader standardShader;
 	Shader::StandardShader2D standardShader2D;
 	Shader::PhongShader phongShader;
+	Shader::PBRShader pbrShader;
 	Shader::KernelShader kernelShader;
 	Shader::ToneShader toneShader;
 	Shader::TextShader textShader;
