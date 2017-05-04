@@ -66,10 +66,18 @@ out vec4 out_color;
 
 // Functions
 void GetValuesFromTextureMaps(inout vec4 albedoColor, inout vec3 normalValue, inout float metallicValue, inout float roughnessValue, inout float aoValue);
+
 float NormalDistributionGGX(vec3 normal, vec3 halfway, float roughness);
 float GeometrySchlickGGX(float roughness, float cosTheta);
 float GeometrySmith(vec3 normal, vec3 cameraRay, vec3 lightRay, float roughness);
 vec3 FresnelSchlick(vec3 F0, float cosCameraHalfwayTheta);
+
+vec3 CookTorranceBRDF(vec3 normal, vec3 cameraRay, vec3 lightRay, vec3 halfwayRay, vec3 F0, float roughness, inout vec3 kS);
+vec3 CalculateRadiance(vec3 fCookTorrance, vec3 radiantFlux, vec3 normal, vec3 lightRay, vec3 albedo, vec3 kS, float metallic);
+
+vec3 PointLightRadiance(PointLight light, vec3 normal, vec3 cameraRay, vec3 albedo, vec3 F0, float metallic, float roughness);
+vec3 DirectionalLightRadiance(DirectionalLight light, vec3 normal, vec3 cameraRay, vec3 albedo, vec3 F0, float metallic, float roughness);
+vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 albedo, vec3 F0, float metallic, float roughness);
 
 // Program entry point
 void main()
@@ -90,42 +98,24 @@ void main()
 	// F0: Base reflectivity
 	vec3 F0 = mix(vec3(0.04), albedoColor.rgb, metallicValue);
 	vec3 irradiance = vec3(0.0);
+	
+	// Lighting
+	if(fs_directionalLight.color.r != -1)
+		irradiance += DirectionalLightRadiance(fs_directionalLight, normal, cameraRay, albedoColor.rgb, F0, metallicValue, roughnessValue);
+	
 	for( int i=0 ; i<POINT_LIGHT_COUNT ; i++ )
 	{
 		if(fs_pointLight[i].color.r != -1)
-		{
-			PointLight light = fs_pointLight[i];
-			
-			// Light radiance
-			vec3 lightRay = normalize(light.position - varying_onCameraPosition);
-			vec3 halfwayRay = normalize(cameraRay + lightRay);
-			
-			float lightDistance = length(light.position - varying_onCameraPosition);
-			float attenuation = 1.0 / (light.constant + light.linear*lightDistance + light.quadric*pow(lightDistance, 2));
-			vec3 radiance = light.color * attenuation;
-			
-			// BRDF
-			float normalDistribution = NormalDistributionGGX(normal, halfwayRay, roughnessValue);
-			float geometry = GeometrySmith(normal, cameraRay, lightRay, roughnessValue);
-			vec3 fresnel = FresnelSchlick(F0, max(0.0, dot(cameraRay, halfwayRay)));
-			
-			vec3 nominator = normalDistribution * geometry * fresnel;
-			float denominator = 4 * max(0.0, dot(normal, cameraRay)) * max(0.0, dot(normal, lightRay));
-			vec3 fCookTorrance = nominator / (denominator+0.001);
-			
-			// Reflectance
-			vec3 kS = fresnel;
-			vec3 kD = vec3(1.0) - kS;
-			kD *= 1.0 - metallicValue;
-			
-			vec3 fLambert = albedoColor.rgb / PI;
-			float cosNormalLightTheta = max(0.0, dot(normal, lightRay));
-			irradiance += (kD*fLambert + fCookTorrance) * radiance * cosNormalLightTheta;
-		}
+			irradiance += PointLightRadiance(fs_pointLight[i], normal, cameraRay, albedoColor.rgb, F0, metallicValue, roughnessValue);
 	}
 	
-	// TODO: Add support for different light types
+	for( int i=0 ; i<SPOT_LIGHT_COUNT ; i++ )
+	{
+		if(fs_spotLight[i].color.r != -1)
+			irradiance += SpotLightRadiance(fs_spotLight[i], normal, cameraRay, albedoColor.rgb, F0, metallicValue, roughnessValue);
+	}
 	
+	// Final color
 	vec3 ambient = vec3(0.03) * albedoColor.rgb * aoValue;
 	out_color = vec4(irradiance + ambient, albedoColor.a);
 }
@@ -160,6 +150,7 @@ void GetValuesFromTextureMaps(inout vec4 albedoColor, inout vec3 normalValue, in
 		aoValue = fs_material.aoMap.value;
 }
 
+// PBR functions
 float NormalDistributionGGX(vec3 normal, vec3 halfway, float roughness)
 {
 	float a = pow(roughness, 2);
@@ -192,4 +183,82 @@ float GeometrySmith(vec3 normal, vec3 cameraRay, vec3 lightRay, float roughness)
 vec3 FresnelSchlick(vec3 F0, float cosCameraHalfwayTheta)
 {
 	return F0 + (1.0-F0)*pow(1.0-cosCameraHalfwayTheta, 5);
+}
+
+vec3 CookTorranceBRDF(vec3 normal, vec3 cameraRay, vec3 lightRay, vec3 halfwayRay, vec3 F0, float roughness, inout vec3 kS)
+{
+	float normalDistribution = NormalDistributionGGX(normal, halfwayRay, roughness);
+	float geometry = GeometrySmith(normal, cameraRay, lightRay, roughness);
+	vec3 fresnel = FresnelSchlick(F0, max(0.0, dot(cameraRay, halfwayRay)));
+	kS = fresnel;
+	
+	vec3 nominator = normalDistribution * geometry * fresnel;
+	float denominator = 4 * max(0.0, dot(normal, cameraRay)) * max(0.0, dot(normal, lightRay));
+	return nominator / (denominator+0.001);
+}
+vec3 CalculateRadiance(vec3 fCookTorrance, vec3 radiantFlux, vec3 normal, vec3 lightRay, vec3 albedo, vec3 kS, float metallic)
+{
+	// Reflectance
+	vec3 kD = vec3(1.0) - kS;
+	kD *= 1.0 - metallic;
+	
+	vec3 fLambert = albedo / PI;
+	float cosNormalLightTheta = max(0.0, dot(normal, lightRay));
+	return (kD*fLambert + fCookTorrance) * radiantFlux * cosNormalLightTheta;
+}
+
+// Light functions
+vec3 PointLightRadiance(PointLight light, vec3 normal, vec3 cameraRay, vec3 albedo, vec3 F0, float metallic, float roughness)
+{
+	// Light radiant flux
+	vec3 lightRay = normalize(light.position - varying_onCameraPosition);
+	vec3 halfwayRay = normalize(cameraRay + lightRay);
+	
+	float lightDistance = length(light.position - varying_onCameraPosition);
+	float attenuation = 1.0 / (light.constant + light.linear*lightDistance + light.quadric*pow(lightDistance, 2));
+	vec3 radiantFlux = light.color * attenuation;
+	
+	// BRDF
+	vec3 kS;
+	vec3 fCookTorrance = CookTorranceBRDF(normal, cameraRay, lightRay, halfwayRay, F0, roughness, kS);
+	
+	return CalculateRadiance(fCookTorrance, radiantFlux, normal, lightRay, albedo, kS, metallic);
+}
+vec3 DirectionalLightRadiance(DirectionalLight light, vec3 normal, vec3 cameraRay, vec3 albedo, vec3 F0, float metallic, float roughness)
+{
+	// Light radiant flux
+	vec3 lightRay = normalize(-light.direction);
+	vec3 halfwayRay = normalize(cameraRay + lightRay);
+	vec3 radiantFlux = light.color;
+	
+	// BRDF
+	vec3 kS;
+	vec3 fCookTorrance = CookTorranceBRDF(normal, cameraRay, lightRay, halfwayRay, F0, roughness, kS);
+	
+	return CalculateRadiance(fCookTorrance, radiantFlux, normal, lightRay, albedo, kS, metallic);
+}
+vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 albedo, vec3 F0, float metallic, float roughness)
+{
+	// Light radiant flux
+	vec3 lightRay = normalize(light.position - varying_onCameraPosition);
+	vec3 halfwayRay = normalize(cameraRay + lightRay);
+	vec3 spotRay = normalize(-light.direction);
+	float theta = dot(lightRay, spotRay);
+	vec3 radiantFlux = vec3(0.0);
+	if(theta > light.outerCutoff)
+	{
+		radiantFlux = light.color;
+		
+		if(theta < light.innerCutoff)
+		{
+			float attenuation = (theta - light.outerCutoff) / (light.innerCutoff - light.outerCutoff);
+			radiantFlux *= attenuation;
+		}
+	}
+	
+	// BRDF
+	vec3 kS;
+	vec3 fCookTorrance = CookTorranceBRDF(normal, cameraRay, lightRay, halfwayRay, F0, roughness, kS);
+	
+	return CalculateRadiance(fCookTorrance, radiantFlux, normal, lightRay, albedo, kS, metallic);
 }
