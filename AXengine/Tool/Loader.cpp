@@ -17,21 +17,28 @@ public:
 		std::map<U32, U32> objectMeshMap;
 		std::map<U32, U32> objectMaterialMap;
 		std::map<U32, U32> materialDiffuseMap;
-		std::map<U32, U32> materialReflectionMap;
 		std::map<U32, U32> materialNormalMap;
 	};
 	struct PhongModelConnections : public ModelConnections {
 		std::map<U32, U32> materialSpecularMap;
 		std::map<U32, U32> materialEmissionMap;
+		std::map<U32, U32> materialReflectionMap;
+	};
+	struct PBRModelConnections : public ModelConnections {
+		std::map<U32, U32> materialMetallicMap;
+		std::map<U32, U32> materialRoughnessMap;
+		std::map<U32, U32> materialAOMap;
 	};
 
 public:
 	static const aiScene* LoadScene(const CHR* filePath, bool useSmoothNormals);
 
 	static void ProcessPhongModel(std::string& directory, const aiScene*& scene, aiNode* currentNode, Asset::Model<Asset::PhongMaterial>& model, U32 currentObjectIndex, PhongModelConnections& modelConnections);
+	static void ProcessPBRModel(std::string& directory, const aiScene*& scene, aiNode* currentNode, Asset::Model<Asset::PBRMaterial>& model, U32 currentObjectIndex, PBRModelConnections& modelConnections);
 	
-	static void ConnectModel(Asset::Model<Asset::PhongMaterial>& model, ModelConnections& modelConnections);
+	template<typename MaterialType> static void ConnectModel(Asset::Model<MaterialType>& model, ModelConnections& modelConnections);
 	static void ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model, PhongModelConnections& modelConnections);
+	static void ConnectPBRModel(Asset::Model<Asset::PBRMaterial>& model, PBRModelConnections& modelConnections);
 
 private:
 	static Asset::Mesh getModelMesh(aiMesh* mesh);
@@ -59,6 +66,27 @@ Asset::Model<Asset::PhongMaterial> Loader::LoadPhongModel(const CHR* filePath, b
 	Helper::ProcessPhongModel(directory, scene, scene->mRootNode, model, 0, modelConnections);
 	Helper::ConnectPhongModel(model, modelConnections);
 	
+	return model;
+}
+Asset::Model<Asset::PBRMaterial> Loader::LoadPBRModel(const CHR* filePath, bool useSmoothNormals)
+{
+	Asset::Model<Asset::PBRMaterial> model;
+
+	const aiScene* scene = Helper::LoadScene(filePath, useSmoothNormals);
+	if(scene == nullptr)
+	{
+		Debug::LogWarning("Loading model %s failed!", filePath);
+		return model;
+	}
+
+	// Texture paths are relative to directory
+	std::string directory = filePath;
+	directory = directory.substr(0, directory.find_last_of('/') + 1);
+
+	Helper::PBRModelConnections modelConnections;
+	Helper::ProcessPBRModel(directory, scene, scene->mRootNode, model, 0, modelConnections);
+	Helper::ConnectPBRModel(model, modelConnections);
+
 	return model;
 }
 
@@ -427,8 +455,118 @@ void Loader::Helper::ProcessPhongModel(std::string& directory, const aiScene*& s
 		ProcessPhongModel(directory, scene, currentNode->mChildren[i], model, nextObjectIndex, modelConnections);
 	}
 }
+void Loader::Helper::ProcessPBRModel(std::string& directory, const aiScene*& scene, aiNode* currentNode, Asset::Model<Asset::PBRMaterial>& model, U32 currentObjectIndex, PBRModelConnections& modelConnections)
+{
+	model.modelParts[currentObjectIndex].name = currentNode->mName.C_Str();
 
-void Loader::Helper::ConnectModel(Asset::Model<Asset::PhongMaterial>& model, ModelConnections& modelConnections)
+	for( SIZE i=0 ; i<currentNode->mNumMeshes ; i++ )
+	{
+		if(i > 0)
+		{
+			model.modelParts.push_back(Entity::GameObject());
+			U32 nextObjectIndex = model.modelParts.size() - 1;
+			modelConnections.objectChildMap.push_back(currentObjectIndex);
+			modelConnections.objectChildMap.push_back(nextObjectIndex);
+
+			currentObjectIndex = nextObjectIndex;
+		}
+
+		aiMesh* mesh = scene->mMeshes[currentNode->mMeshes[i]];
+		model.modelParts[currentObjectIndex].name = currentNode->mName.C_Str();
+		model.modelParts[currentObjectIndex].name += "::";
+		model.modelParts[currentObjectIndex].name += mesh->mName.C_Str();
+
+		// Process mesh
+		model.meshList.push_back(getModelMesh(mesh));
+		modelConnections.objectMeshMap.insert(std::pair<U32, U32>(currentObjectIndex, model.meshList.size()-1));
+
+		// Process material
+		model.materialList.push_back(Asset::PBRMaterial());
+		U32 currentMaterialIndex = model.materialList.size() - 1;
+
+		if(mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			aiString texturePath;
+
+			if(material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+			{
+				material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
+				modelConnections.materialDiffuseMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].diffuseMap.value = glm::vec4(color.r, color.g, color.b, color.a);
+			}
+
+			// Metallic Maps loaded as Specular map
+			if(material->GetTextureCount(aiTextureType_SPECULAR) > 0)
+			{
+				material->GetTexture(aiTextureType_SPECULAR, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
+				modelConnections.materialMetallicMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].metallicMap.value = color.r;
+			}
+
+			// Roughness Maps loaded as Shininess map
+			if(material->GetTextureCount(aiTextureType_SHININESS) > 0)
+			{
+				material->GetTexture(aiTextureType_SHININESS, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
+				modelConnections.materialRoughnessMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+			else
+			{
+				F32 roughness;
+				if(aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &roughness) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].roughnessMap.value = roughness;
+			}
+
+			if(material->GetTextureCount(aiTextureType_AMBIENT) > 0)
+			{
+				material->GetTexture(aiTextureType_AMBIENT, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
+				modelConnections.materialAOMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].aoMap.value = color.r;
+			}
+
+			// Normal Maps loaded as height map
+			if(material->GetTextureCount(aiTextureType_HEIGHT) > 0)
+			{
+				material->GetTexture(aiTextureType_HEIGHT, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true, false));
+				modelConnections.materialNormalMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+		}
+
+		modelConnections.objectMaterialMap.insert(std::pair<U32, U32>(currentObjectIndex, currentMaterialIndex));
+	}
+
+	for( SIZE i=0 ; i<currentNode->mNumChildren ; i++ )
+	{
+		model.modelParts.push_back(Entity::GameObject());
+		U32 nextObjectIndex = model.modelParts.size() - 1;
+		modelConnections.objectChildMap.push_back(currentObjectIndex);
+		modelConnections.objectChildMap.push_back(nextObjectIndex);
+
+		ProcessPBRModel(directory, scene, currentNode->mChildren[i], model, nextObjectIndex, modelConnections);
+	}
+}
+
+template<typename MaterialType> void Loader::Helper::ConnectModel(Asset::Model<MaterialType>& model, ModelConnections& modelConnections)
 {
 	for( SIZE i=0 ; i<modelConnections.objectChildMap.size() ; i+=2 )
 		model.modelParts[modelConnections.objectChildMap[i]].AddChild(model.modelParts[modelConnections.objectChildMap[i+1]]);
@@ -440,8 +578,8 @@ void Loader::Helper::ConnectModel(Asset::Model<Asset::PhongMaterial>& model, Mod
 
 	for( auto materialDiffuse : modelConnections.materialDiffuseMap )
 		model.materialList[materialDiffuse.first].diffuseMap.texture = &model.textureList[materialDiffuse.second];
-	for( auto materialReflection : modelConnections.materialReflectionMap )
-		model.materialList[materialReflection.first].reflectionMap.texture = &model.textureList[materialReflection.second];
+	for( auto materialNormal : modelConnections.materialNormalMap )
+		model.materialList[materialNormal.first].normalMap.texture = &model.textureList[materialNormal.second];
 }
 void Loader::Helper::ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model, PhongModelConnections& modelConnections)
 {
@@ -449,10 +587,21 @@ void Loader::Helper::ConnectPhongModel(Asset::Model<Asset::PhongMaterial>& model
 
 	for( auto materialSpecular : modelConnections.materialSpecularMap )
 		model.materialList[materialSpecular.first].specularMap.texture = &model.textureList[materialSpecular.second];
-	for( auto materialNormal : modelConnections.materialNormalMap )
-		model.materialList[materialNormal.first].normalMap.texture = &model.textureList[materialNormal.second];
 	for( auto materialEmission : modelConnections.materialEmissionMap )
 		model.materialList[materialEmission.first].emissionMap.texture = &model.textureList[materialEmission.second];
+	for( auto materialReflection : modelConnections.materialReflectionMap )
+		model.materialList[materialReflection.first].reflectionMap.texture = &model.textureList[materialReflection.second];
+}
+void Loader::Helper::ConnectPBRModel(Asset::Model<Asset::PBRMaterial>& model, PBRModelConnections& modelConnections)
+{
+	ConnectModel(model, modelConnections);
+	
+	for( auto materialMetallic : modelConnections.materialMetallicMap )
+		model.materialList[materialMetallic.first].metallicMap.texture = &model.textureList[materialMetallic.second];
+	for( auto materialRoughness : modelConnections.materialRoughnessMap )
+		model.materialList[materialRoughness.first].roughnessMap.texture = &model.textureList[materialRoughness.second];
+	for( auto materialAO : modelConnections.materialAOMap )
+		model.materialList[materialAO.first].aoMap.texture = &model.textureList[materialAO.second];
 }
 
 /***** HELPER PRIVATE *****/

@@ -6,21 +6,14 @@ using namespace AX::Gfx;
 using namespace AX::Shader;
 using namespace AX::Tool;
 
-// DEBUG
-#include "AXengine/Asset/PBRMaterial.h"
-
 class PBRscene : public AX::Game {
 public:
 	FreeCamera camera;
 	DirectionalLight light;
 	Cubemap skybox;
 
-	Model<PhongMaterial> sphereModel;
+	Model<PBRMaterial> sphereModel;
 	GameObject* sphere;
-	
-	GameObject* sphereList[54];
-	PBRMaterial pbrMaterialList[54];
-	PointLight pointLightList[4];
 
 	void Start()
 	{
@@ -37,38 +30,6 @@ public:
 		// DEBUG
 		Renderer::Clear(0.05, 0.05, 0.05);
 		ToneShader::SetHDRexposure(2);
-		pointLightList[0].SetPosition(7, 7, 10);
-		pointLightList[1].SetPosition(-7, 7, 10);
-		pointLightList[2].SetPosition(7, -7, 10);
-		pointLightList[3].SetPosition(-7, -7, 10);
-		for( auto& pointLight : pointLightList )
-			pointLight.diffuseIntensity = glm::vec3(5,5,5);
-		camera.transform.SetPosition(0, 0, 6);
-
-		/*auto phongMaterial = sphere->GetChild(0)->material->Get<PhongMaterial>();
-		pbrMaterialList[0].diffuseMap.texture = phongMaterial->diffuseMap.texture;
-		pbrMaterialList[0].normalMap.texture = phongMaterial->normalMap.texture;
-		pbrMaterialList[0].metallicMap.texture = phongMaterial->specularMap.texture;
-		pbrMaterialList[0].roughnessMap.texture = phongMaterial->reflectionMap.texture;
-		sphere->GetChild(0)->material = &pbrMaterialList[0];
-		return;*/
-		
-		for( int y=0 ; y<6 ; y++ )
-		{
-			for( int x=0 ; x<9 ; x++ )
-			{
-				int pos = x + y*9;
-				sphereList[pos] = sphereModel.InstantiateGameObject();
-				sphereList[pos]->GetChild(0)->material = &pbrMaterialList[pos];
-
-				sphereList[pos]->transform.SetPosition(x*1.1-4, y*1.2-3, 0);
-				sphereList[pos]->transform.SetScale(0.5);
-
-				pbrMaterialList[pos].diffuseMap.value = glm::vec4(1, 0, 0, 1);
-				pbrMaterialList[pos].metallicMap.value = 0.2 + x*0.05;
-				pbrMaterialList[pos].roughnessMap.value = 0.9 - y*0.15;
-			}
-		}
 		
 		// Set light
 		light.SetDirection(-1.0, 0.2, -0.3);
@@ -126,22 +87,10 @@ public:
 	}
 	void Draw()
 	{
-		// DEBUG
-		/*Renderer::PrepareScene(camera, light);
-		SkyboxRenderer::Render(skybox);
+		Renderer::PrepareScene(camera, light);
+		//SkyboxRenderer::Render(skybox);
 
-		sphere->Render();*/
-
-		/*Renderer::PrepareScene(camera, pointLight);
-		sphere->Render();*/
-
-		const Light* lightList[] = {
-			&pointLightList[0], &pointLightList[1], &pointLightList[2], &pointLightList[3]
-		};
-		Renderer::PrepareScene(camera, lightList, sizeof(lightList));
-
-		for( auto& sphere_ : sphereList )
-			sphere_->Render();
+		sphere->Render();
 	}
 
 };
