@@ -1,6 +1,7 @@
 #include "AXengine/Shader/PBRShader.h"
 
 #include "AXengine/Asset/PBRMaterial.h"
+#include "AXengine/Entity/Cubemap.h"
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
@@ -14,7 +15,9 @@ enum PBRShaderTexture {
 	NORMAL,
 	METALLIC,
 	ROUGHNESS,
-	AO
+	AO,
+
+	ENVIRONMENT_IRRADIANCE
 };
 
 void PBRShader::ProcessScene(const Entity::Scene& scene)
@@ -54,6 +57,8 @@ void PBRShader::ProcessScene(const Entity::Scene& scene)
 		activeSpotLightCount = 0;
 	}
 
+	_projectionMatrix = scene.projectionMatrix;
+
 	// Process camera
 	_viewMatrix = glm::mat4();
 	if(scene.camera)
@@ -63,6 +68,12 @@ void PBRShader::ProcessScene(const Entity::Scene& scene)
 		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.y), glm::vec3(0, 1, 0));
 		_viewMatrix = glm::rotate(_viewMatrix, glm::radians(scene.camera->transform.rotation.z), glm::vec3(0, 0, -1));
 		_viewMatrix = glm::translate(_viewMatrix, -scene.camera->transform.position);
+
+		ShaderProgram::LoadUniform(_uniform_fs_cameraPosition, scene.camera->transform.position);
+	}
+	else
+	{
+		ShaderProgram::LoadUniform(_uniform_fs_cameraPosition, glm::vec3());
 	}
 
 	// Process lights
@@ -193,6 +204,17 @@ void PBRShader::ProcessMaterial(const Asset::Material& material)
 		{
 			ShaderProgram::LoadUniform(_uniform_fs_material_aoMap_value, pbrMaterial->aoMap.value);
 		}
+
+		if(pbrMaterial->environmentMap)
+		{
+			glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, pbrMaterial->environmentMap->material.reflectionMap.texture->GetTextureID());
+			ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, true);
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, false);
+		}
 	}
 }
 void PBRShader::ProcessTransform(const Entity::Transform& transform)
@@ -215,13 +237,11 @@ void PBRShader::ProcessTransform(const Entity::Transform& transform)
 
 /***** PROTECTED *****/
 
-bool PBRShader::Init(const glm::mat4& projectionMatrix)
+bool PBRShader::Init()
 {
 	bool initResult = ShaderProgram::Init("Shader/PBRVertex.glsl", "Shader/PBRFragment.glsl");
 	if(initResult == false)
 		return false;
-
-	_projectionMatrix = projectionMatrix;
 
 	// Set uniform texture positions
 	Start();
@@ -231,6 +251,8 @@ bool PBRShader::Init(const glm::mat4& projectionMatrix)
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.metallicMap.texture"), PBRShaderTexture::METALLIC);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.roughnessMap.texture"), PBRShaderTexture::ROUGHNESS);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.aoMap.texture"), PBRShaderTexture::AO);
+
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentIrradianceMap"), PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
 
 	Stop();
 
@@ -251,11 +273,15 @@ void PBRShader::GetShaderUniformLocations()
 	_uniform_vs_modelMatrix = ShaderProgram::GetUniformLocation("vs_modelMatrix");
 	_uniform_vs_normalMatrix = ShaderProgram::GetUniformLocation("vs_normalMatrix");
 
+	_uniform_fs_cameraPosition = ShaderProgram::GetUniformLocation("fs_cameraPosition");
+
 	_uniform_fs_material_albedoMap_value = ShaderProgram::GetUniformLocation("fs_material.albedoMap.value");
 	_uniform_fs_material_normalMap_value = ShaderProgram::GetUniformLocation("fs_material.normalMap.value");
 	_uniform_fs_material_metallicMap_value = ShaderProgram::GetUniformLocation("fs_material.metallicMap.value");
 	_uniform_fs_material_roughnessMap_value = ShaderProgram::GetUniformLocation("fs_material.roughnessMap.value");
 	_uniform_fs_material_aoMap_value = ShaderProgram::GetUniformLocation("fs_material.aoMap.value");
+
+	_uniform_fs_isEnvironmentIrradianceAvaible = ShaderProgram::GetUniformLocation("fs_isEnvironmentIrradianceAvaible");
 
 	_uniform_fs_directionalLight_direction = ShaderProgram::GetUniformLocation("fs_directionalLight.direction");
 	_uniform_fs_directionalLight_color = ShaderProgram::GetUniformLocation("fs_directionalLight.color");

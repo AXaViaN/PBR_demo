@@ -38,6 +38,8 @@ public:
 	static void PrepareScene(const Entity::Camera* camera, const Entity::Light* light);
 	static void PrepareScene(const Entity::Camera& camera, const Entity::Light** lightList, Tool::SIZE lightListSize);
 	static void PrepareScene(const Entity::Camera* camera, const Entity::Light** lightList, Tool::SIZE lightListSize);
+	static void SetSceneProjection(const glm::mat4& projectionMatrix) { instance->_scene.projectionMatrix = projectionMatrix; }
+	static void SetSceneCamera(const Entity::Camera* camera) { instance->_scene.camera = camera; }
 
 	static void PrepareShader(Shader::ShaderProgram* shaderProgram);
 

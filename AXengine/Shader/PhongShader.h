@@ -27,7 +27,7 @@ protected:
 	 * Init and Terminate is only visible for Engine
 	 */
 	friend class Core::Engine;
-	bool Init(const glm::mat4& projectionMatrix);
+	bool Init();
 	void Terminate()
 	{
 		ShaderProgram::Terminate();

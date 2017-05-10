@@ -10,10 +10,19 @@ class PBRscene : public AX::Game {
 public:
 	FreeCamera camera;
 	DirectionalLight light;
-	Cubemap skybox;
+	Cubemap daySkybox;
+	Cubemap sunsetSkybox;
+	Cubemap nightSkybox;
 
 	Model<PBRMaterial> sphereModel;
 	GameObject* sphere;
+
+	EnvironmentProbe dayProbe;
+	EnvironmentProbe sunsetProbe;
+	EnvironmentProbe nightProbe;
+
+	Cubemap* currentSkybox;
+	Cubemap* currentEnvironment;
 
 	void Start()
 	{
@@ -35,17 +44,59 @@ public:
 		light.SetDirection(-1.0, 0.2, -0.3);
 
 		// Skybox
-		skybox.Load("Test/Data/Skybox/Above The Sea/right.png",
-					"Test/Data/Skybox/Above The Sea/left.png",
-					"Test/Data/Skybox/Above The Sea/top.png",
-					"Test/Data/Skybox/Above The Sea/bottom.png",
-					"Test/Data/Skybox/Above The Sea/back.png",
-					"Test/Data/Skybox/Above The Sea/front.png");
+		daySkybox.Load("Test/Data/Skybox/Above The Sea/right.png",
+						"Test/Data/Skybox/Above The Sea/left.png",
+						"Test/Data/Skybox/Above The Sea/top.png",
+						"Test/Data/Skybox/Above The Sea/bottom.png",
+						"Test/Data/Skybox/Above The Sea/back.png",
+						"Test/Data/Skybox/Above The Sea/front.png");
+		sunsetSkybox.Load("Test/Data/Skybox/Sunset/right.png",
+						"Test/Data/Skybox/Sunset/left.png",
+						"Test/Data/Skybox/Sunset/top.png",
+						"Test/Data/Skybox/Sunset/bottom.png",
+						"Test/Data/Skybox/Sunset/back.png",
+						"Test/Data/Skybox/Sunset/front.png");
+		nightSkybox.Load("Test/Data/Skybox/Grimm Night/right.png",
+						"Test/Data/Skybox/Grimm Night/left.png",
+						"Test/Data/Skybox/Grimm Night/top.png",
+						"Test/Data/Skybox/Grimm Night/bottom.png",
+						"Test/Data/Skybox/Grimm Night/back.png",
+						"Test/Data/Skybox/Grimm Night/front.png");
+
+		currentSkybox = &daySkybox;
+
+		// Environment
+		EnvironmentProbe::InitConvolutionShader();
+		dayProbe.Init(512);
+		dayProbe.Capture([](void* sceneInstance){
+			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->daySkybox);
+		}, this);
+
+		sunsetProbe.Init(512);
+		sunsetProbe.Capture([](void* sceneInstance){
+			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->sunsetSkybox);
+		}, this);
+
+		nightProbe.Init(512);
+		nightProbe.Capture([](void* sceneInstance){
+			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->nightSkybox);
+		}, this);
+
+		EnvironmentProbe::TerminateConvolutionShader();
+
+		currentEnvironment = &dayProbe.GetEnvironmentMap();
 	}
 	void Dispose()
 	{
-		skybox.Dispose();
 		sphereModel.Dispose();
+
+		daySkybox.Dispose();
+		sunsetSkybox.Dispose();
+		nightSkybox.Dispose();
+
+		dayProbe.Dispose();
+		sunsetProbe.Dispose();
+		nightProbe.Dispose();
 	}
 
 	void Update()
@@ -65,6 +116,31 @@ public:
 			Input::ActivateMouseMotion(true);
 		if(Input::GetMouseButtonDown(Input::MouseButton::RIGHT))
 			Input::ActivateMouseMotion(false);
+
+		if(Input::GetKeyDown(SDL_SCANCODE_1))
+		{
+			currentSkybox = &daySkybox;
+			currentEnvironment = &dayProbe.GetEnvironmentMap();
+		}
+		if(Input::GetKeyDown(SDL_SCANCODE_2))
+		{
+			currentSkybox = &sunsetSkybox;
+			currentEnvironment = &sunsetProbe.GetEnvironmentMap();
+		}
+		if(Input::GetKeyDown(SDL_SCANCODE_3))
+		{
+			currentSkybox = &nightSkybox;
+			currentEnvironment = &nightProbe.GetEnvironmentMap();
+		}
+		
+		static bool isUsingEnvironment = true;
+		if(Input::GetKeyDown(SDL_SCANCODE_TAB))
+			isUsingEnvironment = !isUsingEnvironment;
+
+		if(isUsingEnvironment)
+			sphere->GetChild(0)->material->environmentMap = currentEnvironment;
+		else
+			sphere->GetChild(0)->material->environmentMap = nullptr;
 
 		static bool isAutoRotating = false;
 		if(Input::GetKeyDown(SDL_SCANCODE_SPACE))
@@ -88,7 +164,7 @@ public:
 	void Draw()
 	{
 		Renderer::PrepareScene(camera, light);
-		//SkyboxRenderer::Render(skybox);
+		SkyboxRenderer::Render(*currentSkybox);
 
 		sphere->Render();
 	}

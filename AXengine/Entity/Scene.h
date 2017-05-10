@@ -24,6 +24,7 @@ public:
 	const std::vector<const Light*>& GetLightList() const { return _lightList; }
 
 	const Camera* camera;
+	glm::mat4 projectionMatrix;
 
 private:
 	std::vector<const Light*> _lightList;

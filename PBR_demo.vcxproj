@@ -134,6 +134,7 @@
     <ClCompile Include="AXengine\Core\Engine.cpp" />
     <ClCompile Include="AXengine\Core\Window.cpp" />
     <ClCompile Include="AXengine\Entity\Cubemap.cpp" />
+    <ClCompile Include="AXengine\Entity\EnvironmentProbe.cpp" />
     <ClCompile Include="AXengine\Entity\FreeCamera.cpp" />
     <ClCompile Include="AXengine\Entity\GameObject.cpp" />
     <ClCompile Include="AXengine\Entity\Quad.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="AXengine\Gfx\Renderer2D.cpp" />
     <ClCompile Include="AXengine\Gfx\SkyboxRenderer.cpp" />
     <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
+    <ClCompile Include="AXengine\Shader\ConvolutionShader.cpp" />
     <ClCompile Include="AXengine\Shader\PBRShader.cpp" />
     <ClCompile Include="AXengine\Shader\ToneShader.cpp" />
     <ClCompile Include="AXengine\Shader\KernelShader.cpp" />
@@ -169,6 +171,7 @@
     <ClInclude Include="AXengine\Entity\Camera.h" />
     <ClInclude Include="AXengine\Entity\Cubemap.h" />
     <ClInclude Include="AXengine\Entity\DirectionalLight.h" />
+    <ClInclude Include="AXengine\Entity\EnvironmentProbe.h" />
     <ClInclude Include="AXengine\Entity\GameObject.h" />
     <ClInclude Include="AXengine\Entity\FreeCamera.h" />
     <ClInclude Include="AXengine\Entity\Light.h" />
@@ -188,6 +191,7 @@
     <ClInclude Include="AXengine\Gfx\Renderer2D.h" />
     <ClInclude Include="AXengine\Gfx\SkyboxRenderer.h" />
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
+    <ClInclude Include="AXengine\Shader\ConvolutionShader.h" />
     <ClInclude Include="AXengine\Shader\PBRShader.h" />
     <ClInclude Include="AXengine\Shader\ToneShader.h" />
     <ClInclude Include="AXengine\Shader\KernelShader.h" />

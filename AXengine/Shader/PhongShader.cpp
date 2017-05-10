@@ -58,6 +58,8 @@ void PhongShader::ProcessScene(const Entity::Scene& scene)
 		activeSpotLightCount = 0;
 	}
 
+	_projectionMatrix = scene.projectionMatrix;
+
 	// Process camera
 	_viewMatrix = glm::mat4();
 	if(scene.camera)
@@ -242,13 +244,11 @@ void PhongShader::ProcessTransform(const Entity::Transform& transform)
 
 /***** PROTECTED *****/
 
-bool PhongShader::Init(const glm::mat4& projectionMatrix)
+bool PhongShader::Init()
 {
 	bool initResult = ShaderProgram::Init("Shader/PhongVertex.glsl", "Shader/PhongFragment.glsl");
 	if(initResult == false)
 		return false;
-
-	_projectionMatrix = projectionMatrix;
 
 	// Set uniform texture positions
 	Start();

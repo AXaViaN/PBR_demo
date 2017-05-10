@@ -38,10 +38,16 @@ public:
 	bool Init(glm::ivec2 frameSize, Tool::U32 attachmentFlags);
 	void Terminate();
 
-	void Use();
+	void Use() const;
 	static void UseDefault();
+	
+	/**
+	 * Frame buffer should be active before calling this
+	 */
+	void SetColorTexture(Tool::U32 textureID) const;
+	void SetColorTexture(Tool::U32 textureID, Tool::U32 textureTarget) const;
 
-	Tool::F32 GetAvarageBrightness();
+	Tool::F32 GetAvarageBrightness() const;
 
 	Asset::Texture& GetColorTexture() { return _textureList[0]; }
 	Asset::Texture& GetDepthTexture() { return _textureList[1]; }

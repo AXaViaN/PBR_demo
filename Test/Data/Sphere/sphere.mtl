@@ -13,3 +13,4 @@ map_Kd Texture/albedo.png
 map_Bump Texture/normal.png
 map_Ks Texture/metallic.png
 map_Ns Texture/roughness.png
+map_Ka Texture/roughness.png

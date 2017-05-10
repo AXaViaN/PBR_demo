@@ -27,7 +27,7 @@ protected:
 	 * Init and Terminate is only visible for Engine
 	 */
 	friend class Core::Engine;
-	bool Init(const glm::mat4& projectionMatrix);
+	bool Init();
 	void Terminate()
 	{
 		ShaderProgram::Terminate();
@@ -46,11 +46,15 @@ private:
 	Tool::U32 _uniform_vs_modelMatrix;
 	Tool::U32 _uniform_vs_normalMatrix;
 
+	Tool::U32 _uniform_fs_cameraPosition;
+
 	Tool::U32 _uniform_fs_material_albedoMap_value;
 	Tool::U32 _uniform_fs_material_normalMap_value;
 	Tool::U32 _uniform_fs_material_metallicMap_value;
 	Tool::U32 _uniform_fs_material_roughnessMap_value;
 	Tool::U32 _uniform_fs_material_aoMap_value;
+
+	Tool::U32 _uniform_fs_isEnvironmentIrradianceAvaible;
 
 	Tool::U32 _uniform_fs_directionalLight_direction;
 	Tool::U32 _uniform_fs_directionalLight_color;

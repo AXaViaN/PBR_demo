@@ -47,28 +47,28 @@ bool Engine::Init(Game* game)
 
 	Gfx::Renderer::Instance().Init();
 
-	initResult = standardShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = standardShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("StandardShader cannot be initialized!");
 		return false;
 	}
 
-	initResult = phongShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = phongShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("PhongShader cannot be initialized!");
 		return false;
 	}
 
-	initResult = pbrShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = pbrShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("PBRShader cannot be initialized!");
 		return false;
 	}
 
-	initResult = skyboxShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = skyboxShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("SkyboxShader cannot be initialized!");

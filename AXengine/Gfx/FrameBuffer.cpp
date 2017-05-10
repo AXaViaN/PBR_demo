@@ -44,7 +44,7 @@ void FrameBuffer::Terminate()
 		glDeleteFramebuffers(1, &_fboID);
 }
 
-void FrameBuffer::Use()
+void FrameBuffer::Use() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 	glViewport(0, 0, _frameSize.x, _frameSize.y);
@@ -57,7 +57,16 @@ void FrameBuffer::UseDefault()
 	glViewport(0, 0, windowSize.x, windowSize.y);
 }
 
-Tool::F32 FrameBuffer::GetAvarageBrightness()
+void FrameBuffer::SetColorTexture(Tool::U32 textureID) const
+{
+	SetColorTexture(textureID, GL_TEXTURE_2D);
+}
+void FrameBuffer::SetColorTexture(Tool::U32 textureID, Tool::U32 textureTarget) const
+{
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, textureID, 0);
+}
+
+Tool::F32 FrameBuffer::GetAvarageBrightness() const
 {
 	if(_textureList[0].GetTextureID() == 0)
 		return 0;

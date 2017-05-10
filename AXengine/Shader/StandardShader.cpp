@@ -8,6 +8,8 @@ namespace AX { namespace Shader {
 
 void StandardShader::ProcessScene(const Entity::Scene& scene)
 {
+	_projectionMatrix = scene.projectionMatrix;
+
 	// Process camera
 	_viewMatrix = glm::mat4();
 	if(scene.camera)

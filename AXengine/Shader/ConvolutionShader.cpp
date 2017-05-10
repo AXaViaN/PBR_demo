@@ -1,4 +1,4 @@
-#include "AXengine/Shader/SkyboxShader.h"
+#include "AXengine/Shader/ConvolutionShader.h"
 
 #include "AXengine/Asset/Material.h"
 #include <GL/glew.h>
@@ -6,7 +6,7 @@
 
 namespace AX { namespace Shader {
 
-void SkyboxShader::ProcessScene(const Entity::Scene& scene)
+void ConvolutionShader::ProcessScene(const Entity::Scene& scene)
 {
 	_projectionMatrix = scene.projectionMatrix;
 
@@ -22,7 +22,7 @@ void SkyboxShader::ProcessScene(const Entity::Scene& scene)
 
 	ShaderProgram::LoadUniform(_uniform_vs_ViewProjectionMatrix, _projectionMatrix * viewMatrix);
 }
-void SkyboxShader::ProcessMaterial(const Asset::Material& material)
+void ConvolutionShader::ProcessMaterial(const Asset::Material& material)
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, material.diffuseMap.texture->GetTextureID());

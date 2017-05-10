@@ -201,6 +201,7 @@ void Renderer::Init()
 {
 	_isDebugMode = false;
 	_projectionMatrix = CreateProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
+	_scene.projectionMatrix = _projectionMatrix;
 	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
