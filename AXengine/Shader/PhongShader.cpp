@@ -202,7 +202,7 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		
 		// Environment Map && Reflection Map
 		// Don't use reflection map if no environment map is avaible
-		if(phongMaterial->environmentMap)
+		if(phongMaterial->environmentMap!=nullptr && phongMaterial->environmentMap->material.diffuseMap.texture!=nullptr)
 		{
 			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::ENVIRONMENT);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, phongMaterial->environmentMap->material.diffuseMap.texture->GetTextureID());

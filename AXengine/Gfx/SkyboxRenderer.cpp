@@ -10,7 +10,8 @@ Entity::Cubemap* SkyboxRenderer::_skybox = nullptr;
 
 void SkyboxRenderer::RenderSkybox()
 {
-	if(_skybox == nullptr)
+	if(_skybox==nullptr || _skybox->material.shader==nullptr ||
+	   _skybox->material.diffuseMap.texture == nullptr)
 		return;
 
 	glDisable(GL_DEPTH_TEST);

@@ -159,6 +159,7 @@ void Engine::Run()
 
 	_isRunning = true;
 	_game->Start();
+	Gfx::Renderer::PrepareScene();
 	while(_isRunning && input.IsWindowClosed()==false)
 	{
 		input.Update();
@@ -185,7 +186,14 @@ void Engine::Run()
 			Tool::F32 averageBrightness = renderBuffer.GetAvarageBrightness();
 			if(averageBrightness > 0)
 			{
-				hdrExposure = glm::lerp<Tool::F32>(hdrExposure, 0.5f/averageBrightness, 0.1);
+				Tool::F32 targetExposure = 0.5f/averageBrightness;
+				Tool::F32 lerpRate = 0.1f;
+				// Adapting from bright to dark is slower
+				if(targetExposure > hdrExposure)
+					lerpRate *= 0.25f;
+
+				hdrExposure = glm::lerp<Tool::F32>(hdrExposure, targetExposure, lerpRate);
+				hdrExposure = glm::clamp(hdrExposure, 0.0f, 3.0f);
 				useAutoExposure = toneShader.SetAutoExposure(hdrExposure);
 			}
 		}

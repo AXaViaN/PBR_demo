@@ -205,7 +205,7 @@ void PBRShader::ProcessMaterial(const Asset::Material& material)
 			ShaderProgram::LoadUniform(_uniform_fs_material_aoMap_value, pbrMaterial->aoMap.value);
 		}
 
-		if(pbrMaterial->environmentMap)
+		if(pbrMaterial->environmentMap!=nullptr && pbrMaterial->environmentMap->material.reflectionMap.texture!=nullptr)
 		{
 			glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, pbrMaterial->environmentMap->material.reflectionMap.texture->GetTextureID());
