@@ -13,6 +13,7 @@ public:
 	Cubemap daySkybox;
 	Cubemap sunsetSkybox;
 	Cubemap nightSkybox;
+	Cubemap sunnySkybox;
 
 	Model<PBRMaterial> sphereModel;
 	GameObject* sphere;
@@ -20,6 +21,7 @@ public:
 	EnvironmentProbe dayProbe;
 	EnvironmentProbe sunsetProbe;
 	EnvironmentProbe nightProbe;
+	EnvironmentProbe sunnyProbe;
 
 	Cubemap* currentSkybox;
 	Cubemap* currentEnvironment;
@@ -35,10 +37,6 @@ public:
 		// Set game object
 		sphereModel.Load("Test/Data/Sphere/sphere.obj", true);
 		sphere = sphereModel.InstantiateGameObject();
-		
-		// DEBUG
-		Renderer::Clear(0.05, 0.05, 0.05);
-		ToneShader::SetHDRexposure(2);
 		
 		// Set light
 		light.SetDirection(-1.0, 0.2, -0.3);
@@ -62,11 +60,17 @@ public:
 						"Test/Data/Skybox/Grimm Night/bottom.png",
 						"Test/Data/Skybox/Grimm Night/back.png",
 						"Test/Data/Skybox/Grimm Night/front.png");
+		sunnySkybox.Load("Test/Data/Skybox/Sunny/right.png",
+						 "Test/Data/Skybox/Sunny/left.png",
+						 "Test/Data/Skybox/Sunny/top.png",
+						 "Test/Data/Skybox/Sunny/bottom.png",
+						 "Test/Data/Skybox/Sunny/back.png",
+						 "Test/Data/Skybox/Sunny/front.png");
 
 		currentSkybox = &daySkybox;
 
 		// Environment
-		EnvironmentProbe::InitConvolutionShader();
+		EnvironmentProbe::InitCaptureShader();
 		dayProbe.Init(512);
 		dayProbe.Capture([](void* sceneInstance){
 			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->daySkybox);
@@ -82,7 +86,12 @@ public:
 			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->nightSkybox);
 		}, this);
 
-		EnvironmentProbe::TerminateConvolutionShader();
+		sunnyProbe.Init(512);
+		sunnyProbe.Capture([](void* sceneInstance){
+			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->sunnySkybox);
+		}, this);
+
+		EnvironmentProbe::TerminateCaptureShader();
 
 		currentEnvironment = &dayProbe.GetEnvironmentMap();
 	}
@@ -131,6 +140,11 @@ public:
 		{
 			currentSkybox = &nightSkybox;
 			currentEnvironment = &nightProbe.GetEnvironmentMap();
+		}
+		if(Input::GetKeyDown(SDL_SCANCODE_4))
+		{
+			currentSkybox = &sunnySkybox;
+			currentEnvironment = &sunnyProbe.GetEnvironmentMap();
 		}
 		
 		static bool isUsingEnvironment = true;

@@ -68,6 +68,7 @@ protected:
 	 *	@param value Value to send (can be different types)
 	 */
 	void LoadUniform(const Tool::U32& uniformLocation, Tool::I32 value);
+	void LoadUniform(const Tool::U32& uniformLocation, Tool::U32 value);
 	void LoadUniform(const Tool::U32& uniformLocation, Tool::F32 value);
 	void LoadUniform(const Tool::U32& uniformLocation, bool value);
 	void LoadUniform(const Tool::U32& uniformLocation, glm::vec2 value);

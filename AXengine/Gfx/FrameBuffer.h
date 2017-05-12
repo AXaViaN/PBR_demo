@@ -45,7 +45,7 @@ public:
 	 * Frame buffer should be active before calling this
 	 */
 	void SetColorTexture(Tool::U32 textureID) const;
-	void SetColorTexture(Tool::U32 textureID, Tool::U32 textureTarget) const;
+	void SetColorTexture(Tool::U32 textureID, Tool::U32 textureTarget, Tool::U32 mipmapLevel=0) const;
 
 	Tool::F32 GetAvarageBrightness() const;
 

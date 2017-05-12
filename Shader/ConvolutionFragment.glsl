@@ -24,14 +24,17 @@ void main()
 	{
 		for( float theta=0.0 ; theta<0.5*PI ; theta+=fs_sampleDelta )
 		{
+			float sinTheta = sin(theta);
+			float cosTheta = cos(theta);
+			
 			// Spherical to tangent space
-			vec3 tangentSample = vec3(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta));
+			vec3 tangentSample = vec3(sinTheta*cos(phi), sinTheta*sin(phi), cosTheta);
 			// Tangent to world space
 			vec3 sampleDirection = TangentWorldMatrix * tangentSample;
 			
-			// cos(theta): light is weaker at larger angles
-			// sin(theta): higher hemisphere areas has smaller sample areas
-			irradiance += texture(fs_cubeMap, sampleDirection).rgb * cos(theta)*sin(theta);
+			// cosTheta: light is weaker at larger angles
+			// sinTheta: higher hemisphere areas has smaller sample areas
+			irradiance += texture(fs_cubeMap, sampleDirection).rgb * cosTheta*sinTheta;
 			sampleCount++;
 		}
 	}

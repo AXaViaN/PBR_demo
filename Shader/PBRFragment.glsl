@@ -279,6 +279,7 @@ vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 F0, ve
 	return CalculateRadiance(fCookTorrance, radiantFlux, normal, lightRay, cosNormalLightTheta, fLambert, kS, metallic);
 }
 
+// Ambient and IBL
 vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness)
 {
 	vec3 ambient = albedo * ao;

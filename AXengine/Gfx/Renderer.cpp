@@ -216,6 +216,8 @@ void Renderer::Init()
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 /***** PRIVATE *****/

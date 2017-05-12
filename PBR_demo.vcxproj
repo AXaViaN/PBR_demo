@@ -150,6 +150,7 @@
     <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
     <ClCompile Include="AXengine\Shader\ConvolutionShader.cpp" />
     <ClCompile Include="AXengine\Shader\PBRShader.cpp" />
+    <ClCompile Include="AXengine\Shader\PreFilterShader.cpp" />
     <ClCompile Include="AXengine\Shader\ToneShader.cpp" />
     <ClCompile Include="AXengine\Shader\KernelShader.cpp" />
     <ClCompile Include="AXengine\Shader\PhongShader.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
     <ClInclude Include="AXengine\Shader\ConvolutionShader.h" />
     <ClInclude Include="AXengine\Shader\PBRShader.h" />
+    <ClInclude Include="AXengine\Shader\PreFilterShader.h" />
     <ClInclude Include="AXengine\Shader\ToneShader.h" />
     <ClInclude Include="AXengine\Shader\KernelShader.h" />
     <ClInclude Include="AXengine\Shader\PhongShader.h" />

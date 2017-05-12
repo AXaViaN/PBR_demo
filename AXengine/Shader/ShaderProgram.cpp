@@ -119,6 +119,10 @@ void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, Tool::I32 valu
 {
 	glUniform1i(uniformLocation, value);
 }
+void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, Tool::U32 value)
+{
+	glUniform1ui(uniformLocation, value);
+}
 void ShaderProgram::LoadUniform(const Tool::U32& uniformLocation, Tool::F32 value)
 {
 	glUniform1f(uniformLocation, value);

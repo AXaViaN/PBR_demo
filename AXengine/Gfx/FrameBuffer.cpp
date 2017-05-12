@@ -61,9 +61,9 @@ void FrameBuffer::SetColorTexture(Tool::U32 textureID) const
 {
 	SetColorTexture(textureID, GL_TEXTURE_2D);
 }
-void FrameBuffer::SetColorTexture(Tool::U32 textureID, Tool::U32 textureTarget) const
+void FrameBuffer::SetColorTexture(Tool::U32 textureID, Tool::U32 textureTarget, Tool::U32 mipmapLevel) const
 {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, textureID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, textureID, mipmapLevel);
 }
 
 Tool::F32 FrameBuffer::GetAvarageBrightness() const
