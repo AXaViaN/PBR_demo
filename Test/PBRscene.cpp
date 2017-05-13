@@ -9,7 +9,6 @@ using namespace AX::Tool;
 class PBRscene : public AX::Game {
 public:
 	FreeCamera camera;
-	DirectionalLight light;
 	Cubemap daySkybox;
 	Cubemap sunsetSkybox;
 	Cubemap nightSkybox;
@@ -38,9 +37,6 @@ public:
 		sphereModel.Load("Test/Data/Sphere/sphere.obj", true);
 		sphere = sphereModel.InstantiateGameObject();
 		
-		// Set light
-		light.SetDirection(-1.0, 0.2, -0.3);
-
 		// Skybox
 		daySkybox.Load("Test/Data/Skybox/Above The Sea/right.png",
 						"Test/Data/Skybox/Above The Sea/left.png",
@@ -177,7 +173,7 @@ public:
 	}
 	void Draw()
 	{
-		Renderer::PrepareScene(camera, light);
+		Renderer::PrepareScene(camera);
 		SkyboxRenderer::Render(*currentSkybox);
 
 		sphere->Render();

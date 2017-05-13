@@ -192,6 +192,7 @@
     <ClInclude Include="AXengine\Gfx\Renderer2D.h" />
     <ClInclude Include="AXengine\Gfx\SkyboxRenderer.h" />
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
+    <ClInclude Include="AXengine\Shader\BRDFIntegrationShader.h" />
     <ClInclude Include="AXengine\Shader\ConvolutionShader.h" />
     <ClInclude Include="AXengine\Shader\PBRShader.h" />
     <ClInclude Include="AXengine\Shader\PreFilterShader.h" />

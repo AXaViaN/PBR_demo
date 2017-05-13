@@ -2,15 +2,11 @@
 
 const float PI = 3.14159265359;
 
-in vec3 varying_textureDir;
-
-uniform samplerCube fs_cubeMap;
+in vec2 varying_uvCoord;
 
 uniform uint fs_sampleCount;
-uniform float fs_roughness;
-uniform float fs_resolution;
 
-out vec4 out_color;
+out vec2 out_color;
 
 // Functions
 mat3 CalculateTangentWorldMatrix();
@@ -19,53 +15,52 @@ float RadicalInverse_VdC(uint bits);
 vec2 Hammersley(uint index, uint count);
 vec3 ImportanceSampleGGX(uint index, uint count, mat3 TangentWorldMatrix, float roughness);
 
-float NormalDistributionGGX(vec3 normal, vec3 halfway, float roughness);
+float GeometrySchlickGGX(float roughness, float cosTheta);
+float GeometrySmith(vec3 normal, vec3 cameraRay, vec3 lightRay, float roughness);
 
 // Program entry point
 void main()
 {
+	float cosNormalCameraTheta = varying_uvCoord.x;
+	float roughness = varying_uvCoord.y;
+	
 	mat3 TangentWorldMatrix = CalculateTangentWorldMatrix();
 	
 	// Assumptions
-	vec3 normal = normalize(varying_textureDir);
-	vec3 reflectionRay = normal;
-	vec3 cameraRay = normal;
+	vec3 normal = vec3(0.0, 0.0, 1.0);
+	vec3 cameraRay = vec3(sqrt(1.0-pow(cosNormalCameraTheta, 2)), 0.0, cosNormalCameraTheta);
 	
 	// Convolution
-	vec3 prefilteredColor = vec3(0.0);
-	
-	float totalWeight = 0.0;
+	float A = 0.0;
+	float B = 0.0;
 	for( uint i=0 ; i<fs_sampleCount ; i++ )
 	{
-		vec3 halfway = ImportanceSampleGGX(i, fs_sampleCount, TangentWorldMatrix, fs_roughness);
+		vec3 halfway = ImportanceSampleGGX(i, fs_sampleCount, TangentWorldMatrix, roughness);
 		vec3 lightRay = normalize((2.0 * dot(cameraRay, halfway) * halfway) - cameraRay);
 		
-		float cosNormalLightTheta = max(0.0, dot(normal, lightRay));
+		float cosNormalLightTheta = max(0.0, lightRay.z);
 		if(cosNormalLightTheta > 0.0)
 		{
-			// Calculate mipmap level
-			float cosNormalHalfwayTheta = max(0.0, dot(normal, halfway));
-			float cosHalfwayCameraTheta = max(0.0, dot(halfway, cameraRay));
-			float normalDistribution = NormalDistributionGGX(normal, halfway, fs_roughness);
-			float probabilityDensity = (normalDistribution * cosNormalHalfwayTheta/(4.0*cosHalfwayCameraTheta)) + 0.0001;
+			float cosNormalHalfwayTheta = max(0.0, halfway.z);
+			float cosCameraHalfwayTheta = max(0.0, dot(cameraRay, halfway));
 			
-			float saTexel = 4.0*PI / (6.0*pow(fs_resolution, 2));
-			float saSample = 1.0 / (float(fs_sampleCount)*probabilityDensity + 0.0001);
-			float mipmapLevel = fs_roughness==0.0 ? 0.0 : 0.5*log2(saSample/saTexel);
+			float geometry = GeometrySmith(normal, cameraRay, lightRay, roughness);
+			float geometryVis = (geometry*cosCameraHalfwayTheta) / (cosNormalHalfwayTheta*cosNormalCameraTheta);
+			float Fc = pow(1.0-cosCameraHalfwayTheta, 5);
 			
-			// Sample
-			prefilteredColor += textureLod(fs_cubeMap, lightRay, mipmapLevel).rgb * cosNormalLightTheta;
-			totalWeight += cosNormalLightTheta;
+			A += (1.0-Fc) * geometryVis;
+			B += Fc * geometryVis;
 		}
 	}
-	prefilteredColor /= totalWeight;
+	A /= float(fs_sampleCount);
+	B /= float(fs_sampleCount);
 	
-	out_color = vec4(prefilteredColor, 1.0);
+	out_color = vec2(A, B);
 }
 
 mat3 CalculateTangentWorldMatrix()
 {
-	vec3 forward = normalize(varying_textureDir);
+	vec3 forward = vec3(0.0, 0.0, 1.0);
 	
 	vec3 up = abs(forward.z) < 0.999 ? vec3(0, 0, 1) : vec3(1, 0, 0);
 	vec3 right = normalize(cross(up, forward));
@@ -104,15 +99,20 @@ vec3 ImportanceSampleGGX(uint index, uint count, mat3 TangentWorldMatrix, float 
 	return normalize(sampleDirection);
 }
 
-float NormalDistributionGGX(vec3 normal, vec3 halfway, float roughness)
+float GeometrySchlickGGX(float roughness, float cosTheta)
 {
-	float a = pow(roughness, 2);
-	float a2 = pow(a, 2);
+	return cosTheta / (cosTheta * (1.0-roughness) + roughness);
+}
+float GeometrySmith(vec3 normal, vec3 cameraRay, vec3 lightRay, float roughness)
+{
+	// Remap roughness for IBL lighting
+	float kIBL = pow(roughness, 2) / 2.0;
 	
-	float cosNormalHalfwayTheta = max(0.0, dot(normal, halfway));
+	float cosNormalCameraTheta = max(0.0, dot(normal, cameraRay));
+	float cosNormalLightTheta = max(0.0, dot(normal, lightRay));
 	
-	float denom = pow(cosNormalHalfwayTheta, 2) * (a2-1.0) + 1.0;
-	denom = PI * pow(denom, 2);
+	float cameraGGX = GeometrySchlickGGX(kIBL, cosNormalCameraTheta);
+	float lightGGX = GeometrySchlickGGX(kIBL, cosNormalLightTheta);
 	
-	return a2 / denom;
+	return cameraGGX * lightGGX;
 }

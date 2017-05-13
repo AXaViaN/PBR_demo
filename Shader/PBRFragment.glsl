@@ -19,6 +19,7 @@ struct TextureMapVec4 {
 };
 struct Material {
 	TextureMapVec4 albedoMap;
+	TextureMapVec3 emissionMap;
 	TextureMapVec3 normalMap;
 	TextureMapVec1 metallicMap;
 	TextureMapVec1 roughnessMap;
@@ -59,8 +60,13 @@ in vec3 varying_onCameraPosition;
 uniform vec3 fs_cameraPosition;
 
 uniform Material fs_material;
+
 uniform samplerCube fs_environmentIrradianceMap;
 uniform bool fs_isEnvironmentIrradianceAvaible;
+uniform samplerCube fs_environmentFilterMap;
+uniform float fs_environmentFilterMaxLOD;
+uniform sampler2D fs_environmnetBRDFLUT;
+uniform bool fs_isEnvironmentSplitSumAvaible;
 
 uniform DirectionalLight fs_directionalLight;
 uniform PointLight fs_pointLight[POINT_LIGHT_COUNT];
@@ -69,7 +75,7 @@ uniform SpotLight fs_spotLight[SPOT_LIGHT_COUNT];
 out vec4 out_color;
 
 // Functions
-void GetValuesFromTextureMaps(inout vec4 albedoColor, inout vec3 normalValue, inout float metallicValue, inout float roughnessValue, inout float aoValue);
+void GetValuesFromTextureMaps(inout vec4 albedoColor, inout vec3 emissionColor, inout vec3 normalValue, inout float metallicValue, inout float roughnessValue, inout float aoValue);
 
 float NormalDistributionGGX(vec3 normal, vec3 halfway, float roughness);
 float GeometrySchlickGGX(float roughness, float cosTheta);
@@ -84,17 +90,18 @@ vec3 PointLightRadiance(PointLight light, vec3 normal, vec3 cameraRay, vec3 F0, 
 vec3 DirectionalLightRadiance(DirectionalLight light, vec3 normal, vec3 cameraRay, vec3 F0, vec3 fLambert, float metallic, float roughness);
 vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 F0, vec3 fLambert, float metallic, float roughness);
 
-vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness);
+vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float metallic);
 
 // Program entry point
 void main()
 {
 	vec4 albedoColor;
+	vec3 emissionColor;
 	vec3 normalValue;
 	float metallicValue;
 	float roughnessValue;
 	float aoValue;
-	GetValuesFromTextureMaps(albedoColor, normalValue, metallicValue, roughnessValue, aoValue);
+	GetValuesFromTextureMaps(albedoColor, emissionColor, normalValue, metallicValue, roughnessValue, aoValue);
 	
 	vec3 normal = normalize(varying_normal);
 	if(normalValue.r >= 0)
@@ -124,18 +131,23 @@ void main()
 	}
 	
 	// Final color
-	vec3 ambient = AmbientRadiance(F0, albedoColor.rgb, aoValue, roughnessValue);
-	out_color = vec4(irradiance + ambient, albedoColor.a);
+	vec3 ambient = AmbientRadiance(F0, albedoColor.rgb, aoValue, roughnessValue, metallicValue);
+	out_color = vec4(irradiance + ambient + emissionColor, albedoColor.a);
 }
 
 ///////////////////////////////////////////////////////
 
-void GetValuesFromTextureMaps(inout vec4 albedoColor, inout vec3 normalValue, inout float metallicValue, inout float roughnessValue, inout float aoValue)
+void GetValuesFromTextureMaps(inout vec4 albedoColor, inout vec3 emissionColor, inout vec3 normalValue, inout float metallicValue, inout float roughnessValue, inout float aoValue)
 {
 	if(fs_material.albedoMap.value.r == -1)
 		albedoColor = texture(fs_material.albedoMap.texture, varying_uvCoord);
 	else
 		albedoColor = fs_material.albedoMap.value;
+	
+	if(fs_material.emissionMap.value.r == -1)
+		emissionColor = texture(fs_material.emissionMap.texture, varying_uvCoord).rgb;
+	else
+		emissionColor = fs_material.emissionMap.value;
 	
 	if(fs_material.normalMap.value.r == -1)
 		normalValue = texture(fs_material.normalMap.texture, varying_uvCoord).rgb;
@@ -280,22 +292,32 @@ vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 F0, ve
 }
 
 // Ambient and IBL
-vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness)
+vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float metallic)
 {
-	vec3 ambient = albedo * ao;
+	vec3 worldCameraRay = normalize(fs_cameraPosition - varying_onWorldPosition);
+	vec3 worldNormal = normalize(varying_onWorldNormal);
+	float cosWorldNormalCameraTheta = max(0.0, dot(worldNormal, worldCameraRay));
+	
+	vec3 kS = FresnelSchlickRoughness(F0, roughness, cosWorldNormalCameraTheta);
+	vec3 kD = 1.0 - kS;
+	kD *= 1.0 - metallic;
+	
+	vec3 diffuse = vec3(0.03);
+	vec3 specular = vec3(0.0);
 	if(fs_isEnvironmentIrradianceAvaible)
 	{
-		vec3 worldCameraRay = normalize(varying_onWorldPosition - fs_cameraPosition);
-		vec3 worldNormal = normalize(varying_onWorldNormal);
-		vec3 kS = FresnelSchlickRoughness(F0, roughness, max(0.0, dot(worldNormal, worldCameraRay)));
-		vec3 kD = 1.0 - kS;
-		
-		ambient *= kD * texture(fs_environmentIrradianceMap, worldNormal).rgb;
+		diffuse = kD * texture(fs_environmentIrradianceMap, worldNormal).rgb;
 	}
-	else
+	diffuse *= albedo;
+	
+	if(fs_isEnvironmentSplitSumAvaible)
 	{
-		ambient *= vec3(0.03);
+		vec3 reflectionDirection = reflect(-worldCameraRay, worldNormal);
+		vec3 prefilteredColor = textureLod(fs_environmentFilterMap, reflectionDirection, roughness*fs_environmentFilterMaxLOD).rgb;
+		
+		vec2 environmentBRDF = texture(fs_environmnetBRDFLUT, vec2(cosWorldNormalCameraTheta, roughness)).rg;
+		specular = prefilteredColor * (kS*environmentBRDF.x + environmentBRDF.y);
 	}
 	
-	return ambient;
+	return (diffuse + specular) * ao;
 }

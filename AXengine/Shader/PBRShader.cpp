@@ -12,12 +12,15 @@ namespace AX { namespace Shader {
 
 enum PBRShaderTexture {
 	ALBEDO,
+	EMISSION,
 	NORMAL,
 	METALLIC,
 	ROUGHNESS,
 	AO,
 
-	ENVIRONMENT_IRRADIANCE
+	ENVIRONMENT_IRRADIANCE,
+	ENVIRONMENT_FILTER,
+	ENVIRONMENT_BRDF
 };
 
 void PBRShader::ProcessScene(const Entity::Scene& scene)
@@ -153,6 +156,18 @@ void PBRShader::ProcessMaterial(const Asset::Material& material)
 			ShaderProgram::LoadUniform(_uniform_fs_material_albedoMap_value, pbrMaterial->diffuseMap.value);
 		}
 
+		// Emission Map
+		if(pbrMaterial->emissionMap.texture)
+		{
+			glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::EMISSION);
+			glBindTexture(GL_TEXTURE_2D, pbrMaterial->emissionMap.texture->GetTextureID());
+			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(-1, -1, -1));
+		}
+		else
+		{
+			ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, pbrMaterial->emissionMap.value);
+		}
+
 		// Normal Map
 		if(pbrMaterial->normalMap.texture)
 		{
@@ -205,16 +220,39 @@ void PBRShader::ProcessMaterial(const Asset::Material& material)
 			ShaderProgram::LoadUniform(_uniform_fs_material_aoMap_value, pbrMaterial->aoMap.value);
 		}
 
-		if(pbrMaterial->environmentMap!=nullptr && pbrMaterial->environmentMap->material.reflectionMap.texture!=nullptr)
+		if(pbrMaterial->environmentMap)
 		{
-			glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, pbrMaterial->environmentMap->material.reflectionMap.texture->GetTextureID());
-			ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, true);
+			if(pbrMaterial->environmentMap->material.reflectionMap.texture)
+			{
+				glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, pbrMaterial->environmentMap->material.reflectionMap.texture->GetTextureID());
+				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, true);
+			}
+			else
+			{
+				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, false);
+			}
+
+			Entity::Cubemap* specularEnvironment = pbrMaterial->environmentMap->material.environmentMap;
+			if(specularEnvironment!=nullptr &&
+			   specularEnvironment->material.diffuseMap.texture!=nullptr &&
+			   specularEnvironment->material.reflectionMap.texture!=nullptr)
+			{
+				glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_FILTER);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, specularEnvironment->material.diffuseMap.texture->GetTextureID());
+				ShaderProgram::LoadUniform(_uniform_fs_environmentFilterMaxLOD, specularEnvironment->material.diffuseMap.value.r);
+
+				glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_BRDF);
+				glBindTexture(GL_TEXTURE_2D, specularEnvironment->material.reflectionMap.texture->GetTextureID());
+
+				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentSplitSumAvaible, true);
+			}
+			else
+			{
+				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentSplitSumAvaible, false);
+			}
 		}
-		else
-		{
-			ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, false);
-		}
+		
 	}
 }
 void PBRShader::ProcessTransform(const Entity::Transform& transform)
@@ -247,12 +285,15 @@ bool PBRShader::Init()
 	Start();
 	
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.albedoMap.texture"), PBRShaderTexture::ALBEDO);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.emissionMap.texture"), PBRShaderTexture::EMISSION);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.normalMap.texture"), PBRShaderTexture::NORMAL);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.metallicMap.texture"), PBRShaderTexture::METALLIC);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.roughnessMap.texture"), PBRShaderTexture::ROUGHNESS);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.aoMap.texture"), PBRShaderTexture::AO);
 
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentIrradianceMap"), PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentFilterMap"), PBRShaderTexture::ENVIRONMENT_FILTER);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmnetBRDFLUT"), PBRShaderTexture::ENVIRONMENT_BRDF);
 
 	Stop();
 
@@ -276,12 +317,15 @@ void PBRShader::GetShaderUniformLocations()
 	_uniform_fs_cameraPosition = ShaderProgram::GetUniformLocation("fs_cameraPosition");
 
 	_uniform_fs_material_albedoMap_value = ShaderProgram::GetUniformLocation("fs_material.albedoMap.value");
+	_uniform_fs_material_emissionMap_value = ShaderProgram::GetUniformLocation("fs_material.emissionMap.value");
 	_uniform_fs_material_normalMap_value = ShaderProgram::GetUniformLocation("fs_material.normalMap.value");
 	_uniform_fs_material_metallicMap_value = ShaderProgram::GetUniformLocation("fs_material.metallicMap.value");
 	_uniform_fs_material_roughnessMap_value = ShaderProgram::GetUniformLocation("fs_material.roughnessMap.value");
 	_uniform_fs_material_aoMap_value = ShaderProgram::GetUniformLocation("fs_material.aoMap.value");
 
 	_uniform_fs_isEnvironmentIrradianceAvaible = ShaderProgram::GetUniformLocation("fs_isEnvironmentIrradianceAvaible");
+	_uniform_fs_isEnvironmentSplitSumAvaible = ShaderProgram::GetUniformLocation("fs_isEnvironmentSplitSumAvaible");
+	_uniform_fs_environmentFilterMaxLOD = ShaderProgram::GetUniformLocation("fs_environmentFilterMaxLOD");
 
 	_uniform_fs_directionalLight_direction = ShaderProgram::GetUniformLocation("fs_directionalLight.direction");
 	_uniform_fs_directionalLight_color = ShaderProgram::GetUniformLocation("fs_directionalLight.color");

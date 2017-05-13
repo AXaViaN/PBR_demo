@@ -1,9 +1,11 @@
 #include "AXengine/Entity/EnvironmentProbe.h"
 
 #include "AXengine/Core/Engine.h"
+#include "AXengine/Entity/Quad.h"
 #include "AXengine/Gfx/FrameBuffer.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Gfx/SkyboxRenderer.h"
+#include "AXengine/Shader/BRDFIntegrationShader.h"
 #include "AXengine/Shader/ConvolutionShader.h"
 #include "AXengine/Shader/PreFilterShader.h"
 #include "AXengine/Tool/Debug.h"
@@ -18,6 +20,11 @@ Shader::ShaderProgram* EnvironmentProbe::_preFilterShader = nullptr;
 Tool::U16 EnvironmentProbe::_convolutedFrameSize = 32;
 Tool::U16 EnvironmentProbe::_prefilteredFrameSizeMax = 128;
 Tool::U16 EnvironmentProbe::_prefilteredFrameSizeMin = 4;
+
+Asset::Texture EnvironmentProbe::_brdfIntegrationTexture;
+Tool::U32 EnvironmentProbe::_brdfIntegrationUserCount = 0;
+Tool::U16 EnvironmentProbe::_brdfIntegrationFrameSize = 512;
+Tool::U16 EnvironmentProbe::_brdfIntegrationSampleCount;
 
 void EnvironmentProbe::Init(Tool::U32 frameSize)
 {
@@ -34,17 +41,29 @@ void EnvironmentProbe::Init(Tool::U32 frameSize)
 	
 	_specularEnvironmentMap.material.diffuseMap.texture = &_prefilteredTexture;
 	_specularEnvironmentMap.material.reflectionMap.texture = &_brdfIntegrationTexture;
+
+	if(_brdfIntegrationUserCount == 0)
+	{
+		_brdfIntegrationTexture = createBRDFIntegrationTexture(glm::ivec2(_brdfIntegrationFrameSize, _brdfIntegrationFrameSize));
+		_brdfIntegrationUserCount++;
+	}
 }
 void EnvironmentProbe::Dispose()
 {
 	_environmentTexture.Dispose();
 	_convolutedTexture.Dispose();
 	_prefilteredTexture.Dispose();
-	_brdfIntegrationTexture.Dispose();
+
+	if(_brdfIntegrationUserCount > 0)
+		_brdfIntegrationUserCount--;
+	if(_brdfIntegrationUserCount == 0)
+		_brdfIntegrationTexture.Dispose();
 }
 
 bool EnvironmentProbe::InitCaptureShader(Tool::F32 irradianceSampleDelta, Tool::U32 preFilterSampleCount)
 {
+	_brdfIntegrationSampleCount = preFilterSampleCount;
+
 	_convolutionShader = new Shader::ConvolutionShader();
 	_preFilterShader = new Shader::PreFilterShader();
 
@@ -134,6 +153,56 @@ Asset::Texture EnvironmentProbe::createCubemapTexture(glm::ivec2 dimensions, boo
 
 	return Asset::Texture(textureID);
 }
+Asset::Texture EnvironmentProbe::createBRDFIntegrationTexture(glm::ivec2 dimensions)
+{
+	// Init shader
+	Shader::BRDFIntegrationShader brdfIntegrationShader;
+	bool initResult = brdfIntegrationShader.Init(_brdfIntegrationSampleCount);
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("BRDFIntegrationShader cannot be initialized!");
+		return Asset::Texture(0);
+	}
+
+	// Create empty texture
+	Tool::U32 textureID;
+	glGenTextures(1, &textureID);
+	if(textureID == 0)
+	{
+		Tool::Debug::LogWarning("OpenGL texture generator failed!");
+		brdfIntegrationShader.Terminate();
+		return Asset::Texture(0);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, dimensions.x, dimensions.y, 0, GL_RG, GL_FLOAT, nullptr);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Fill texture
+	Quad quad;
+	quad.material.shader = &brdfIntegrationShader;
+
+	Gfx::FrameBuffer FBO;
+	FBO.Init(glm::ivec2(dimensions.x, dimensions.y), Gfx::FrameBuffer::DEPTH_STENCIL_BUFFER);
+	FBO.Use();
+
+	FBO.SetColorTexture(textureID);
+
+	Gfx::Renderer::PrepareScene();
+	Gfx::Renderer::Clear();
+	quad.RenderImmediate();
+	
+	FBO.Terminate();
+	Gfx::FrameBuffer::UseDefault();
+	brdfIntegrationShader.Terminate();
+
+	return Asset::Texture(textureID);
+}
 
 void EnvironmentProbe::captureEnvironment(void(*RenderSceneCallback)(void*), void* callbackParam, std::vector<glm::vec3> cameraRotation)
 {
@@ -189,6 +258,7 @@ void EnvironmentProbe::prefilterEnvironment(std::vector<glm::vec3> cameraRotatio
 	Shader::ShaderProgram* environmentShader = _environmentMap.material.shader;
 	_environmentMap.material.shader = _preFilterShader;
 	Tool::U16 mipmapCount = glm::log2(static_cast<Tool::F32>(_prefilteredFrameSizeMax)/static_cast<Tool::F32>(_prefilteredFrameSizeMin));
+	_specularEnvironmentMap.material.diffuseMap.value.r = mipmapCount-1;
 	for( Tool::U16 mipmapLevel=0 ; mipmapLevel<mipmapCount ; mipmapLevel++ )
 	{
 		glm::ivec2 frameSize = glm::ivec2(_prefilteredFrameSizeMax, _prefilteredFrameSizeMax);

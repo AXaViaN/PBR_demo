@@ -6,6 +6,7 @@
  *	material.diffuseMap.texture = captured cubemap
  *	material.reflectionMap.texture = convoluted cubemap
  *	material.environmentMap->material.diffuseMap.texture = pre-filtered cubemap
+ *	material.environmentMap->material.diffuseMap.texture.value.r = pre-filter mipmap max LOD
  *	material.environmentMap->material.reflectionMap.texture = BRDF integration map
  */
 
@@ -34,6 +35,7 @@ public:
 
 private:
 	static Asset::Texture createCubemapTexture(glm::ivec2 dimensions, bool addMipmap);
+	static Asset::Texture createBRDFIntegrationTexture(glm::ivec2 dimensions);
 
 	void captureEnvironment(void(*RenderSceneCallback)(void*), void* callbackParam, std::vector<glm::vec3> cameraRotation);
 	void convoluteIrradiance(std::vector<glm::vec3> cameraRotation);
@@ -57,7 +59,11 @@ private:
 	Asset::Texture _environmentTexture;
 	Asset::Texture _convolutedTexture;
 	Asset::Texture _prefilteredTexture;
-	Asset::Texture _brdfIntegrationTexture;
+	
+	static Asset::Texture _brdfIntegrationTexture;
+	static Tool::U32 _brdfIntegrationUserCount;
+	static Tool::U16 _brdfIntegrationFrameSize;
+	static Tool::U16 _brdfIntegrationSampleCount;
 
 };
 

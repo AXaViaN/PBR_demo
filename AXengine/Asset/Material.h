@@ -32,6 +32,7 @@ public:
 	template<typename T> T* Get() { return static_cast<T*>(this); }
 
 	TextureMap<glm::vec4> diffuseMap;
+	TextureMap<glm::vec3> emissionMap;
 	TextureMap<Tool::F32> reflectionMap;
 
 	Entity::Cubemap* environmentMap;
