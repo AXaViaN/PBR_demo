@@ -21,17 +21,18 @@ namespace AX { namespace Entity {
 
 class EnvironmentProbe {
 public:
-	void Init(Tool::U32 frameSize);
+	void Init(Tool::U32 frameSize, Tool::F64 effectVolume=10);
 	void Dispose();
 	
 	static bool InitCaptureShader(Tool::F32 irradianceSampleDelta=0.025f, Tool::U32 preFilterSampleCount=1024);
 	static void TerminateCaptureShader();
 
-	void Capture(void(*RenderSceneCallback)(void*), void* callbackParam);
+	void Capture(void(*RenderSceneCallback)(void*), void* callbackParam, glm::vec3 position=glm::vec3());
 
-	void SetPosition(Tool::F32 x, Tool::F32 y, Tool::F32 z) { _captureCamera.transform.position = glm::vec3(x, y, z); }
-
-	Cubemap& GetEnvironmentMap() { return _environmentMap; }
+	Cubemap GetEnvironmentMap() const { return _environmentMap; }
+	const glm::vec3& GetPositon() const { return _captureCamera.transform.position; }
+	const Tool::F64& GetEffectVolume() const { return _effectVolume; }
+	static const Tool::F64& GetMaxEffectVolume() { return _maxEffectVolume; }
 
 private:
 	static Asset::Texture createCubemapTexture(glm::ivec2 dimensions, bool addMipmap);
@@ -43,6 +44,7 @@ private:
 
 private:
 	static glm::mat4 _projectionMatrix;
+	static Tool::F64 _maxEffectVolume;
 	static Shader::ShaderProgram* _convolutionShader;
 	static Shader::ShaderProgram* _preFilterShader;
 	static Tool::U16 _convolutedFrameSize;
@@ -54,6 +56,7 @@ private:
 	Cubemap _environmentMap;
 	Cubemap _specularEnvironmentMap;
 
+	Tool::F64 _effectVolume;
 	Tool::U32 _frameSize;
 
 	Asset::Texture _environmentTexture;

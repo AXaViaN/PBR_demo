@@ -18,7 +18,7 @@
 namespace AX {
 namespace Asset { class Material; }
 namespace Core { class Engine; }
-namespace Entity { class GameObject; }
+namespace Entity { class GameObject; class EnvironmentProbe; }
 }
 
 namespace AX { namespace Gfx {
@@ -40,6 +40,8 @@ public:
 	static void PrepareScene(const Entity::Camera* camera, const Entity::Light** lightList, Tool::SIZE lightListSize);
 	static void SetSceneProjection(const glm::mat4& projectionMatrix) { instance->_scene.projectionMatrix = projectionMatrix; }
 	static void SetSceneCamera(const Entity::Camera* camera) { instance->_scene.camera = camera; }
+	static void SetSceneEnvironment(const Entity::EnvironmentProbe* environmentProbe) { instance->_scene.AddEnvironmentProbe(environmentProbe); }
+	static void SetSceneEnvironment(const Entity::EnvironmentProbe** environmentProbeList, Tool::SIZE environmentProbeListSize) { instance->_scene.AddEnvironmentProbe(environmentProbeList, environmentProbeListSize/sizeof(Entity::EnvironmentProbe*)); }
 
 	static void PrepareShader(Shader::ShaderProgram* shaderProgram);
 

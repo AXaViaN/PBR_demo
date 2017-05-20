@@ -23,7 +23,7 @@ public:
 	EnvironmentProbe sunnyProbe;
 
 	Cubemap* currentSkybox;
-	Cubemap* currentEnvironment;
+	EnvironmentProbe* currentProbe;
 
 	void Start()
 	{
@@ -89,7 +89,7 @@ public:
 
 		EnvironmentProbe::TerminateCaptureShader();
 
-		currentEnvironment = &dayProbe.GetEnvironmentMap();
+		currentProbe = &dayProbe;
 	}
 	void Dispose()
 	{
@@ -98,10 +98,12 @@ public:
 		daySkybox.Dispose();
 		sunsetSkybox.Dispose();
 		nightSkybox.Dispose();
+		sunnySkybox.Dispose();
 
 		dayProbe.Dispose();
 		sunsetProbe.Dispose();
 		nightProbe.Dispose();
+		sunnyProbe.Dispose();
 	}
 
 	void Update()
@@ -125,32 +127,23 @@ public:
 		if(Input::GetKeyDown(SDL_SCANCODE_1))
 		{
 			currentSkybox = &daySkybox;
-			currentEnvironment = &dayProbe.GetEnvironmentMap();
+			currentProbe = &dayProbe;
 		}
 		if(Input::GetKeyDown(SDL_SCANCODE_2))
 		{
 			currentSkybox = &sunsetSkybox;
-			currentEnvironment = &sunsetProbe.GetEnvironmentMap();
+			currentProbe = &sunsetProbe;
 		}
 		if(Input::GetKeyDown(SDL_SCANCODE_3))
 		{
 			currentSkybox = &nightSkybox;
-			currentEnvironment = &nightProbe.GetEnvironmentMap();
+			currentProbe = &nightProbe;
 		}
 		if(Input::GetKeyDown(SDL_SCANCODE_4))
 		{
 			currentSkybox = &sunnySkybox;
-			currentEnvironment = &sunnyProbe.GetEnvironmentMap();
+			currentProbe = &sunnyProbe;
 		}
-		
-		static bool isUsingEnvironment = true;
-		if(Input::GetKeyDown(SDL_SCANCODE_TAB))
-			isUsingEnvironment = !isUsingEnvironment;
-
-		if(isUsingEnvironment)
-			sphere->GetChild(0)->material->environmentMap = currentEnvironment;
-		else
-			sphere->GetChild(0)->material->environmentMap = nullptr;
 
 		static bool isAutoRotating = false;
 		if(Input::GetKeyDown(SDL_SCANCODE_SPACE))
@@ -174,6 +167,8 @@ public:
 	void Draw()
 	{
 		Renderer::PrepareScene(camera);
+		Renderer::SetSceneEnvironment(currentProbe);
+		
 		SkyboxRenderer::Render(*currentSkybox);
 
 		sphere->Render();

@@ -15,6 +15,7 @@
 namespace AX { namespace Entity {
 
 glm::mat4 EnvironmentProbe::_projectionMatrix(glm::perspective(glm::radians(90.0f), 1.0f, Gfx::Renderer::NEAR_PLANE, Gfx::Renderer::FAR_PLANE));
+Tool::F64 EnvironmentProbe::_maxEffectVolume = 0;
 Shader::ShaderProgram* EnvironmentProbe::_convolutionShader = nullptr;
 Shader::ShaderProgram* EnvironmentProbe::_preFilterShader = nullptr;
 Tool::U16 EnvironmentProbe::_convolutedFrameSize = 32;
@@ -26,9 +27,14 @@ Tool::U32 EnvironmentProbe::_brdfIntegrationUserCount = 0;
 Tool::U16 EnvironmentProbe::_brdfIntegrationFrameSize = 512;
 Tool::U16 EnvironmentProbe::_brdfIntegrationSampleCount;
 
-void EnvironmentProbe::Init(Tool::U32 frameSize)
+void EnvironmentProbe::Init(Tool::U32 frameSize, Tool::F64 effectVolume)
 {
 	_frameSize = frameSize;
+	_effectVolume = glm::abs(effectVolume);
+	_effectVolume = glm::max(1.0, _effectVolume);
+	if(_effectVolume > _maxEffectVolume)
+		_maxEffectVolume = _effectVolume;
+
 	_environmentMap.material.diffuseMap.value.r = _frameSize;
 	
 	_environmentTexture = createCubemapTexture(glm::ivec2(_frameSize, _frameSize), true);
@@ -92,11 +98,12 @@ void EnvironmentProbe::TerminateCaptureShader()
 	delete _convolutionShader;
 }
 
-void EnvironmentProbe::Capture(void(*RenderSceneCallback)(void*), void* callbackParam)
+void EnvironmentProbe::Capture(void(*RenderSceneCallback)(void*), void* callbackParam, glm::vec3 position)
 {
 	// Set 90 FOV projection
 	Gfx::Renderer::SetSceneProjection(_projectionMatrix);
 	
+	_captureCamera.transform.position = position;
 	std::vector<glm::vec3> cameraRotation{
 		glm::vec3(  0, -90, 180),	// Right
 		glm::vec3(  0,  90, 180),	// Left

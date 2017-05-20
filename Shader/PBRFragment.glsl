@@ -2,6 +2,7 @@
 
 #define POINT_LIGHT_COUNT 8
 #define SPOT_LIGHT_COUNT 8
+#define ENVIRONMENT_COUNT 4
 
 const float PI = 3.14159265359;
 
@@ -24,6 +25,13 @@ struct Material {
 	TextureMapVec1 metallicMap;
 	TextureMapVec1 roughnessMap;
 	TextureMapVec1 aoMap;
+};
+
+struct Environment {
+	samplerCube irradianceMap;
+	samplerCube filterMap;
+	float filterMaxLOD;
+	float weight;
 };
 
 struct DirectionalLight {
@@ -61,12 +69,8 @@ uniform vec3 fs_cameraPosition;
 
 uniform Material fs_material;
 
-uniform samplerCube fs_environmentIrradianceMap;
-uniform bool fs_isEnvironmentIrradianceAvaible;
-uniform samplerCube fs_environmentFilterMap;
-uniform float fs_environmentFilterMaxLOD;
-uniform sampler2D fs_environmnetBRDFLUT;
-uniform bool fs_isEnvironmentSplitSumAvaible;
+uniform Environment fs_environmentMap[ENVIRONMENT_COUNT];
+uniform sampler2D fs_environmentBRDFLUT;
 
 uniform DirectionalLight fs_directionalLight;
 uniform PointLight fs_pointLight[POINT_LIGHT_COUNT];
@@ -102,6 +106,9 @@ void main()
 	float roughnessValue;
 	float aoValue;
 	GetValuesFromTextureMaps(albedoColor, emissionColor, normalValue, metallicValue, roughnessValue, aoValue);
+	
+	metallicValue = clamp(metallicValue, 0.01, 0.99);
+	roughnessValue = clamp(roughnessValue, 0.01, 0.99);
 	
 	vec3 normal = normalize(varying_normal);
 	if(normalValue.r >= 0)
@@ -296,28 +303,54 @@ vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float meta
 {
 	vec3 worldCameraRay = normalize(fs_cameraPosition - varying_onWorldPosition);
 	vec3 worldNormal = normalize(varying_onWorldNormal);
+	vec3 reflectionDirection = reflect(-worldCameraRay, worldNormal);
 	float cosWorldNormalCameraTheta = max(0.0, dot(worldNormal, worldCameraRay));
 	
 	vec3 kS = FresnelSchlickRoughness(F0, roughness, cosWorldNormalCameraTheta);
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 	
-	vec3 diffuse = vec3(0.03);
+	vec3 diffuse = vec3(0.0);
 	vec3 specular = vec3(0.0);
-	if(fs_isEnvironmentIrradianceAvaible)
+	for( int i=0 ; i<ENVIRONMENT_COUNT ; i++ )
 	{
-		diffuse = kD * texture(fs_environmentIrradianceMap, worldNormal).rgb;
+		if(fs_environmentMap[i].weight > 0)
+		{
+			float LOD = roughness * fs_environmentMap[i].filterMaxLOD;
+			
+			// Can't iterate through samplers (ugh)
+			vec3 irradianceSample;
+			vec3 prefilterSample;
+			if(i == 0)
+			{
+				irradianceSample = texture(fs_environmentMap[0].irradianceMap, worldNormal).rgb;
+				prefilterSample = textureLod(fs_environmentMap[0].filterMap, reflectionDirection, LOD).rgb;
+			}
+			if(i == 1)
+			{
+				irradianceSample = texture(fs_environmentMap[1].irradianceMap, worldNormal).rgb;
+				prefilterSample = textureLod(fs_environmentMap[1].filterMap, reflectionDirection, LOD).rgb;
+			}
+			if(i == 2)
+			{
+				irradianceSample = texture(fs_environmentMap[2].irradianceMap, worldNormal).rgb;
+				prefilterSample = textureLod(fs_environmentMap[2].filterMap, reflectionDirection, LOD).rgb;
+			}
+			if(i == 3)
+			{
+				irradianceSample = texture(fs_environmentMap[3].irradianceMap, worldNormal).rgb;
+				prefilterSample = textureLod(fs_environmentMap[3].filterMap, reflectionDirection, LOD).rgb;
+			}
+			
+			diffuse += irradianceSample * fs_environmentMap[i].weight;
+			specular += prefilterSample * fs_environmentMap[i].weight;
+		}
 	}
-	diffuse *= albedo;
 	
-	if(fs_isEnvironmentSplitSumAvaible)
-	{
-		vec3 reflectionDirection = reflect(-worldCameraRay, worldNormal);
-		vec3 prefilteredColor = textureLod(fs_environmentFilterMap, reflectionDirection, roughness*fs_environmentFilterMaxLOD).rgb;
-		
-		vec2 environmentBRDF = texture(fs_environmnetBRDFLUT, vec2(cosWorldNormalCameraTheta, roughness)).rg;
-		specular = prefilteredColor * (kS*environmentBRDF.x + environmentBRDF.y);
-	}
+	diffuse *= kD * albedo;
+	
+	vec2 environmentBRDF = texture(fs_environmentBRDFLUT, vec2(cosWorldNormalCameraTheta, roughness)).rg;
+	specular *= (kS*environmentBRDF.x + environmentBRDF.y);
 	
 	return (diffuse + specular) * ao;
 }

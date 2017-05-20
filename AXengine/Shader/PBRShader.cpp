@@ -2,6 +2,7 @@
 
 #include "AXengine/Asset/PBRMaterial.h"
 #include "AXengine/Entity/Cubemap.h"
+#include "AXengine/Entity/EnvironmentProbe.h"
 #include "AXengine/Entity/DirectionalLight.h"
 #include "AXengine/Entity/PointLight.h"
 #include "AXengine/Entity/SpotLight.h"
@@ -18,13 +19,14 @@ enum PBRShaderTexture {
 	ROUGHNESS,
 	AO,
 
-	ENVIRONMENT_IRRADIANCE,
-	ENVIRONMENT_FILTER,
-	ENVIRONMENT_BRDF
+	ENVIRONMENT_BRDF,
+	ENVIRONMENT_IRRADIANCE = 16,
+	ENVIRONMENT_FILTER = 24
 };
 
 void PBRShader::ProcessScene(const Entity::Scene& scene)
 {
+	// Select active lights
 	const Entity::DirectionalLight* directionalLight = nullptr;
 	const Entity::PointLight* pointLight[POINT_LIGHT_COUNT] = {nullptr};
 	const Entity::SpotLight* spotLight[SPOT_LIGHT_COUNT] = {nullptr};
@@ -60,6 +62,11 @@ void PBRShader::ProcessScene(const Entity::Scene& scene)
 		activeSpotLightCount = 0;
 	}
 
+	// Save environment probes
+	_environmentProbeList.clear();
+	_environmentProbeList = scene.GetEnvironmentProbeList();
+	
+	// Save projection matrix
 	_projectionMatrix = scene.projectionMatrix;
 
 	// Process camera
@@ -129,17 +136,16 @@ void PBRShader::ProcessScene(const Entity::Scene& scene)
 }
 void PBRShader::ProcessMaterial(const Asset::Material& material)
 {
-	// TODO: Consider DebugMode
-	/*if(isDebugMode)
+	if(isDebugMode)
 	{
-		// Give green diffuse in debug mode
-		ShaderProgram::LoadUniform(_uniform_fs_material_diffuseMap_value, glm::vec4(0, 1, 0, 1));
-		ShaderProgram::LoadUniform(_uniform_fs_material_specularMap_value, glm::vec3(0, 1, 0));
-		ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(0, 1, 0));
-		ShaderProgram::LoadUniform(_uniform_fs_material_reflectionMap_value, glm::vec3(0, 0, 0));
-		ShaderProgram::LoadUniform(_uniform_fs_material_shininess, 128.0f);
+		// Give black diffuse in debug mode
+		ShaderProgram::LoadUniform(_uniform_fs_material_albedoMap_value, glm::vec4(0, 0, 0, 1));
+		ShaderProgram::LoadUniform(_uniform_fs_material_emissionMap_value, glm::vec3(0, 0, 0));
+		ShaderProgram::LoadUniform(_uniform_fs_material_metallicMap_value, 0.0f);
+		ShaderProgram::LoadUniform(_uniform_fs_material_roughnessMap_value, 1.0f);
+		ShaderProgram::LoadUniform(_uniform_fs_material_aoMap_value, 1.0f);
 	}
-	else*/
+	else
 	{
 		// Process material
 		const Asset::PBRMaterial* pbrMaterial = static_cast<const Asset::PBRMaterial*>(&material);
@@ -219,40 +225,6 @@ void PBRShader::ProcessMaterial(const Asset::Material& material)
 		{
 			ShaderProgram::LoadUniform(_uniform_fs_material_aoMap_value, pbrMaterial->aoMap.value);
 		}
-
-		if(pbrMaterial->environmentMap)
-		{
-			if(pbrMaterial->environmentMap->material.reflectionMap.texture)
-			{
-				glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, pbrMaterial->environmentMap->material.reflectionMap.texture->GetTextureID());
-				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, true);
-			}
-			else
-			{
-				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentIrradianceAvaible, false);
-			}
-
-			Entity::Cubemap* specularEnvironment = pbrMaterial->environmentMap->material.environmentMap;
-			if(specularEnvironment!=nullptr &&
-			   specularEnvironment->material.diffuseMap.texture!=nullptr &&
-			   specularEnvironment->material.reflectionMap.texture!=nullptr)
-			{
-				glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_FILTER);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, specularEnvironment->material.diffuseMap.texture->GetTextureID());
-				ShaderProgram::LoadUniform(_uniform_fs_environmentFilterMaxLOD, specularEnvironment->material.diffuseMap.value.r);
-
-				glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_BRDF);
-				glBindTexture(GL_TEXTURE_2D, specularEnvironment->material.reflectionMap.texture->GetTextureID());
-
-				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentSplitSumAvaible, true);
-			}
-			else
-			{
-				ShaderProgram::LoadUniform(_uniform_fs_isEnvironmentSplitSumAvaible, false);
-			}
-		}
-		
 	}
 }
 void PBRShader::ProcessTransform(const Entity::Transform& transform)
@@ -271,6 +243,65 @@ void PBRShader::ProcessTransform(const Entity::Transform& transform)
 
 	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelViewMatrix));
 	ShaderProgram::LoadUniform(_uniform_vs_normalMatrix, normalMatrix);
+
+	// Select closest environment maps
+	std::vector<std::pair<Entity::Cubemap, Tool::F64>> activeEnvironmentList;
+	std::map<Tool::F64, const Entity::EnvironmentProbe*> environmentDistanceMap;
+	for( auto& environmentProbe : _environmentProbeList )
+	{
+		Tool::F64 distance = glm::distance(transform.position, environmentProbe->GetPositon());
+		while(environmentDistanceMap.find(distance) != environmentDistanceMap.end())
+			distance += 0.0001;
+		environmentDistanceMap[distance] = environmentProbe;
+	}
+	for( auto& dist_env : environmentDistanceMap )
+	{
+		if(dist_env.first>=Entity::EnvironmentProbe::GetMaxEffectVolume() || activeEnvironmentList.size()>ENVIRONMENT_COUNT)
+			break;
+		else if(dist_env.second != nullptr && dist_env.first < dist_env.second->GetEffectVolume())
+			activeEnvironmentList.push_back(std::pair<Entity::Cubemap, Tool::F64>(dist_env.second->GetEnvironmentMap(), dist_env.first));
+	}
+
+	// Convert distances to weights
+	Tool::F64 redundantWeight = 0.0;
+	for( auto& env_dist : activeEnvironmentList )
+	{
+		Tool::F64 effectVolume = environmentDistanceMap[env_dist.second]->GetEffectVolume();
+
+		// TODO: Decide between distance functions
+
+		// Distance Function 1
+		// Blends in/out fast, strong influence in close range
+		env_dist.second =  1.0 - glm::pow(env_dist.second/effectVolume, 2);
+
+		// Distance Function 2
+		// Blends in/out smooth, weaker influence in close range
+		/*
+		Tool::F64 scaler = (2.0 * env_dist.second)/effectVolume - 1.0;
+		scaler = scaler > 0 ? glm::pow(scaler, 3.0/5.0) : -glm::pow(glm::abs(scaler), 3.0/5.0);
+		env_dist.second =  (1.0 - scaler) / 2.0;
+		*/
+
+		redundantWeight += env_dist.second;
+	}
+	if(redundantWeight > 0)
+		redundantWeight = 0.0f;
+	else
+		redundantWeight = (1.0 - redundantWeight) / static_cast<Tool::F64>(activeEnvironmentList.size());
+	
+	// Load environment maps
+	for( Tool::SIZE i=0 ; i<ENVIRONMENT_COUNT ; i++ )
+	{
+		if(activeEnvironmentList.size() > i)
+		{
+			auto& env_dist = activeEnvironmentList[i];
+			loadEnvironment(i, &env_dist.first, env_dist.second+redundantWeight);
+		}
+		else
+		{
+			loadEnvironment(i, nullptr, 0);
+		}
+	}
 }
 
 /***** PROTECTED *****/
@@ -291,10 +322,22 @@ bool PBRShader::Init()
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.roughnessMap.texture"), PBRShaderTexture::ROUGHNESS);
 	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_material.aoMap.texture"), PBRShaderTexture::AO);
 
-	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentIrradianceMap"), PBRShaderTexture::ENVIRONMENT_IRRADIANCE);
-	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentFilterMap"), PBRShaderTexture::ENVIRONMENT_FILTER);
-	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmnetBRDFLUT"), PBRShaderTexture::ENVIRONMENT_BRDF);
+	ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_environmentBRDFLUT"), PBRShaderTexture::ENVIRONMENT_BRDF);
+	for( int i=0 ; i<ENVIRONMENT_COUNT ; i++ )
+	{
+		std::string uniformNameList[] = {
+			"fs_environmentMap[i].irradianceMap",
+			"fs_environmentMap[i].filterMap"
+		};
 
+		for( int j=0 ; j<sizeof(uniformNameList)/sizeof(std::string) ; j++ )
+			uniformNameList[j][18] = '0' + i;
+
+		int j = 0;
+		ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str()), PBRShaderTexture::ENVIRONMENT_IRRADIANCE + i);
+		ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str()), PBRShaderTexture::ENVIRONMENT_FILTER + i);
+	}
+	
 	Stop();
 
 	return true;
@@ -322,10 +365,21 @@ void PBRShader::GetShaderUniformLocations()
 	_uniform_fs_material_metallicMap_value = ShaderProgram::GetUniformLocation("fs_material.metallicMap.value");
 	_uniform_fs_material_roughnessMap_value = ShaderProgram::GetUniformLocation("fs_material.roughnessMap.value");
 	_uniform_fs_material_aoMap_value = ShaderProgram::GetUniformLocation("fs_material.aoMap.value");
+	
+	for( int i=0 ; i<ENVIRONMENT_COUNT ; i++ )
+	{
+		std::string uniformNameList[] = {
+			"fs_environmentMap[i].filterMaxLOD",
+			"fs_environmentMap[i].weight"
+		};
 
-	_uniform_fs_isEnvironmentIrradianceAvaible = ShaderProgram::GetUniformLocation("fs_isEnvironmentIrradianceAvaible");
-	_uniform_fs_isEnvironmentSplitSumAvaible = ShaderProgram::GetUniformLocation("fs_isEnvironmentSplitSumAvaible");
-	_uniform_fs_environmentFilterMaxLOD = ShaderProgram::GetUniformLocation("fs_environmentFilterMaxLOD");
+		for( int j=0 ; j<sizeof(uniformNameList)/sizeof(std::string) ; j++ )
+			uniformNameList[j][18] = '0' + i;
+
+		int j = 0;
+		_uniform_fs_environmentMap_filterMaxLOD[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
+		_uniform_fs_environmentMap_weight[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
+	}
 
 	_uniform_fs_directionalLight_direction = ShaderProgram::GetUniformLocation("fs_directionalLight.direction");
 	_uniform_fs_directionalLight_color = ShaderProgram::GetUniformLocation("fs_directionalLight.color");
@@ -370,6 +424,31 @@ void PBRShader::GetShaderUniformLocations()
 		_uniform_fs_spotLight_color[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
 		_uniform_fs_spotLight_innerCutoff[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
 		_uniform_fs_spotLight_outerCutoff[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
+	}
+}
+
+/***** PRIVATE *****/
+
+void PBRShader::loadEnvironment(Tool::SIZE index, const Entity::Cubemap* environmentMap, Tool::F32 weight)
+{
+	if(environmentMap)
+	{
+		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE+index);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap->material.reflectionMap.texture->GetTextureID());
+
+		Entity::Cubemap* specularEnvironment = environmentMap->material.environmentMap;
+		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_FILTER+index);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, specularEnvironment->material.diffuseMap.texture->GetTextureID());
+
+		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_filterMaxLOD[index], specularEnvironment->material.diffuseMap.value.r);
+		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_weight[index], weight);
+
+		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_BRDF);
+		glBindTexture(GL_TEXTURE_2D, specularEnvironment->material.reflectionMap.texture->GetTextureID());
+	}
+	else
+	{
+		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_weight[index], 0.0f);
 	}
 }
 

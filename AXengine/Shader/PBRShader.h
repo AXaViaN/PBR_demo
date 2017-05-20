@@ -10,9 +10,10 @@
 #include "AXengine/Tool/Loader.h"
 #include "AXengine/Tool/Utility.h"
 
-namespace AX { namespace Core {
-class Engine;
-} }
+namespace AX {
+namespace Core { class Engine; }
+namespace Entity { class Cubemap; class EnvironmentProbe; }
+}
 
 namespace AX { namespace Shader {
 
@@ -38,8 +39,13 @@ protected:
 	virtual void GetShaderUniformLocations() override;
 
 private:
+	void loadEnvironment(Tool::SIZE index, const Entity::Cubemap* environmentMap, Tool::F32 weight);
+
+private:
 	glm::mat4 _projectionMatrix;
 	glm::mat4 _viewMatrix;
+
+	std::vector<const Entity::EnvironmentProbe*> _environmentProbeList;
 
 	Tool::U32 _uniform_vs_ModelViewProjectionMatrix;
 	Tool::U32 _uniform_vs_modelViewMatrix;
@@ -55,9 +61,9 @@ private:
 	Tool::U32 _uniform_fs_material_roughnessMap_value;
 	Tool::U32 _uniform_fs_material_aoMap_value;
 
-	Tool::U32 _uniform_fs_isEnvironmentIrradianceAvaible;
-	Tool::U32 _uniform_fs_isEnvironmentSplitSumAvaible;
-	Tool::U32 _uniform_fs_environmentFilterMaxLOD;
+	static const Tool::SIZE ENVIRONMENT_COUNT = 4;
+	Tool::U32 _uniform_fs_environmentMap_filterMaxLOD[ENVIRONMENT_COUNT];
+	Tool::U32 _uniform_fs_environmentMap_weight[ENVIRONMENT_COUNT];
 	
 	Tool::U32 _uniform_fs_directionalLight_direction;
 	Tool::U32 _uniform_fs_directionalLight_color;

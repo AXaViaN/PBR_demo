@@ -7,6 +7,7 @@
 #define __AX__SHADER__SHADER_PROGRAM_H
 
 #include "AXengine/Entity/Scene.h"
+#include "AXengine/Entity/Transform.h"
 #include "AXengine/Asset/Material.h"
 #include "AXengine/Tool/Utility.h"
 #include <glm/glm.hpp>
