@@ -1,22 +1,23 @@
 /**
- *	File: AXengine/Shader/PhongShader.h
- *	Purpose: Shader for basic lighting
+ *	File: AXengine/Shader/PBRShader.h
+ *	Purpose: Shader for PBR lighting
  */
 
-#ifndef __AX__SHADER__PHONG_SHADER_H
-#define __AX__SHADER__PHONG_SHADER_H
+#ifndef __AX__SHADER__PBR_SHADER_H
+#define __AX__SHADER__PBR_SHADER_H
 
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Loader.h"
 #include "AXengine/Tool/Utility.h"
 
-namespace AX { namespace Core {
-class Engine;
-} }
+namespace AX {
+namespace Core { class Engine; }
+namespace Entity { class Cubemap; class EnvironmentProbe; }
+}
 
 namespace AX { namespace Shader {
 
-class PhongShader : public ShaderProgram {
+class PBRShader : public ShaderProgram {
 public:
 	virtual void ProcessScene(const Entity::Scene& scene) override;
 	virtual void ProcessMaterial(const Asset::Material& material) override;
@@ -38,8 +39,13 @@ protected:
 	virtual void GetShaderUniformLocations() override;
 
 private:
+	void loadEnvironment(Tool::SIZE index, const Entity::Cubemap* environmentMap, Tool::F32 weight);
+
+private:
 	glm::mat4 _projectionMatrix;
 	glm::mat4 _viewMatrix;
+
+	std::vector<const Entity::EnvironmentProbe*> _environmentProbeList;
 
 	Tool::U32 _uniform_vs_ModelViewProjectionMatrix;
 	Tool::U32 _uniform_vs_modelViewMatrix;
@@ -48,23 +54,23 @@ private:
 
 	Tool::U32 _uniform_fs_cameraPosition;
 
-	Tool::U32 _uniform_fs_material_diffuseMap_value;
-	Tool::U32 _uniform_fs_material_specularMap_value;
-	Tool::U32 _uniform_fs_material_normalMap_value;
+	Tool::U32 _uniform_fs_material_albedoMap_value;
 	Tool::U32 _uniform_fs_material_emissionMap_value;
-	Tool::U32 _uniform_fs_material_reflectionMap_value;
-	Tool::U32 _uniform_fs_material_shininess;
+	Tool::U32 _uniform_fs_material_normalMap_value;
+	Tool::U32 _uniform_fs_material_metallicMap_value;
+	Tool::U32 _uniform_fs_material_roughnessMap_value;
+	Tool::U32 _uniform_fs_material_aoMap_value;
 
+	static const Tool::SIZE ENVIRONMENT_COUNT = 4;
+	Tool::U32 _uniform_fs_environmentMap_filterMaxLOD[ENVIRONMENT_COUNT];
+	Tool::U32 _uniform_fs_environmentMap_weight[ENVIRONMENT_COUNT];
+	
 	Tool::U32 _uniform_fs_directionalLight_direction;
-	Tool::U32 _uniform_fs_directionalLight_color_diffuse;
-	Tool::U32 _uniform_fs_directionalLight_color_specular;
-	Tool::U32 _uniform_fs_directionalLight_color_ambient;
+	Tool::U32 _uniform_fs_directionalLight_color;
 
 	static const Tool::SIZE POINT_LIGHT_COUNT = 8;
 	Tool::U32 _uniform_fs_pointLight_position[POINT_LIGHT_COUNT];
-	Tool::U32 _uniform_fs_pointLight_color_diffuse[POINT_LIGHT_COUNT];
-	Tool::U32 _uniform_fs_pointLight_color_specular[POINT_LIGHT_COUNT];
-	Tool::U32 _uniform_fs_pointLight_color_ambient[POINT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_pointLight_color[POINT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_pointLight_constant[POINT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_pointLight_linear[POINT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_pointLight_quadric[POINT_LIGHT_COUNT];
@@ -72,9 +78,7 @@ private:
 	static const Tool::SIZE SPOT_LIGHT_COUNT = 8;
 	Tool::U32 _uniform_fs_spotLight_position[SPOT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_spotLight_direction[SPOT_LIGHT_COUNT];
-	Tool::U32 _uniform_fs_spotLight_color_diffuse[SPOT_LIGHT_COUNT];
-	Tool::U32 _uniform_fs_spotLight_color_specular[SPOT_LIGHT_COUNT];
-	Tool::U32 _uniform_fs_spotLight_color_ambient[SPOT_LIGHT_COUNT];
+	Tool::U32 _uniform_fs_spotLight_color[SPOT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_spotLight_innerCutoff[SPOT_LIGHT_COUNT];
 	Tool::U32 _uniform_fs_spotLight_outerCutoff[SPOT_LIGHT_COUNT];
 
@@ -82,4 +86,4 @@ private:
 
 } } // namespace AX::Shader
 
-#endif // __AX__SHADER__PHONG_SHADER_H
+#endif // __AX__SHADER__PBR_SHADER_H

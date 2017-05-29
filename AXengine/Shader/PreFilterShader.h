@@ -1,22 +1,22 @@
 /**
- *	File: AXengine/Shader/SkyboxShader.h
- *	Purpose: Shader program for skybox rendering
+ *	File: AXengine/Shader/PreFilterShader.h
+ *	Purpose: Shader program for pre-filtering cubemaps
  */
 
-#ifndef __AX__SHADER__SKYBOX_SHADER_H
-#define __AX__SHADER__SKYBOX_SHADER_H
+#ifndef __AX__SHADER__PRE_FILTER_SHADER_H
+#define __AX__SHADER__PRE_FILTER_SHADER_H
 
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Loader.h"
 #include "AXengine/Tool/Utility.h"
 
-namespace AX { namespace Core {
-class Engine;
+namespace AX { namespace Entity {
+class EnvironmentProbe;
 } }
 
 namespace AX { namespace Shader {
 
-class SkyboxShader : public ShaderProgram {
+class PreFilterShader : public ShaderProgram {
 public:
 	virtual void ProcessScene(const Entity::Scene& scene) override;
 	virtual void ProcessMaterial(const Asset::Material& material) override;
@@ -24,16 +24,22 @@ public:
 
 protected:
 	/**
-	 * Init and Terminate is only visible for Engine
+	 * Init and Terminate is only visible for EnvironmentProbe
 	 * 
 	 * This is done to prevent API users to call these methods.
 	 */
-	friend class Core::Engine;
-	bool Init()
+	friend class Entity::EnvironmentProbe;
+	bool Init(Tool::U32 sampleCount)
 	{
-		bool initResult = ShaderProgram::Init("Shader/SkyboxVertex.glsl", "Shader/SkyboxFragment.glsl");
+		bool initResult = ShaderProgram::Init("Shader/PreFilterVertex.glsl", "Shader/PreFilterFragment.glsl");
 		if(initResult == false)
 			return false;
+
+		Start();
+
+		ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_sampleCount"), sampleCount);
+
+		Stop();
 
 		return true;
 	}
@@ -51,6 +57,9 @@ protected:
 	virtual void GetShaderUniformLocations() override
 	{
 		_uniform_vs_ViewProjectionMatrix = ShaderProgram::GetUniformLocation("vs_ViewProjectionMatrix");
+
+		_uniform_fs_roughness = ShaderProgram::GetUniformLocation("fs_roughness");
+		_uniform_fs_resolution = ShaderProgram::GetUniformLocation("fs_resolution");
 	}
 
 private:
@@ -58,8 +67,11 @@ private:
 
 	Tool::U32 _uniform_vs_ViewProjectionMatrix;
 
+	Tool::U32 _uniform_fs_roughness;
+	Tool::U32 _uniform_fs_resolution;
+	
 };
 
 } } // namespace AX::Shader
 
-#endif // __AX__SHADER__SKYBOX_SHADER_H
+#endif // __AX__SHADER__PRE_FILTER_SHADER_H

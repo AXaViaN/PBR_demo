@@ -1,15 +1,21 @@
 #include "AXengine/Asset/Model.h"
 
 #include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Asset/PBRMaterial.h"
 #include "AXengine/Tool/Loader.h"
 
 namespace AX { namespace Asset {
 
 template class Model<PhongMaterial>;
+template class Model<PBRMaterial>;
 
 void Model<PhongMaterial>::Load(const Tool::CHR* filePath, bool useSmoothNormals)
 {
 	*this = Tool::Loader::LoadPhongModel(filePath, useSmoothNormals);
+}
+void Model<PBRMaterial>::Load(const Tool::CHR* filePath, bool useSmoothNormals)
+{
+	*this = Tool::Loader::LoadPBRModel(filePath, useSmoothNormals);
 }
 
 template<typename T> Entity::GameObject* Model<T>::InstantiateGameObject()

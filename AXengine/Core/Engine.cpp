@@ -47,21 +47,28 @@ bool Engine::Init(Game* game)
 
 	Gfx::Renderer::Instance().Init();
 
-	initResult = standardShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = standardShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("StandardShader cannot be initialized!");
 		return false;
 	}
 
-	initResult = phongShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = phongShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("PhongShader cannot be initialized!");
 		return false;
 	}
 
-	initResult = skyboxShader.Init(Gfx::Renderer::GetDefaultProjectionMatrix());
+	initResult = pbrShader.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("PBRShader cannot be initialized!");
+		return false;
+	}
+
+	initResult = skyboxShader.Init();
 	if(initResult == false)
 	{
 		Tool::Debug::LogWarning("SkyboxShader cannot be initialized!");
@@ -115,6 +122,7 @@ void Engine::Terminate()
 	standardShader2D.Terminate();
 	textShader.Terminate();
 	phongShader.Terminate();
+	pbrShader.Terminate();
 	standardShader.Terminate();
 
 	Tool::Loader::Terminate();
@@ -136,7 +144,6 @@ void Engine::Run()
 	toneShader.SetGamma(2.0f);
 	bool useAutoExposure = true;
 	Tool::F32 hdrExposure = 1.0f;
-	_game->Start();
 	
 	Gfx::FrameBuffer renderBuffer;
 	bool initResult = renderBuffer.Init(window.GetWindowSize(), Gfx::FrameBuffer::HDR_COLOR | Gfx::FrameBuffer::COLOR_TEXTURE__DEPTH_STENCIL_BUFFER);
@@ -151,7 +158,9 @@ void Engine::Run()
 	renderQuad.material.diffuseMap.texture = &renderBuffer.GetColorTexture();
 
 	_isRunning = true;
-	while(_isRunning && input.IsWindowClosed() == false)
+	_game->Start();
+	Gfx::Renderer::PrepareScene();
+	while(_isRunning && input.IsWindowClosed()==false)
 	{
 		input.Update();
 
@@ -177,7 +186,14 @@ void Engine::Run()
 			Tool::F32 averageBrightness = renderBuffer.GetAvarageBrightness();
 			if(averageBrightness > 0)
 			{
-				hdrExposure = glm::lerp<Tool::F32>(hdrExposure, 0.5f/averageBrightness, 0.1);
+				Tool::F32 targetExposure = 0.5f/averageBrightness;
+				Tool::F32 lerpRate = 0.1f;
+				// Adapting from bright to dark is slower
+				if(targetExposure > hdrExposure)
+					lerpRate *= 0.25f;
+
+				hdrExposure = glm::lerp<Tool::F32>(hdrExposure, targetExposure, lerpRate);
+				hdrExposure = glm::clamp(hdrExposure, 0.0f, 3.0f);
 				useAutoExposure = toneShader.SetAutoExposure(hdrExposure);
 			}
 		}

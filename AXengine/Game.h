@@ -11,6 +11,7 @@
 
 #include "AXengine/Asset/Material.h"
 #include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Asset/PBRMaterial.h"
 #include "AXengine/Asset/Model.h"
 #include "AXengine/Asset/Mesh.h"
 #include "AXengine/Asset/Texture.h"
@@ -21,6 +22,7 @@
 #include "AXengine/Entity/SpotLight.h"
 #include "AXengine/Entity/Quad.h"
 #include "AXengine/Entity/Cubemap.h"
+#include "AXengine/Entity/EnvironmentProbe.h"
 #include "AXengine/Entity/Text.h"
 #include "AXengine/Gfx/Renderer.h"
 #include "AXengine/Gfx/Renderer2D.h"
@@ -68,11 +70,6 @@ public:
 
 // RegisterGameClass defines the program entry point
 #define RegisterGameClass(GameClass) \
-	int main(int argc, const char* argv[]) \
-	{ \
-		GameClass game; \
-		game.Run(); \
-		return 0; \
-	}
+	int main(int argc, const char* argv[]) { GameClass().Run(); return 0; }
 
 #endif // __AX__GAME_H

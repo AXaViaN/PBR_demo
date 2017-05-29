@@ -99,7 +99,22 @@
     <ClCompile Include="AXengine\Shader\ToneShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AXengine\Shader\PBRShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Asset\PBRMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Entity\EnvironmentProbe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Shader\ConvolutionShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Test\PBRscene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AXengine\Shader\PreFilterShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -216,6 +231,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AXengine\Shader\ToneShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Shader\PBRShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Asset\PBRMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Entity\EnvironmentProbe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Shader\ConvolutionShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Shader\PreFilterShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Shader\BRDFIntegrationShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

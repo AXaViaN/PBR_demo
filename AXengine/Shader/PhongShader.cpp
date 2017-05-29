@@ -7,7 +7,6 @@
 #include "AXengine/Entity/SpotLight.h"
 #include "AXengine/Gfx/Renderer.h"
 #include <GL/glew.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
 namespace AX { namespace Shader {
@@ -58,6 +57,8 @@ void PhongShader::ProcessScene(const Entity::Scene& scene)
 			spotLight[i] = nullptr;
 		activeSpotLightCount = 0;
 	}
+
+	_projectionMatrix = scene.projectionMatrix;
 
 	// Process camera
 	_viewMatrix = glm::mat4();
@@ -201,7 +202,7 @@ void PhongShader::ProcessMaterial(const Asset::Material& material)
 		
 		// Environment Map && Reflection Map
 		// Don't use reflection map if no environment map is avaible
-		if(phongMaterial->environmentMap)
+		if(phongMaterial->environmentMap!=nullptr && phongMaterial->environmentMap->material.diffuseMap.texture!=nullptr)
 		{
 			glActiveTexture(GL_TEXTURE0 + PhongShaderTexture::ENVIRONMENT);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, phongMaterial->environmentMap->material.diffuseMap.texture->GetTextureID());
@@ -243,13 +244,11 @@ void PhongShader::ProcessTransform(const Entity::Transform& transform)
 
 /***** PROTECTED *****/
 
-bool PhongShader::Init(const glm::mat4& projectionMatrix)
+bool PhongShader::Init()
 {
 	bool initResult = ShaderProgram::Init("Shader/PhongVertex.glsl", "Shader/PhongFragment.glsl");
 	if(initResult == false)
 		return false;
-
-	_projectionMatrix = projectionMatrix;
 
 	// Set uniform texture positions
 	Start();

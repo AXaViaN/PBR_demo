@@ -1,22 +1,22 @@
 /**
- *	File: AXengine/Shader/SkyboxShader.h
- *	Purpose: Shader program for skybox rendering
+ *	File: AXengine/Shader/ConvolutionShader.h
+ *	Purpose: Shader program for convoluting cubemaps
  */
 
-#ifndef __AX__SHADER__SKYBOX_SHADER_H
-#define __AX__SHADER__SKYBOX_SHADER_H
+#ifndef __AX__SHADER__CONVOLUTION_SHADER_H
+#define __AX__SHADER__CONVOLUTION_SHADER_H
 
 #include "AXengine/Shader/ShaderProgram.h"
 #include "AXengine/Tool/Loader.h"
 #include "AXengine/Tool/Utility.h"
 
-namespace AX { namespace Core {
-class Engine;
+namespace AX { namespace Entity {
+class EnvironmentProbe;
 } }
 
 namespace AX { namespace Shader {
 
-class SkyboxShader : public ShaderProgram {
+class ConvolutionShader : public ShaderProgram {
 public:
 	virtual void ProcessScene(const Entity::Scene& scene) override;
 	virtual void ProcessMaterial(const Asset::Material& material) override;
@@ -24,16 +24,22 @@ public:
 
 protected:
 	/**
-	 * Init and Terminate is only visible for Engine
+	 * Init and Terminate is only visible for EnvironmentProbe
 	 * 
 	 * This is done to prevent API users to call these methods.
 	 */
-	friend class Core::Engine;
-	bool Init()
+	friend class Entity::EnvironmentProbe;
+	bool Init(Tool::F32 sampleDelta)
 	{
-		bool initResult = ShaderProgram::Init("Shader/SkyboxVertex.glsl", "Shader/SkyboxFragment.glsl");
+		bool initResult = ShaderProgram::Init("Shader/ConvolutionVertex.glsl", "Shader/ConvolutionFragment.glsl");
 		if(initResult == false)
 			return false;
+
+		Start();
+
+		ShaderProgram::LoadUniform(ShaderProgram::GetUniformLocation("fs_sampleDelta"), sampleDelta);
+
+		Stop();
 
 		return true;
 	}
@@ -62,4 +68,4 @@ private:
 
 } } // namespace AX::Shader
 
-#endif // __AX__SHADER__SKYBOX_SHADER_H
+#endif // __AX__SHADER__CONVOLUTION_SHADER_H

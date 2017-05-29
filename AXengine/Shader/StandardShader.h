@@ -30,14 +30,12 @@ protected:
 	 * StandardShader is the default shader of the engine.
 	 */
 	friend class Core::Engine;
-	bool Init(const glm::mat4& projectionMatrix)
+	bool Init()
 	{
 		bool initResult = ShaderProgram::Init("Shader/StandardVertex.glsl", "Shader/StandardFragment.glsl");
 		if(initResult == false)
 			return false;
 
-		_projectionMatrix = projectionMatrix;
-		
 		return true;
 	}
 	void Terminate()

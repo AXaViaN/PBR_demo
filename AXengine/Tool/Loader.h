@@ -10,6 +10,7 @@
 #include "AXengine/Asset/Texture.h"
 #include "AXengine/Asset/Model.h"
 #include "AXengine/Asset/PhongMaterial.h"
+#include "AXengine/Asset/PBRMaterial.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 #include <assimp/Importer.hpp>
@@ -24,6 +25,7 @@ namespace AX { namespace Tool {
 class Loader : public Singleton<Loader> {
 public:
 	static Asset::Model<Asset::PhongMaterial> LoadPhongModel(const CHR* filePath, bool useSmoothNormals);
+	static Asset::Model<Asset::PBRMaterial> LoadPBRModel(const CHR* filePath, bool useSmoothNormals);
 
 	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap, bool isSRGB=true);
 	static Asset::Texture LoadCubeMapTexture(std::vector<const CHR*> filePathList);
