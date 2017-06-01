@@ -29,6 +29,7 @@ public:
 
 	static Asset::Texture LoadTexture(const CHR* filePath, bool addMipmap, bool isSRGB=true);
 	static Asset::Texture LoadCubeMapTexture(std::vector<const CHR*> filePathList);
+	static Asset::Texture LoadHDREquirectangular(const CHR* filePath);
 
 	static Asset::Mesh LoadMesh(F32 positionList[], SIZE positionListSize, 
 								U32 indexList[], SIZE indexListSize);

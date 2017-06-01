@@ -11,16 +11,19 @@
 #include "AXengine/Asset/Texture.h"
 #include "AXengine/Tool/Utility.h"
 
-namespace AX { namespace Core {
-class Engine;
-} }
+namespace AX {
+namespace Core { class Engine; }
+namespace Entity { class EnvironmentProbe; }
+}
 
 namespace AX { namespace Entity {
 
 class Cubemap {
 public:
 	Cubemap();
+	Cubemap(EnvironmentProbe* probe);
 
+	void Load(const Tool::CHR* hdrEquirectangularPath);
 	void Load(const Tool::CHR* right, const Tool::CHR* left, const Tool::CHR* up,
 			  const Tool::CHR* bottom, const Tool::CHR* back, const Tool::CHR* front);
 	void Dispose()

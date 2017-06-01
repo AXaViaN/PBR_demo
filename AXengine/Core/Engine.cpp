@@ -74,7 +74,14 @@ bool Engine::Init(Game* game)
 		Tool::Debug::LogWarning("SkyboxShader cannot be initialized!");
 		return false;
 	}
-	
+
+	initResult = equirectangularShader.Init();
+	if(initResult == false)
+	{
+		Tool::Debug::LogWarning("EquirectangularShader cannot be initialized!");
+		return false;
+	}
+
 	Gfx::Renderer2D::Instance().Init();
 	Entity::Quad::InitMesh();
 	Entity::Cubemap::InitMesh();
@@ -117,6 +124,7 @@ void Engine::Terminate()
 	Entity::Cubemap::DisposeMesh();
 
 	toneShader.Terminate();
+	equirectangularShader.Terminate();
 	skyboxShader.Terminate();
 	kernelShader.Terminate();
 	standardShader2D.Terminate();
@@ -203,6 +211,7 @@ void Engine::Run()
 	}
 	
 	_game->Dispose();
+	renderBuffer.Terminate();
 }
 
 } } // namespace AX::Core

@@ -11,17 +11,16 @@ out vec4 out_color;
 
 void main()
 {
-	vec2 uvOffset[] = {
-		vec2(-fs_offset,  fs_offset),
-		vec2( 0.0,        fs_offset),
-		vec2( fs_offset,  fs_offset),
-		vec2(-fs_offset,  0.0),
-		vec2( 0.0,        0.0),
-		vec2( fs_offset,  0.0),
-		vec2(-fs_offset, -fs_offset),
-		vec2( 0.0,       -fs_offset),
-		vec2( fs_offset, -fs_offset)
-	};
+	vec2 uvOffset[9];
+	uvOffset[0] = vec2(-fs_offset,  fs_offset);
+	uvOffset[1] = vec2( 0.0,        fs_offset);
+	uvOffset[2] = vec2( fs_offset,  fs_offset);
+	uvOffset[3] = vec2(-fs_offset,  0.0);
+	uvOffset[4] = vec2( 0.0,        0.0);
+	uvOffset[5] = vec2( fs_offset,  0.0);
+	uvOffset[6] = vec2(-fs_offset, -fs_offset);
+	uvOffset[7] = vec2( 0.0,       -fs_offset);
+	uvOffset[8] = vec2( fs_offset, -fs_offset);
 	
 	out_color = vec4(0.0);
 	for( int i=0 ; i<9 ; i++ )

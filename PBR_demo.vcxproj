@@ -70,13 +70,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\_build\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)\ThirdParty\freetype-2.7.1\include;$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThirdParty\stb_image-2.15\include;$(SolutionDir)\ThirdParty\freetype-2.7.1\include;$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\ThirdParty\freetype-2.7.1\lib\Release Multithreaded\x64;$(SolutionDir)\ThirdParty\assimp-3.3.1\lib\Release\x64;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\lib\x64;$(SolutionDir)\ThirdParty\SDL2-2.0.5\lib\x64;$(SolutionDir)\ThirdParty\glew-2.0.0\lib\Release\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <IntDir>$(SolutionDir)\_build\obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\_build\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)\ThirdParty\freetype-2.7.1\include;$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThirdParty\stb_image-2.15\include;$(SolutionDir)\ThirdParty\freetype-2.7.1\include;$(SolutionDir)\ThirdParty\assimp-3.3.1\include;$(SolutionDir)\ThirdParty\glm-0.9.8.4\include;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\include;$(SolutionDir)\ThirdParty\SDL2-2.0.5\include;$(SolutionDir)\ThirdParty\glew-2.0.0\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\ThirdParty\freetype-2.7.1\lib\Release Multithreaded\x64;$(SolutionDir)\ThirdParty\assimp-3.3.1\lib\Release\x64;$(SolutionDir)\ThirdParty\SDL2_image-2.0.1\lib\x64;$(SolutionDir)\ThirdParty\SDL2-2.0.5\lib\x64;$(SolutionDir)\ThirdParty\glew-2.0.0\lib\Release\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <IntDir>$(SolutionDir)\_build\obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -149,6 +149,7 @@
     <ClCompile Include="AXengine\Gfx\SkyboxRenderer.cpp" />
     <ClCompile Include="AXengine\Gfx\TextRenderer.cpp" />
     <ClCompile Include="AXengine\Shader\ConvolutionShader.cpp" />
+    <ClCompile Include="AXengine\Shader\EquirectangularShader.cpp" />
     <ClCompile Include="AXengine\Shader\PBRShader.cpp" />
     <ClCompile Include="AXengine\Shader\PreFilterShader.cpp" />
     <ClCompile Include="AXengine\Shader\ToneShader.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="AXengine\Gfx\TextRenderer.h" />
     <ClInclude Include="AXengine\Shader\BRDFIntegrationShader.h" />
     <ClInclude Include="AXengine\Shader\ConvolutionShader.h" />
+    <ClInclude Include="AXengine\Shader\EquirectangularShader.h" />
     <ClInclude Include="AXengine\Shader\PBRShader.h" />
     <ClInclude Include="AXengine\Shader\PreFilterShader.h" />
     <ClInclude Include="AXengine\Shader\ToneShader.h" />

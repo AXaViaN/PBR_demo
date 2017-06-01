@@ -1,12 +1,14 @@
 #include "AXengine/Tool/Loader.h"
 
 #include "AXengine/Tool/Debug.h"
+#include <map>
 #include <vector>
 #include <GL/glew.h>
 #include <SDL2/SDL_image.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <map>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 
 namespace AX { namespace Tool {
 
@@ -233,6 +235,37 @@ Asset::Texture Loader::LoadCubeMapTexture(std::vector<const CHR*> filePathList)
 
 	return Asset::Texture(textureID);
 }
+Asset::Texture Loader::LoadHDREquirectangular(const CHR* filePath)
+{
+	I32 width, height, components;
+	F32* pixels = stbi_loadf(filePath, &width, &height, &components, 0);
+	if(pixels == nullptr)
+	{
+		Debug::LogWarning("Loading HDR equirectangular from %s failed!", filePath);
+		return Asset::Texture(0);
+	}
+
+	U32 textureID;
+	glGenTextures(1, &textureID);
+	if(textureID == 0)
+	{
+		Debug::LogWarning("OpenGL texture generator failed!");
+		return Asset::Texture(0);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, pixels);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_image_free(pixels);
+
+	return Asset::Texture(textureID);
+}
 
 Asset::Mesh Loader::LoadMesh(F32 positionList[], SIZE positionListSize, U32 indexList[], SIZE indexListSize)
 {
@@ -264,6 +297,8 @@ bool Loader::Init()
 		Debug::LogWarning("Texture loader failed to initialize.");
 		return false;
 	}
+
+	stbi_set_flip_vertically_on_load(true);
 
 	return true;
 }

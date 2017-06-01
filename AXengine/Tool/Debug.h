@@ -96,6 +96,8 @@ public:
 			
 			std::fprintf(stderr, " {%s::%d} [%ums]\n", func, line, SDL_GetTicks());
 		#endif
+
+		std::fflush(stderr);
 	}
 	static void __dont_log() { }
 	

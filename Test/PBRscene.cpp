@@ -9,26 +9,22 @@ using namespace AX::Tool;
 class PBRscene : public AX::Game {
 public:
 	FreeCamera camera;
-	Cubemap daySkybox;
-	Cubemap sunsetSkybox;
-	Cubemap nightSkybox;
-	Cubemap sunnySkybox;
+	Cubemap skyboxList[6];
+	EnvironmentProbe probeList[6];
 
 	Model<PBRMaterial> sphereModel;
 	GameObject* sphere;
 
-	EnvironmentProbe dayProbe;
-	EnvironmentProbe sunsetProbe;
-	EnvironmentProbe nightProbe;
-	EnvironmentProbe sunnyProbe;
-
 	Cubemap* currentSkybox;
 	EnvironmentProbe* currentProbe;
+
+	Text infoText;
 
 	void Start()
 	{
 		// Setup
 		Input::ActivateMouseMotion(false);
+		TextRenderer::Init("Test/Data/arial.ttf");
 
 		// Set Camera
 		camera.transform.SetPosition(0, 0, 2);
@@ -38,72 +34,52 @@ public:
 		sphere = sphereModel.InstantiateGameObject();
 		
 		// Skybox
-		daySkybox.Load("Test/Data/Skybox/Above The Sea/right.png",
-						"Test/Data/Skybox/Above The Sea/left.png",
-						"Test/Data/Skybox/Above The Sea/top.png",
-						"Test/Data/Skybox/Above The Sea/bottom.png",
-						"Test/Data/Skybox/Above The Sea/back.png",
-						"Test/Data/Skybox/Above The Sea/front.png");
-		sunsetSkybox.Load("Test/Data/Skybox/Sunset/right.png",
-						"Test/Data/Skybox/Sunset/left.png",
-						"Test/Data/Skybox/Sunset/top.png",
-						"Test/Data/Skybox/Sunset/bottom.png",
-						"Test/Data/Skybox/Sunset/back.png",
-						"Test/Data/Skybox/Sunset/front.png");
-		nightSkybox.Load("Test/Data/Skybox/Grimm Night/right.png",
-						"Test/Data/Skybox/Grimm Night/left.png",
-						"Test/Data/Skybox/Grimm Night/top.png",
-						"Test/Data/Skybox/Grimm Night/bottom.png",
-						"Test/Data/Skybox/Grimm Night/back.png",
-						"Test/Data/Skybox/Grimm Night/front.png");
-		sunnySkybox.Load("Test/Data/Skybox/Sunny/right.png",
-						 "Test/Data/Skybox/Sunny/left.png",
-						 "Test/Data/Skybox/Sunny/top.png",
-						 "Test/Data/Skybox/Sunny/bottom.png",
-						 "Test/Data/Skybox/Sunny/back.png",
-						 "Test/Data/Skybox/Sunny/front.png");
-
-		currentSkybox = &daySkybox;
+		skyboxList[0].Load("Test/Data/Skybox/GCanyon.hdr");
+		skyboxList[1].Load("Test/Data/Skybox/Tokyo_BigSight.hdr");
+		skyboxList[2].Load("Test/Data/Skybox/Topanga_Forest.hdr");
+		skyboxList[3].Load("Test/Data/Skybox/Tropical_Beach.hdr");
+		skyboxList[4].Load("Test/Data/Skybox/TropicalRuins.hdr");
+		skyboxList[5].Load("Test/Data/Skybox/WinterForest.hdr");
 
 		// Environment
 		EnvironmentProbe::InitCaptureShader();
-		dayProbe.Init(512);
-		dayProbe.Capture([](void* sceneInstance){
-			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->daySkybox);
-		}, this);
 
-		sunsetProbe.Init(512);
-		sunsetProbe.Capture([](void* sceneInstance){
-			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->sunsetSkybox);
-		}, this);
-
-		nightProbe.Init(512);
-		nightProbe.Capture([](void* sceneInstance){
-			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->nightSkybox);
-		}, this);
-
-		sunnyProbe.Init(512);
-		sunnyProbe.Capture([](void* sceneInstance){
-			SkyboxRenderer::Render(reinterpret_cast<PBRscene*>(sceneInstance)->sunnySkybox);
-		}, this);
+		for( SIZE i=0 ; i<6 ; i++ )
+		{
+			probeList[i].Init(512);
+			currentSkybox = &skyboxList[i];
+			probeList[i].Capture([](void* sceneInstance){
+				SkyboxRenderer::Render(*(reinterpret_cast<PBRscene*>(sceneInstance)->currentSkybox));
+			}, this);
+		}
 
 		EnvironmentProbe::TerminateCaptureShader();
 
-		currentProbe = &dayProbe;
+		currentSkybox = &skyboxList[0];
+		currentProbe = &probeList[0];
+
+		// Text
+		infoText.text = "[1-6] Change environment    "
+						"[SPACE] Rotate camera around sphere    "
+						"[LMB] Enter FreeCam    "
+						"[RMB] Exit FreeCam    "
+						"[F] Fullscreen    "
+						"[ESC] Exit";
+		infoText.size = 18;
+		infoText.color = glm::vec3(1.0, 1.0, 1.0);
+		infoText.position = glm::vec2(50, 10);
+		infoText.backgroundColor = glm::vec4(0, 0, 0, 0.7);
+		infoText.backgroundBorder = glm::vec2(5, 5);
 	}
 	void Dispose()
 	{
+		for( SIZE i=0 ; i<6 ; i++ )
+		{
+			skyboxList[i].Dispose();
+			probeList[i].Dispose();
+		}
+
 		sphereModel.Dispose();
-
-		daySkybox.Dispose();
-		sunsetSkybox.Dispose();
-		nightSkybox.Dispose();
-		sunnySkybox.Dispose();
-
-		dayProbe.Dispose();
-		sunsetProbe.Dispose();
-		nightProbe.Dispose();
-		sunnyProbe.Dispose();
 	}
 
 	void Update()
@@ -124,25 +100,14 @@ public:
 		if(Input::GetMouseButtonDown(Input::MouseButton::RIGHT))
 			Input::ActivateMouseMotion(false);
 
-		if(Input::GetKeyDown(SDL_SCANCODE_1))
+		for( SIZE i=0 ; i<6 ; i++ )
 		{
-			currentSkybox = &daySkybox;
-			currentProbe = &dayProbe;
-		}
-		if(Input::GetKeyDown(SDL_SCANCODE_2))
-		{
-			currentSkybox = &sunsetSkybox;
-			currentProbe = &sunsetProbe;
-		}
-		if(Input::GetKeyDown(SDL_SCANCODE_3))
-		{
-			currentSkybox = &nightSkybox;
-			currentProbe = &nightProbe;
-		}
-		if(Input::GetKeyDown(SDL_SCANCODE_4))
-		{
-			currentSkybox = &sunnySkybox;
-			currentProbe = &sunnyProbe;
+			if(Input::GetKeyDown(SDL_SCANCODE_1 + i))
+			{
+				currentSkybox = &skyboxList[i];
+				currentProbe = &probeList[i];
+				break;
+			}
 		}
 
 		static bool isAutoRotating = false;
@@ -172,6 +137,8 @@ public:
 		SkyboxRenderer::Render(*currentSkybox);
 
 		sphere->Render();
+
+		infoText.Render();
 	}
 
 };

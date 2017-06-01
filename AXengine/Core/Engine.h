@@ -14,6 +14,7 @@
 #include "AXengine/Shader/ToneShader.h"
 #include "AXengine/Shader/TextShader.h"
 #include "AXengine/Shader/SkyboxShader.h"
+#include "AXengine/Shader/EquirectangularShader.h"
 #include "AXengine/Tool/Singleton.h"
 #include "AXengine/Tool/Utility.h"
 
@@ -58,6 +59,7 @@ public:
 	Shader::ToneShader toneShader;
 	Shader::TextShader textShader;
 	Shader::SkyboxShader skyboxShader;
+	Shader::EquirectangularShader equirectangularShader;
 
 	const Tool::CHR* name = "PBR Demo Engine";
 

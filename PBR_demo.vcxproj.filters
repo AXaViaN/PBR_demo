@@ -117,6 +117,9 @@
     <ClCompile Include="AXengine\Shader\PreFilterShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AXengine\Shader\EquirectangularShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AXengine\Core\Engine.h">
@@ -249,6 +252,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AXengine\Shader\BRDFIntegrationShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AXengine\Shader\EquirectangularShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
