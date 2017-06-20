@@ -21,7 +21,10 @@ namespace AX { namespace Entity {
 
 class EnvironmentProbe {
 public:
+	EnvironmentProbe() : _isSkyboxProbe(false) { }
+
 	void Init(Tool::U32 frameSize, Tool::F64 effectVolume=10);
+	void InitSkyboxProbe(Tool::U32 frameSize) { _isSkyboxProbe=true; Init(frameSize, 9999999); }
 	void Dispose();
 	
 	static bool InitCaptureShader(Tool::F32 irradianceSampleDelta=0.025f, Tool::U32 preFilterSampleCount=1024);
@@ -33,6 +36,7 @@ public:
 	const glm::vec3& GetPositon() const { return _captureCamera.transform.position; }
 	const Tool::F64& GetEffectVolume() const { return _effectVolume; }
 	static const Tool::F64& GetMaxEffectVolume() { return _maxEffectVolume; }
+	bool IsSkyboxProbe() const { return _isSkyboxProbe; }
 
 private:
 	static Asset::Texture createCubemapTexture(glm::ivec2 dimensions, bool addMipmap);
@@ -58,6 +62,7 @@ private:
 
 	Tool::F64 _effectVolume;
 	Tool::U32 _frameSize;
+	bool _isSkyboxProbe;
 
 	Asset::Texture _environmentTexture;
 	Asset::Texture _convolutedTexture;

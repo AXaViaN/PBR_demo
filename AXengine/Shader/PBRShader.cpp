@@ -231,8 +231,8 @@ void PBRShader::ProcessTransform(const Entity::Transform& transform)
 {
 	glm::mat4 modelMatrix;
 	modelMatrix = glm::translate(modelMatrix, transform.position);
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
 	modelMatrix = glm::scale(modelMatrix, transform.scale);
 
@@ -242,64 +242,65 @@ void PBRShader::ProcessTransform(const Entity::Transform& transform)
 	ShaderProgram::LoadUniform(_uniform_vs_ModelViewProjectionMatrix, _projectionMatrix * modelViewMatrix);
 
 	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelViewMatrix));
-	ShaderProgram::LoadUniform(_uniform_vs_normalMatrix, normalMatrix);
+	ShaderProgram::LoadUniform(_uniform_vs_normalMatrix, glm::mat3(normalMatrix));
+
+	normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+	ShaderProgram::LoadUniform(_uniform_vs_worldNormalMatrix, glm::mat3(normalMatrix));
 
 	// Select closest environment maps
-	std::vector<std::pair<Entity::Cubemap, Tool::F64>> activeEnvironmentList;
 	std::map<Tool::F64, const Entity::EnvironmentProbe*> environmentDistanceMap;
+	const Entity::EnvironmentProbe* skyboxEnvironment = nullptr;
 	for( auto& environmentProbe : _environmentProbeList )
 	{
-		Tool::F64 distance = glm::distance(transform.position, environmentProbe->GetPositon());
-		while(environmentDistanceMap.find(distance) != environmentDistanceMap.end())
-			distance += 0.0001;
-		environmentDistanceMap[distance] = environmentProbe;
-	}
-	for( auto& dist_env : environmentDistanceMap )
-	{
-		if(dist_env.first>=Entity::EnvironmentProbe::GetMaxEffectVolume() || activeEnvironmentList.size()>ENVIRONMENT_COUNT)
-			break;
-		else if(dist_env.second != nullptr && dist_env.first < dist_env.second->GetEffectVolume())
-			activeEnvironmentList.push_back(std::pair<Entity::Cubemap, Tool::F64>(dist_env.second->GetEnvironmentMap(), dist_env.first));
-	}
-
-	// Convert distances to weights
-	Tool::F64 redundantWeight = 0.0;
-	for( auto& env_dist : activeEnvironmentList )
-	{
-		Tool::F64 effectVolume = environmentDistanceMap[env_dist.second]->GetEffectVolume();
-
-		// TODO: Decide between distance functions
-
-		// Distance Function 1
-		// Blends in/out fast, strong influence in close range
-		env_dist.second =  1.0 - glm::pow(env_dist.second/effectVolume, 2);
-
-		// Distance Function 2
-		// Blends in/out smooth, weaker influence in close range
-		/*
-		Tool::F64 scaler = (2.0 * env_dist.second)/effectVolume - 1.0;
-		scaler = scaler > 0 ? glm::pow(scaler, 3.0/5.0) : -glm::pow(glm::abs(scaler), 3.0/5.0);
-		env_dist.second =  (1.0 - scaler) / 2.0;
-		*/
-
-		redundantWeight += env_dist.second;
-	}
-	if(redundantWeight > 0)
-		redundantWeight = 0.0f;
-	else
-		redundantWeight = (1.0 - redundantWeight) / static_cast<Tool::F64>(activeEnvironmentList.size());
-	
-	// Load environment maps
-	for( Tool::SIZE i=0 ; i<ENVIRONMENT_COUNT ; i++ )
-	{
-		if(activeEnvironmentList.size() > i)
+		if(environmentProbe->IsSkyboxProbe())
 		{
-			auto& env_dist = activeEnvironmentList[i];
-			loadEnvironment(i, &env_dist.first, env_dist.second+redundantWeight);
+			skyboxEnvironment = environmentProbe;
 		}
 		else
 		{
-			loadEnvironment(i, nullptr, 0);
+			Tool::F64 distance = glm::distance(transform.position, environmentProbe->GetPositon());
+			while(environmentDistanceMap.find(distance) != environmentDistanceMap.end())
+				distance += 0.0001;
+			environmentDistanceMap[distance] = environmentProbe;
+		}
+	}
+
+	// Sort environment probes by effectVolume
+	auto& environmentIt = environmentDistanceMap.begin();
+	std::map<Tool::F64, const Entity::EnvironmentProbe*> environmentImportanceMap;
+	for( Tool::SIZE i=0 ; i<ENVIRONMENT_COUNT ; i++ )
+	{
+		if(i==0 && skyboxEnvironment!=nullptr)
+		{
+			environmentImportanceMap[skyboxEnvironment->GetEffectVolume()] = skyboxEnvironment;
+		}
+		else if(environmentIt != environmentDistanceMap.end())
+		{
+			Tool::F64 effectVolume = environmentIt->second->GetEffectVolume();
+			while(environmentImportanceMap.find(effectVolume) != environmentImportanceMap.end())
+				effectVolume += 0.0001;
+			environmentImportanceMap[effectVolume] = environmentIt->second;
+
+			environmentIt++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	// Load environment maps
+	auto& environmentImportanceIt = environmentImportanceMap.rbegin();
+	for( Tool::SIZE i=0 ; i<ENVIRONMENT_COUNT ; i++ )
+	{
+		if(environmentImportanceIt != environmentImportanceMap.rend())
+		{
+			loadEnvironment(i, environmentImportanceIt->second);
+			environmentImportanceIt++;
+		}
+		else
+		{
+			loadEnvironment(i, nullptr);
 		}
 	}
 }
@@ -356,6 +357,7 @@ void PBRShader::GetShaderUniformLocations()
 	_uniform_vs_modelViewMatrix = ShaderProgram::GetUniformLocation("vs_modelViewMatrix");
 	_uniform_vs_modelMatrix = ShaderProgram::GetUniformLocation("vs_modelMatrix");
 	_uniform_vs_normalMatrix = ShaderProgram::GetUniformLocation("vs_normalMatrix");
+	_uniform_vs_worldNormalMatrix = ShaderProgram::GetUniformLocation("vs_worldNormalMatrix");
 
 	_uniform_fs_cameraPosition = ShaderProgram::GetUniformLocation("fs_cameraPosition");
 
@@ -370,15 +372,17 @@ void PBRShader::GetShaderUniformLocations()
 	{
 		std::string uniformNameList[] = {
 			"fs_environmentMap[i].filterMaxLOD",
-			"fs_environmentMap[i].weight"
+			"fs_environmentMap[i].worldPosition",
+			"fs_environmentMap[i].effectVolume"
 		};
-
+		
 		for( int j=0 ; j<sizeof(uniformNameList)/sizeof(std::string) ; j++ )
 			uniformNameList[j][18] = '0' + i;
 
 		int j = 0;
 		_uniform_fs_environmentMap_filterMaxLOD[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
-		_uniform_fs_environmentMap_weight[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
+		_uniform_fs_environmentMap_worldPosition[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
+		_uniform_fs_environmentMap_effectVolume[i] = ShaderProgram::GetUniformLocation(uniformNameList[j++].c_str());
 	}
 
 	_uniform_fs_directionalLight_direction = ShaderProgram::GetUniformLocation("fs_directionalLight.direction");
@@ -429,26 +433,29 @@ void PBRShader::GetShaderUniformLocations()
 
 /***** PRIVATE *****/
 
-void PBRShader::loadEnvironment(Tool::SIZE index, const Entity::Cubemap* environmentMap, Tool::F32 weight)
+void PBRShader::loadEnvironment(Tool::SIZE index, const Entity::EnvironmentProbe* environmentProbe)
 {
-	if(environmentMap)
+	if(environmentProbe)
 	{
-		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE+index);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap->material.reflectionMap.texture->GetTextureID());
+		auto& environmentMap = environmentProbe->GetEnvironmentMap();
 
-		Entity::Cubemap* specularEnvironment = environmentMap->material.environmentMap;
+		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_IRRADIANCE+index);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap.material.reflectionMap.texture->GetTextureID());
+
+		Entity::Cubemap* specularEnvironment = environmentMap.material.environmentMap;
 		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_FILTER+index);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, specularEnvironment->material.diffuseMap.texture->GetTextureID());
 
 		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_filterMaxLOD[index], specularEnvironment->material.diffuseMap.value.r);
-		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_weight[index], weight);
+		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_worldPosition[index], environmentProbe->GetPositon());
+		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_effectVolume[index], static_cast<Tool::F32>(environmentProbe->GetEffectVolume()));
 
 		glActiveTexture(GL_TEXTURE0 + PBRShaderTexture::ENVIRONMENT_BRDF);
 		glBindTexture(GL_TEXTURE_2D, specularEnvironment->material.reflectionMap.texture->GetTextureID());
 	}
 	else
 	{
-		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_weight[index], 0.0f);
+		ShaderProgram::LoadUniform(_uniform_fs_environmentMap_filterMaxLOD[index], -1.0f);
 	}
 }
 

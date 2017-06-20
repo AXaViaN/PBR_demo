@@ -39,7 +39,7 @@ protected:
 	virtual void GetShaderUniformLocations() override;
 
 private:
-	void loadEnvironment(Tool::SIZE index, const Entity::Cubemap* environmentMap, Tool::F32 weight);
+	void loadEnvironment(Tool::SIZE index, const Entity::EnvironmentProbe* environmentProbe);
 
 private:
 	glm::mat4 _projectionMatrix;
@@ -51,6 +51,7 @@ private:
 	Tool::U32 _uniform_vs_modelViewMatrix;
 	Tool::U32 _uniform_vs_modelMatrix;
 	Tool::U32 _uniform_vs_normalMatrix;
+	Tool::U32 _uniform_vs_worldNormalMatrix;
 
 	Tool::U32 _uniform_fs_cameraPosition;
 
@@ -63,7 +64,8 @@ private:
 
 	static const Tool::SIZE ENVIRONMENT_COUNT = 4;
 	Tool::U32 _uniform_fs_environmentMap_filterMaxLOD[ENVIRONMENT_COUNT];
-	Tool::U32 _uniform_fs_environmentMap_weight[ENVIRONMENT_COUNT];
+	Tool::U32 _uniform_fs_environmentMap_worldPosition[ENVIRONMENT_COUNT];
+	Tool::U32 _uniform_fs_environmentMap_effectVolume[ENVIRONMENT_COUNT];
 	
 	Tool::U32 _uniform_fs_directionalLight_direction;
 	Tool::U32 _uniform_fs_directionalLight_color;

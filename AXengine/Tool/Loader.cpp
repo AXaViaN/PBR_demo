@@ -29,6 +29,7 @@ public:
 	struct PBRModelConnections : public ModelConnections {
 		std::map<U32, U32> materialMetallicMap;
 		std::map<U32, U32> materialRoughnessMap;
+		std::map<U32, U32> materialEmissionMap;
 		std::map<U32, U32> materialAOMap;
 	};
 
@@ -565,6 +566,19 @@ void Loader::Helper::ProcessPBRModel(std::string& directory, const aiScene*& sce
 					model.materialList[currentMaterialIndex].roughnessMap.value = roughness;
 			}
 
+			if(material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
+			{
+				material->GetTexture(aiTextureType_EMISSIVE, 0, &texturePath);
+				model.textureList.push_back(LoadTexture((directory+texturePath.C_Str()).c_str(), true));
+				modelConnections.materialEmissionMap.insert(std::pair<U32, U32>(currentMaterialIndex, model.textureList.size()-1));
+			}
+			else
+			{
+				aiColor4D color;
+				if(aiGetMaterialColor(material, AI_MATKEY_COLOR_EMISSIVE, &color) == AI_SUCCESS)
+					model.materialList[currentMaterialIndex].emissionMap.value = glm::vec3(color.r, color.g, color.b);
+			}
+
 			if(material->GetTextureCount(aiTextureType_AMBIENT) > 0)
 			{
 				material->GetTexture(aiTextureType_AMBIENT, 0, &texturePath);
@@ -635,6 +649,8 @@ void Loader::Helper::ConnectPBRModel(Asset::Model<Asset::PBRMaterial>& model, PB
 		model.materialList[materialMetallic.first].metallicMap.texture = &model.textureList[materialMetallic.second];
 	for( auto materialRoughness : modelConnections.materialRoughnessMap )
 		model.materialList[materialRoughness.first].roughnessMap.texture = &model.textureList[materialRoughness.second];
+	for( auto materialEmission : modelConnections.materialEmissionMap )
+		model.materialList[materialEmission.first].emissionMap.texture = &model.textureList[materialEmission.second];
 	for( auto materialAO : modelConnections.materialAOMap )
 		model.materialList[materialAO.first].aoMap.texture = &model.textureList[materialAO.second];
 }

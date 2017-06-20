@@ -31,7 +31,9 @@ struct Environment {
 	samplerCube irradianceMap;
 	samplerCube filterMap;
 	float filterMaxLOD;
-	float weight;
+	
+	vec3 worldPosition;
+	float effectVolume;
 };
 
 struct DirectionalLight {
@@ -60,6 +62,7 @@ struct SpotLight {
 
 in vec3 varying_normal;
 in mat3 varying_TBN;
+in mat3 varying_WorldTBN;
 in vec2 varying_uvCoord;
 in vec3 varying_onWorldNormal;
 in vec3 varying_onWorldPosition;
@@ -94,7 +97,7 @@ vec3 PointLightRadiance(PointLight light, vec3 normal, vec3 cameraRay, vec3 F0, 
 vec3 DirectionalLightRadiance(DirectionalLight light, vec3 normal, vec3 cameraRay, vec3 F0, vec3 fLambert, float metallic, float roughness);
 vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 F0, vec3 fLambert, float metallic, float roughness);
 
-vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float metallic);
+vec3 AmbientRadiance(vec3 F0, vec3 normalValue, vec3 albedo, float ao, float roughness, float metallic);
 
 // Program entry point
 void main()
@@ -138,7 +141,7 @@ void main()
 	}
 	
 	// Final color
-	vec3 ambient = AmbientRadiance(F0, albedoColor.rgb, aoValue, roughnessValue, metallicValue);
+	vec3 ambient = AmbientRadiance(F0, normalValue, albedoColor.rgb, aoValue, roughnessValue, metallicValue);
 	out_color = vec4(irradiance + ambient + emissionColor, albedoColor.a);
 }
 
@@ -299,10 +302,13 @@ vec3 SpotLightRadiance(SpotLight light, vec3 normal, vec3 cameraRay, vec3 F0, ve
 }
 
 // Ambient and IBL
-vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float metallic)
+vec3 AmbientRadiance(vec3 F0, vec3 normalValue, vec3 albedo, float ao, float roughness, float metallic)
 {
 	vec3 worldCameraRay = normalize(fs_cameraPosition - varying_onWorldPosition);
 	vec3 worldNormal = normalize(varying_onWorldNormal);
+	if(normalValue.r >= 0)
+		worldNormal = normalize(varying_WorldTBN * (normalValue*2.0 - 1.0));
+	
 	vec3 reflectionDirection = reflect(-worldCameraRay, worldNormal);
 	float cosWorldNormalCameraTheta = max(0.0, dot(worldNormal, worldCameraRay));
 	
@@ -310,12 +316,41 @@ vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float meta
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 	
+	float probeWeight[ENVIRONMENT_COUNT];
+	float redundantWeight = 0.0;
+	for( int i=0 ; i<ENVIRONMENT_COUNT ; i++ )
+	{
+		if(fs_environmentMap[i].filterMaxLOD > 0)
+		{
+			float probeDistance = distance(fs_environmentMap[i].worldPosition, varying_onWorldPosition);
+			probeWeight[i] = 1.0 - pow(probeDistance/fs_environmentMap[i].effectVolume, 2);
+			
+			if(probeWeight[i] > 0)
+			{
+				probeWeight[i] = pow(probeWeight[i]+1.0, 2) - 1.0;
+				redundantWeight += probeWeight[i];
+			}
+		}
+		else
+		{
+			probeWeight[i] = 0.0;
+		}
+	}
+	redundantWeight = (redundantWeight - 1.0);
+	redundantWeight = max(0.0, redundantWeight);
+	
 	vec3 diffuse = vec3(0.0);
 	vec3 specular = vec3(0.0);
 	for( int i=0 ; i<ENVIRONMENT_COUNT ; i++ )
 	{
-		if(fs_environmentMap[i].weight > 0)
+		if(probeWeight[i] > 0)
 		{
+			float processed = min(probeWeight[i], redundantWeight);
+			probeWeight[i] -= processed;
+			redundantWeight -= processed;
+			if(probeWeight[i] == 0)
+				continue;
+			
 			float LOD = roughness * fs_environmentMap[i].filterMaxLOD;
 			
 			// Can't iterate through samplers (ugh)
@@ -342,8 +377,8 @@ vec3 AmbientRadiance(vec3 F0, vec3 albedo, float ao, float roughness, float meta
 				prefilterSample = textureLod(fs_environmentMap[3].filterMap, reflectionDirection, LOD).rgb;
 			}
 			
-			diffuse += irradianceSample * fs_environmentMap[i].weight;
-			specular += prefilterSample * fs_environmentMap[i].weight;
+			diffuse += irradianceSample * probeWeight[i];
+			specular += prefilterSample * probeWeight[i];
 		}
 	}
 	

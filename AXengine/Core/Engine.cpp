@@ -201,7 +201,7 @@ void Engine::Run()
 					lerpRate *= 0.25f;
 
 				hdrExposure = glm::lerp<Tool::F32>(hdrExposure, targetExposure, lerpRate);
-				hdrExposure = glm::clamp(hdrExposure, 0.0f, 3.0f);
+				hdrExposure = glm::clamp(hdrExposure, 1.0f, 3.0f);
 				useAutoExposure = toneShader.SetAutoExposure(hdrExposure);
 			}
 		}
